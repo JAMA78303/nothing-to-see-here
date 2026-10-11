@@ -1,0 +1,10 @@
+{
+  "name": "Nothing To See Here",
+  "short_name": "Gerald",
+  "description": "A suspicious man under a streetlamp. Most of the time, nothing happens.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121826",
+  "theme_color": "#121826",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

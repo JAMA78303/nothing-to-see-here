@@ -6,7 +6,7 @@ A suspicious man under a streetlamp. Most of the time, nothing happens.
 - **Poking Gerald just makes a noise.** His belt is a secret.
 - **Every minute or two he sends you a link.** Half the time it's a rick roll.
 
-Next.js 16, TypeScript, Tailwind, Supabase (anonymous auth, Postgres functions, Realtime).
+Next.js 16, TypeScript, Tailwind, Redis (Upstash). Hosted on Vercel; nothing else to sign up for.
 
 ## Run it locally
 
@@ -15,48 +15,42 @@ npm install
 npm run dev
 ```
 
-With no Supabase keys it runs in **local test mode**: boosted odds, a milestone of 20 visits and a 20 second visit window, all stored in your browser. Set `NEXT_PUBLIC_DEV_TOOLS=1` in `.env.local` to preview every moment from the Sightings screen.
+With no Redis configured it uses an in-memory store with test settings: boosted odds, a milestone of 20 visits and a 20 second visit window. The pill at the top says **Local test mode**. Set `NEXT_PUBLIC_DEV_TOOLS=1` in `.env.local` to preview every moment from the Sightings screen.
 
-## Go live
+## Go live on Vercel
 
-1. **Create a Supabase project** (London region, `eu-west-2`, if most players are in the UK).
-2. **Run the migration.** Paste `supabase/migrations/20261011000000_init.sql` into the SQL editor and run it, or use the CLI: `supabase link` then `supabase db push`.
-3. **Turn on anonymous sign-ins:** Authentication → Sign In / Providers → Allow anonymous sign-ins.
-4. **Deploy to Vercel.** Import the repo and set these environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Supabase → Settings → API keys)
-   - `NEXT_PUBLIC_SITE_URL` (for example `https://nothingtoseehere.lol`)
-5. Open the site. The pill at the top should say **Live** and the counter should read 1.
+1. Push this repo to GitHub and **import it in Vercel**.
+2. In the Vercel project, open **Storage → Create Database → Upstash for Redis** (free tier is fine to start) and connect it to the project. This sets `KV_REST_API_URL` and `KV_REST_API_TOKEN` for you.
+3. Add `NEXT_PUBLIC_SITE_URL` (your domain) under **Settings → Environment Variables**.
+4. **Redeploy.** Open the site: the pill should say **Live** and the counter should read 1.
 
-### Testing on the live database
+### Testing on the live site
 
-Tuning lives in one row of the `settings` table. To see things happen quickly:
+Set these environment variables in Vercel and redeploy to see things happen quickly:
 
-```sql
-update public.settings set milestone = 20, odds_boost = 100, visit_cooldown = '20 seconds';
+```
+MILESTONE=20
+ODDS_BOOST=100
+VISIT_COOLDOWN_SECONDS=20
 ```
 
-Put it back before launch, and reset the counter:
+Remove them before launch, and clear the test data from the Upstash console (Data Browser → flush the database).
 
-```sql
-update public.settings set milestone = 50000, odds_boost = 1, visit_cooldown = '30 minutes';
-truncate public.sightings, public.visitors;
-update public.world set visits = 0;
-update public.moment_counts set witnesses = 0;
-```
+## How it works
 
-## How it's protected
+- Each browser gets a random id in an httpOnly cookie. No accounts, no personal data.
+- `POST /api/visit` counts one visit per visitor per 30 minutes (and at most 60 new visits per IP per hour). Redis `INCR` is atomic, so exactly one visitor gets each number and whoever lands a milestone gets the legendary moment.
+- `POST /api/roll` decides rare moments on the server, at most once per 25 seconds per visitor.
+- `POST /api/sighting` only accepts links and secrets, which the browser legitimately decides.
+- `GET /api/world` is polled every 5 seconds by open pages for the live counter.
 
-- Tables are read-only to the browser (RLS select policies only). All writes go through `record_visit()`, `roll_moment()` and `record_sighting()`.
-- `record_visit()` counts one visit per visitor per 30 minutes. The world row lock makes the increment atomic, so exactly one person lands each milestone.
-- `roll_moment()` decides rare moments on the server, at most once per 25 seconds per visitor.
-- `record_sighting()` only accepts links and secrets, which the browser legitimately decides.
+Redis keys: `world:visits`, `moment_counts` (hash), `visitor:<id>` (hash), `seen:<id>` (set), plus short-lived `lock:*` and `ip:*` keys.
 
 ## Before you scale
 
-- **Bot protection.** Anonymous sign-ups are only rate-limited per IP. Add Cloudflare Turnstile: pass its token to `signInAnonymously({ options: { captchaToken } })` in `src/game/backend.ts`, then turn on CAPTCHA in Supabase (Authentication → Attack Protection). Turning it on first will break sign-in.
-- **Realtime fan-out.** Every visit broadcasts the new count to every open page. Past a few thousand people online at once, switch to a throttled Broadcast (for example a `pg_cron` job that sends the count once a second).
-- **Hot row.** All visits update one `world` row. That handles hundreds of visits a second. If it goes viral, shard the counter into N rows and sum them.
+- **Bot protection.** Clearing cookies gives a new visitor id; the per-IP cap is the only brake. Add [Vercel BotID](https://vercel.com/docs/botid) or Cloudflare Turnstile on `/api/visit` before promoting it.
+- **Polling cost.** Each open page calls `/api/world` every 5 seconds. Fine for thousands of people online; past that, cache the response for a second or two at the edge.
+- **Lost collections.** A visitor who clears cookies or switches device starts their collection again.
 - **Share clips** aren't built. Sharing is text and a link (Web Share on phones, copy on desktop).
 - **Rick roll audio** is an original tune; the real song needs a licence.
 
@@ -67,6 +61,8 @@ update public.moment_counts set witnesses = 0;
 | `src/game/engine.ts` | Gerald: animations, moments, sounds, timers |
 | `src/game/markup.ts` | The SVG stage and overlays |
 | `src/game/game.css` | All game styles |
-| `src/game/backend.ts` | Supabase backend and the local test-mode backend |
-| `src/game/moments.ts` | Tiers and odds (moment ids must match the migration) |
-| `supabase/migrations/` | Schema, RLS and Postgres functions |
+| `src/game/backend.ts` | The browser's API client |
+| `src/game/moments.ts` | Tiers, odds and moment ids |
+| `src/server/game.ts` | Game rules: visits, rolls, sightings |
+| `src/server/store.ts` | Redis, with an in-memory fallback for local dev |
+| `src/app/api/*` | The API routes |

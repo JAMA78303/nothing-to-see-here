@@ -86,6 +86,7 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
     } catch {}
   };
   let worldVisits = 0, myVisits = 0, milestone = 50000, ready = false, offline = false;
+  let mode: "live" | "local" = "live";
   let seen = new Set<string>();
   let counts: Record<string, number> = {};
   const witnesses = (id: string) => counts[id] ?? 0;
@@ -594,9 +595,9 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
       : `Next world event at visit ${fmt(worldVisits + toGo)} · ${fmt(toGo)} to go`;
     E("meText").textContent = ready ? `Your visit #${fmt(myVisits)} · poked ${fmt(pokes)} ${pokes === 1 ? "time" : "times"}` : " ";
     E("seenCount").textContent = `${seen.size}/${MOMENTS.length}`;
-    const live = backend.mode === "live" && ready && !offline;
+    const live = mode === "live" && ready && !offline;
     E("pill").classList.toggle("live", live);
-    E("pillText").textContent = live ? "Live" : backend.mode === "local" ? "Local test mode" : "Offline";
+    E("pillText").textContent = offline ? "Offline" : !ready ? "Connecting" : live ? "Live" : "Local test mode";
   }
 
   /* ---------- eyes ---------- */
@@ -727,6 +728,7 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
     try {
       const s = await backend.start();
       if (dead) return;
+      mode = s.mode;
       milestone = s.milestone;
       worldVisits = s.worldVisits;
       myVisits = s.myVisits;

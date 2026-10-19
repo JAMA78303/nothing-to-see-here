@@ -87,6 +87,8 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
   };
   let worldVisits = 0, myVisits = 0, milestone = 50000, ready = false, offline = false;
   let mode: "live" | "local" = "live";
+  // ?demo with dev tools on: no random rolls or links, so a script can drive him (scripts/record-tiktok.mjs).
+  const demo = opts.devTools && new URLSearchParams(location.search).has("demo");
   let seen = new Set<string>();
   let counts: Record<string, number> = {};
   const witnesses = (id: string) => counts[id] ?? 0;
@@ -597,6 +599,7 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
     E("seenCount").textContent = `${seen.size}/${MOMENTS.length}`;
     const live = mode === "live" && ready && !offline;
     E("pill").classList.toggle("live", live);
+    E("pill").hidden = demo;
     E("pillText").textContent = offline ? "Offline" : !ready ? "Connecting" : live ? "Live" : "Local test mode";
   }
 
@@ -655,7 +658,7 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
       else if (r < 0.45) { setPupils(-5.5, -1); void play(G.head, "turn", 1100); }
       else if (r < 0.55) say("♪ hm hm hmm", 1300);
       else if (r < 0.65) { G.hat.classList.add("down"); later(() => G.hat.classList.remove("down"), 700); }
-      else if (r < 0.75) { G.bag.classList.add("tuck"); later(() => G.bag.classList.remove("tuck"), 900); }
+      else if (r < 0.75) { G.bag.classList.add("tuck"); later(() => G.bag.classList.remove("tuck"), 900); if (Math.random() < 0.4) say(rand(["What shovel?", "I don't garden.", "It's for… soup."]), 1400); }
       else if (r < 0.82) void play(G.gerald, "sidestep", 1200);
       else if (r < 0.88) { G.sweat.classList.remove("on"); void G.sweat.getBoundingClientRect(); G.sweat.classList.add("on"); }
     }
@@ -698,6 +701,7 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
   // Every minute or two he slips you a link: the rick roll about half the time.
   const blocked = () => busy || document.hidden || panel.classList.contains("show") || reveal.classList.contains("show");
   function tryLink() {
+    if (demo) return;
     if (blocked()) return void later(tryLink, 5000);
     void runMoment(byId(Math.random() < 0.5 ? "link" : "video")!);
     later(tryLink, 60000 + Math.random() * 60000);
@@ -705,6 +709,7 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
 
   /* ---------- visits drive the world counter and the rolls ---------- */
   async function roll() {
+    if (demo) return;
     if (blocked() || !ready) return;
     try {
       const id = await backend.roll();
@@ -772,8 +777,19 @@ export function startGame(backend: Backend, opts: { devTools: boolean }): () => 
   later(shadowTick, 6000);
   void arrive();
 
+  type DemoHook = { play(id: string): Promise<void>; busy(): boolean; closeReveal(): void };
+  const win = window as unknown as { __gerald?: DemoHook };
+  if (opts.devTools) {
+    win.__gerald = {
+      play: async (id) => { const m = byId(id); if (m) await runMoment(m); },
+      busy: () => busy,
+      closeReveal,
+    };
+  }
+
   return () => {
     dead = true;
+    delete win.__gerald;
     timers.forEach(clearTimeout);
     timers.clear();
     unlisteners.forEach((u) => u());

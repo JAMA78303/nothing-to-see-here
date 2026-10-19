@@ -85,7 +85,7 @@ cdp.on("Page.screencastFrame", async ({ data, sessionId }) => {
 
 await page.goto(url, { waitUntil: "networkidle" });
 await page.waitForFunction(() => window.__gerald);
-await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth: 1080, maxHeight: 1920, everyNthFrame: 1 });
+await cdp.send("Page.startScreencast", { format: "jpeg", quality: 85, maxWidth: 1080, maxHeight: 1920, everyNthFrame: 1 });
 
 /* ---------- helpers ---------- */
 const hold = (ms) => page.waitForTimeout(ms);
@@ -98,12 +98,12 @@ const svgPoint = (x, y) =>
     const s = p.matrixTransform(svg.getScreenCTM());
     return { x: s.x, y: s.y };
   }, [x, y]);
-const moveTo = async (x, y, steps = 14) => {
+const moveTo = async (x, y, steps = 6) => {
   const p = await svgPoint(x, y);
   await page.mouse.move(p.x, p.y, { steps });
 };
 const tap = async (x, y) => {
-  await moveTo(x, y, 10);
+  await moveTo(x, y, 3);
   await page.mouse.down();
   await hold(70);
   await page.mouse.up();
@@ -115,17 +115,17 @@ const untilIdle = () => page.waitForFunction(() => !window.__gerald.busy(), null
 await hold(1800); // arrival line
 
 // His eyes follow your finger.
-await moveTo(330, 120, 18);
+await moveTo(330, 120, 8);
 await hold(250);
-await moveTo(60, 260, 22);
+await moveTo(60, 260, 8);
 await hold(250);
-await moveTo(330, 420, 22);
+await moveTo(330, 420, 8);
 await hold(250);
-await moveTo(200, 470, 14);
+await moveTo(200, 470, 8);
 await hold(400);
 
 // Poke, poke, poke: just noises.
-for (const [x, y] of [[200, 290], [185, 360], [215, 300], [200, 185], [190, 380], [210, 290]]) {
+for (const [x, y] of [[200, 290], [185, 360], [215, 300], [200, 185]]) {
   await tap(x, y);
   await hold(330);
 }
@@ -136,7 +136,9 @@ await hold(1700);
 await play("backflip");
 await hold(1700);
 
-// The secret: tap his belt.
+// The secret: tap his belt (close the reveal card first, it covers the belt on a phone screen).
+await page.evaluate(() => window.__gerald.closeReveal());
+await hold(400);
 await tap(200, 328);
 await untilIdle();
 await hold(1900);

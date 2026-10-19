@@ -107,8 +107,7 @@ export const MARKUP = String.raw`<div class="app">
               <path d="M72,150 L56,412" stroke="#9b6a3c" stroke-width="6" stroke-linecap="round"/>
               <path class="o" d="M60,140 L84,142 L83,152 L59,150Z" fill="#9b6a3c" stroke-width="3"/>
               <path class="o" d="M42,406 L70,408 L68,436 Q56,448 44,434Z" fill="#9aa3b2" stroke-width="3"/>
-              <path d="M47,430 q8,5 16,1" stroke="#6b4a2f" stroke-width="4" fill="none" stroke-linecap="round"/>
-              <circle cx="50" cy="422" r="2.5" fill="#6b4a2f"/>
+              <path d="M45,431 Q50,425 55,432 Q60,426 66,431 L64,437 Q56,446 46,436Z" fill="#6b4a2f"/>
             </g>
 
             <!-- legs -->

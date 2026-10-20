@@ -179,7 +179,7 @@ button:focus-visible, select:focus-visible, .stage:focus-visible { outline: 2px 
 #head.dropin, #nest1.dropin { animation: dropin .5s cubic-bezier(.3,1.5,.6,1); }
 @keyframes dropin { from { transform: translateY(-120px); opacity: 0; } }
 #flip.backflip { animation: backflip 1.15s cubic-bezier(.4,0,.3,1); }
-@keyframes backflip { 18% { transform: translateY(10px) scaleY(.88); } 55% { transform: translateY(-170px) rotate(-200deg); } 85% { transform: translateY(0) rotate(-360deg) scaleY(.9); } 100% { transform: rotate(-360deg); } }
+@keyframes backflip { 0% { transform: translateY(0) rotate(0deg) scaleY(1); } 18% { transform: translateY(10px) rotate(0deg) scaleY(.88); } 35% { transform: translateY(-120px) rotate(-90deg) scaleY(1); } 55% { transform: translateY(-175px) rotate(-200deg) scaleY(1); } 75% { transform: translateY(-70px) rotate(-310deg) scaleY(1); } 88% { transform: translateY(6px) rotate(-360deg) scaleY(.9); } 100% { transform: translateY(0) rotate(-360deg) scaleY(1); } }
 #flip.gone { opacity: 0; }
 #abduct.up { animation: up 1.8s cubic-bezier(.5,0,.8,.5) forwards; }
 @keyframes up { 20% { transform: translateY(-14px) rotate(-4deg); } 100% { transform: translateY(-620px) rotate(14deg) scale(.5); } }

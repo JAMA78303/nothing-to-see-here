@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { createClient } from "redis";
 
 /** The handful of atomic operations the game needs. */
 export interface Store {
@@ -17,9 +18,11 @@ export interface Store {
   smembers(key: string): Promise<string[]>;
 }
 
-// Vercel's Upstash integration sets KV_REST_API_*; a direct Upstash database sets UPSTASH_REDIS_REST_*.
+// Upstash over HTTP: Vercel's Upstash integration sets KV_REST_API_*, a direct Upstash database UPSTASH_REDIS_REST_*.
 const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
 const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+// Any Redis over TCP (Vercel's Redis integration sets REDIS_URL, with a prefix such as KV_ if one was chosen).
+const tcpUrl = process.env.REDIS_URL ?? process.env.KV_REDIS_URL ?? process.env.KV_URL;
 
 function redisStore(redis: Redis): Store {
   return {
@@ -39,6 +42,56 @@ function redisStore(redis: Redis): Store {
     },
     sadd: async (key, member) => (await redis.sadd(key, member)) === 1,
     smembers: (key) => redis.smembers(key),
+  };
+}
+
+// Just the node-redis commands we use. Typing the client through node-redis's own
+// generics makes the TypeScript compiler run out of memory.
+interface TcpClient {
+  connect(): Promise<unknown>;
+  on(event: "error", fn: (e: unknown) => void): unknown;
+  set(key: string, value: string, opts: { condition: "NX"; expiration: { type: "EX"; value: number } }): Promise<string | null>;
+  incr(key: string): Promise<number>;
+  get(key: string): Promise<string | null>;
+  hIncrBy(key: string, field: string, by: number): Promise<number>;
+  hGet(key: string, field: string): Promise<string | null | undefined>;
+  hGetAll(key: string): Promise<Record<string, string>>;
+  sAdd(key: string, member: string): Promise<number>;
+  sMembers(key: string): Promise<string[]>;
+  multi(): { incr(key: string): { expire(key: string, s: number, mode: "NX"): { exec(): Promise<unknown[]> } } };
+}
+
+function tcpStore(redisUrl: string): Store {
+  // One connection per server instance, reused across requests.
+  let connecting: Promise<TcpClient> | null = null;
+  const client = (): Promise<TcpClient> =>
+    (connecting ??= (async () => {
+      const c = createClient({ url: redisUrl }) as unknown as TcpClient;
+      c.on("error", (e) => console.error("redis", e));
+      await c.connect();
+      return c;
+    })().catch((e) => {
+      connecting = null;
+      throw e;
+    }));
+  return {
+    kind: "redis",
+    claim: async (key, ttl) =>
+      (await (await client()).set(key, "1", { condition: "NX", expiration: { type: "EX", value: ttl } })) === "OK",
+    incr: async (key) => (await client()).incr(key),
+    async incrExpiring(key, ttl) {
+      const [n] = await (await client()).multi().incr(key).expire(key, ttl, "NX").exec();
+      return Number(n);
+    },
+    getNumber: async (key) => Number((await (await client()).get(key)) ?? 0),
+    hincr: async (key, field, by) => (await client()).hIncrBy(key, field, by),
+    hgetNumber: async (key, field) => Number((await (await client()).hGet(key, field)) ?? 0),
+    async hgetallNumbers(key) {
+      const all = await (await client()).hGetAll(key);
+      return Object.fromEntries(Object.entries(all).map(([k, v]) => [k, Number(v)]));
+    },
+    sadd: async (key, member) => (await (await client()).sAdd(key, member)) === 1,
+    smembers: async (key) => (await client()).sMembers(key),
   };
 }
 
@@ -92,7 +145,8 @@ const globalForStore = globalThis as unknown as { ntshStore?: Store };
 
 export function getStore(): Store {
   if (url && token) return (globalForStore.ntshStore ??= redisStore(new Redis({ url, token })));
-  if (process.env.NODE_ENV === "production") throw new Error("Redis is not configured: set KV_REST_API_URL and KV_REST_API_TOKEN");
+  if (tcpUrl) return (globalForStore.ntshStore ??= tcpStore(tcpUrl));
+  if (process.env.NODE_ENV === "production") throw new Error("Redis is not configured: set REDIS_URL, or KV_REST_API_URL and KV_REST_API_TOKEN");
   // Survives hot reloads in dev.
   return (globalForStore.ntshStore ??= memoryStore());
 }

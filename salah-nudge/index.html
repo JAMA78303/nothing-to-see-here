@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salah Nudge</title>
+<meta name="description" content="Prayer and adhkar reminders that turn green, yellow, then red as each prayer's window runs out.">
+<meta name="theme-color" content="#1E4E5E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Salah Nudge">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="install" id="installBar" hidden>
+    <span>Install Salah Nudge to get reminders like an app.</span>
+    <button class="btn" type="button" id="installBtn">Install</button>
+  </div>
+  <header class="top">
+    <h1 class="brand">Salah Nudge</h1>
+    <div class="where"><b id="cityLabel">—</b><span id="gregLabel"></span><span id="hijriLabel"></span><span class="num" id="clockLabel"></span></div>
+  </header>
+
+  <section class="arch" id="arch" data-level="idle" aria-live="polite">
+    <div class="eyebrow" id="archEyebrow">Now</div>
+    <h2 class="prayer-name" id="archName">—</h2>
+    <div class="countdown" id="archCount">—</div>
+    <div class="chip" id="archChip">—</div>
+    <p class="sub" id="archSub"></p>
+    <div class="actions">
+      <button class="btn primary" id="archMark" type="button">Mark as prayed</button>
+      <button class="btn" id="archAdhkar" type="button">Open adhkar</button>
+    </div>
+    <div class="legend" aria-label="Colour key">
+      <span><i style="background:var(--ok)"></i>More than 1 hour left</span>
+      <span><i style="background:var(--warn)"></i>Under 1 hour</span>
+      <span><i style="background:var(--late)"></i>Under 10 minutes</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Today <small id="methodLabel"></small></h2>
+    <div class="track" id="track"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Prayers <small id="prayedCount"></small></h2>
+      <ul class="plist" id="plist"></ul>
+    </section>
+
+    <section class="card" id="adhkarCard">
+      <h2>Adhkar <small id="adhkarSuggest"></small></h2>
+      <div class="due" id="due"></div>
+      <div class="tabs" role="tablist" id="tabs">
+        <button role="tab" type="button" data-set="after" id="tab-after">After salah</button>
+        <button role="tab" type="button" data-set="morning" id="tab-morning">Morning</button>
+        <button role="tab" type="button" data-set="evening" id="tab-evening">Evening</button>
+      </div>
+      <div class="dlist" id="dlist"></div>
+      <p class="hint">Tap a dhikr to count it. Counts reset each day. <button class="jump" type="button" id="resetCounts">Reset this set</button></p>
+    </section>
+  </div>
+
+  <section class="card preview">
+    <h2>Preview a time <small>See how the colours and nudges change through the day</small></h2>
+    <div class="row">
+      <input type="range" id="offset" min="-720" max="720" step="1" value="0" aria-label="Shift time in minutes">
+      <span class="num" id="offsetLabel">Live</span>
+    </div>
+    <div class="row" id="jumps"></div>
+  </section>
+
+  <details class="card" id="settings">
+    <summary>Location and settings</summary>
+    <div class="form">
+      <div class="field"><label for="city">City</label><select id="city"></select></div>
+      <div class="field"><label for="locate">Your location</label><button class="btn" type="button" id="locate">Use my location</button></div>
+      <div class="field"><label for="lat">Latitude</label><input type="number" id="lat" step="0.0001" min="-90" max="90"></div>
+      <div class="field"><label for="lng">Longitude</label><input type="number" id="lng" step="0.0001" min="-180" max="180"></div>
+      <div class="field"><label for="tz">Time zone</label><select id="tz"></select></div>
+      <div class="field"><label for="method">Calculation method</label><select id="method"></select></div>
+      <div class="field"><label for="asr">Asr time</label>
+        <select id="asr"><option value="1">Standard (Shafiʿi, Maliki, Hanbali)</option><option value="2">Hanafi</option></select></div>
+      <div class="field"><label for="toggles">Nudges</label>
+        <div id="toggles" style="display:grid;gap:6px">
+          <label class="toggle"><input type="checkbox" id="notifyOn"> Show phone notifications</label>
+          <label class="toggle"><input type="checkbox" id="soundOn"> Play a soft chime</label>
+          <label class="toggle"><input type="checkbox" id="adhkarOn" checked> Remind me about adhkar</label>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Times are calculated on your device from the coordinates above. <span id="notifyHint">Notifications work while the app is open or running in the background. On iPhone, add it to your Home Screen first.</span></p>
+  </details>
+</div>
+
+<div class="toasts" id="toasts" aria-live="assertive"></div>
+</body>
+</html>

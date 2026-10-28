@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #9fd3f5; }
+  canvas { display: block; }
+  #caption {
+    position: absolute; left: 0; right: 0; top: 1260px; text-align: center;
+    font: 900 110px/1 "Arial Black", Arial, sans-serif; color: #fff;
+    -webkit-text-stroke: 14px #000; paint-order: stroke fill;
+    text-shadow: 0 8px 0 rgba(0,0,0,.35);
+    transform-origin: 50% 50%;
+  }
+</style>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
+</head>
+<body>
+<div id="caption"></div>
+<script type="module">
+  const scene = new URLSearchParams(location.search).get("scene");
+  import(`./${scene}.js`);
+</script>
+</body>
+</html>

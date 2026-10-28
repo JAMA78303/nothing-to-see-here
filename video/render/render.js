@@ -1,7 +1,8 @@
-// Renders the pool scene, either one frame or the full video.
+// Renders a scene (scenes/<name>.js), either one frame or the full video.
+// Expects out/<name>/timing.json and out/<name>/voice.wav from tts/voice.py.
 // Usage:
-//   node render/render.js still <out.png> <seconds>
-//   node render/render.js video <out.mp4> [audio.wav]
+//   node render/render.js still <name> <seconds> [out.png]
+//   node render/render.js video <name>              -> out/<name>/<name>.mp4
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -11,6 +12,7 @@ const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "..");
 const FPS = 30;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json" };
+const outDir = name => path.join(ROOT, "out", name);
 
 function serve() {
   const server = http.createServer((req, res) => {
@@ -22,27 +24,30 @@ function serve() {
   return new Promise(r => server.listen(0, () => r(server)));
 }
 
-async function openScene(t = 0) {
+async function openScene(name, t = 0) {
   const server = await serve();
   const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   page.on("pageerror", e => console.error("page error:", e.message));
-  await page.goto(`http://localhost:${server.address().port}/scenes/pool.html?t=${t}`);
+  const timing = `/out/${name}/timing.json`;
+  await page.goto(`http://localhost:${server.address().port}/scenes/index.html?scene=${name}&timing=${timing}&t=${t}`);
   await page.waitForFunction(() => window.ready, null, { timeout: 60000 });
   const close = async () => { await browser.close(); server.close(); };
   return { page, close };
 }
 
-async function still(out, t) {
-  const { page, close } = await openScene(t);
+async function still(name, t, out = path.join(outDir(name), `t${t}.png`)) {
+  const { page, close } = await openScene(name, t);
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
   await page.screenshot({ path: out });
   await close();
   console.log("wrote", out);
 }
 
-async function video(out, audio = "out/voice.wav") {
-  const { page, close } = await openScene(0);
+async function video(name) {
+  const out = path.join(outDir(name), `${name}.mp4`);
+  const audio = path.join(outDir(name), "voice.wav");
+  const { page, close } = await openScene(name, 0);
   const duration = await page.evaluate(() => window.duration);
   const frames = Math.ceil(duration * FPS);
   const ffmpeg = spawn("ffmpeg", [
@@ -66,8 +71,8 @@ async function video(out, audio = "out/voice.wav") {
   console.log("wrote", out);
 }
 
-const [mode, out, arg] = process.argv.slice(2);
-(mode === "still" ? still(out, Number(arg || 0)) : video(out, arg)).catch(e => {
+const [mode, name, t, out] = process.argv.slice(2);
+(mode === "still" ? still(name, Number(t || 0), out) : video(name)).catch(e => {
   console.error(e);
   process.exit(1);
 });

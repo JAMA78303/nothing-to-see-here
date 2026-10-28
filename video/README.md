@@ -14,12 +14,18 @@ curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-fil
 
 You also need `ffmpeg` and Playwright's Chromium.
 
-## Make the pool video
+## Make a video
+
+Each video is a script in `scripts/<name>.json` plus a scene in `scenes/<name>.js`. The current videos are `pool` and `basement`.
 
 ```bash
-.venv/bin/python tts/voice.py scripts/pool.json out/   # out/voice.wav + out/timing.json
-npm run render -- out/pool.mp4 out/voice.wav           # final video
-npm run still -- out/frame.png 18.5                    # preview a single moment (seconds)
+.venv/bin/python tts/voice.py scripts/basement.json out/basement/   # voice.wav + timing.json
+npm run render -- basement                                         # out/basement/basement.mp4
+npm run still -- basement 16.5                                     # preview one moment (seconds)
 ```
 
-Shot lengths follow the voiceover, so editing the lines in `scripts/pool.json` and re-running both steps keeps everything in sync. The animation for each shot is in `renderAt()` in `scenes/pool.html`.
+Shot lengths follow the voiceover, so editing the lines in the script and re-running both steps keeps everything in sync.
+
+## Adding a topic
+
+`scenes/kit.js` holds the shared pieces: the yard, soil layers, groundwater, house, trees, clouds, arrows, captions and camera moves. A new scene imports the kit, uses `groundWithHole()` to cut its set piece into the ground, defines one camera framing per shot, and passes a draw function to `start()`. See `scenes/basement.js` for an example.

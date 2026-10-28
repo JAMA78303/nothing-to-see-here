@@ -1,0 +1,16 @@
+{
+  "title": "Never drain your pool",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": ["never", "water", "boat", "weight", "gone", "pushes", "pops", "slowly"],
+  "shots": [
+    { "shot": "intro",     "text": "Never drain your pool. Here's why." },
+    { "shot": "underground", "text": "Under your yard, the ground is full of water." },
+    { "shot": "boat",      "text": "Your pool is basically a concrete boat, sitting in it." },
+    { "shot": "balance",   "text": "When it's full, the weight of the water holds it down." },
+    { "shot": "drain",     "text": "But drain it, and that weight is gone." },
+    { "shot": "push",      "text": "Now the water in the ground pushes up from below..." },
+    { "shot": "pop",       "text": "until the whole pool pops right out of the ground." },
+    { "shot": "outro",     "text": "That's why pool pros drain slowly, or not at all." }
+  ]
+}

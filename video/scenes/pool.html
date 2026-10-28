@@ -6,10 +6,11 @@
   html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #9fd3f5; }
   canvas { display: block; }
   #caption {
-    position: absolute; left: 0; right: 0; top: 1180px; text-align: center;
+    position: absolute; left: 0; right: 0; top: 1260px; text-align: center;
     font: 900 110px/1 "Arial Black", Arial, sans-serif; color: #fff;
     -webkit-text-stroke: 14px #000; paint-order: stroke fill;
     text-shadow: 0 8px 0 rgba(0,0,0,.35);
+    transform-origin: 50% 50%;
   }
 </style>
 <script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
@@ -94,7 +95,7 @@ const M = {
   grass: mat(stripes, 16),
   topsoil: mat(noisy("#8a5a33", ["#6e4524", "#a6703f", "#5a381c"]), 3),
   clay: mat(noisy("#a8643a", ["#8c4f2b", "#c27a48", "#7a4223"]), 3),
-  water: mat(noisy("#3f7fd8", ["#2f66bd", "#5b98e8", "#7fb2f0"], 1400, 9), 3),
+  deep: mat(noisy("#6b4426", ["#5a381c", "#7d5230", "#4a2e17"]), 3),
   concrete: mat(noisy("#d9d6cf", ["#c7c3ba", "#e8e6e1"], 500, 4), 4),
 };
 
@@ -104,7 +105,7 @@ const layers = [
   { top: 0, bottom: -0.25, mat: M.grass },
   { top: -0.25, bottom: -2.4, mat: M.topsoil },
   { top: -2.4, bottom: -4.2, mat: M.clay },
-  { top: -4.2, bottom: GROUND_BOTTOM, mat: M.water },
+  { top: -4.2, bottom: GROUND_BOTTOM, mat: M.deep },
 ];
 const ground = new THREE.Group();
 scene.add(ground);
@@ -236,7 +237,7 @@ tree(-20, -25, 1.4);
 
 function cloud(x, y, z, s) {
   const g = new THREE.Group();
-  const m = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x9a9a9a });
+  const m = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0xc8c8c8 });
   for (const [dx, dy, r] of [[0, 0, 2], [2, -0.3, 1.5], [-2, -0.4, 1.6], [0.8, 1, 1.4]]) {
     const p = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), m);
     p.position.set(dx, dy, 0);
@@ -249,30 +250,190 @@ function cloud(x, y, z, s) {
 cloud(-12, 20, -45, 2);
 cloud(14, 24, -55, 2.4);
 
+// ---------- groundwater (front-face overlay, clipped so it can rise) ----------
+renderer.localClippingEnabled = true;
+const waterClip = new THREE.Plane(new THREE.Vector3(0, -1, 0), -4.2);
+const gwTex = canvasTex(256, 256, noisy("#3f7fd8", ["#2f66bd", "#5b98e8", "#8fbdf3"], 1400, 9), 16, 6);
+const groundwater = new THREE.Mesh(
+  new THREE.PlaneGeometry(48, 18),
+  new THREE.MeshLambertMaterial({ map: gwTex, emissive: 0x0c2450, clippingPlanes: [waterClip] })
+);
+groundwater.position.set(0, GROUND_BOTTOM + 9, 0.02);
+scene.add(groundwater);
+function setWaterTable(top) { waterClip.constant = top; }
+
+// ---------- pool rig: pivot so the shell can lift and tilt ----------
+const PIVOT = new THREE.Vector3(0, -1.5, -3.2);
+const poolRig = new THREE.Group();
+poolRig.position.copy(PIVOT);
+scene.remove(pool);
+poolRig.add(pool);
+pool.position.copy(PIVOT).negate();
+scene.add(poolRig);
+
 // ---------- force arrows ----------
-const arrows = new THREE.Group();
-scene.add(arrows);
 const arrowMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x888888 });
-for (const x of [-3.2, -1.6, 1.2, 2.6, 3.9]) {
+const downMat = new THREE.MeshLambertMaterial({ color: 0xffd400, emissive: 0x806a00, transparent: true });
+function arrow(material) {
   const a = new THREE.Group();
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.4), arrowMat);
-  const head = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.6, 16), arrowMat);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.4), material);
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.6, 16), material);
   shaft.position.y = 0.7; head.position.y = 1.7;
   a.add(shaft, head);
+  return a;
+}
+const upArrows = new THREE.Group();
+scene.add(upArrows);
+for (const x of [-3.2, -1.6, 1.2, 2.6, 3.9]) {
+  const a = arrow(arrowMat);
   a.position.set(x, (x < 0 ? P.shallow : P.deep) - 2.6, 0.4);
-  arrows.add(a);
+  a.userData.baseY = a.position.y;
+  upArrows.add(a);
+}
+const downArrows = new THREE.Group();
+pool.add(downArrows);
+for (const x of [-2.6, 0, 2.6]) {
+  const a = arrow(downMat);
+  a.rotation.z = Math.PI;
+  a.position.set(x, 2.3, -1.2);
+  downArrows.add(a);
 }
 
-// ---------- state API used by the renderer ----------
-window.setState = ({ poolWater = 1, poolLift = 0, arrows: arrowAmt = 0, caption = "" } = {}) => {
-  setPoolWater(poolWater);
-  pool.position.y = poolLift;
-  arrows.visible = arrowAmt > 0.01;
-  arrows.children.forEach(a => a.scale.setScalar(Math.max(0.01, arrowAmt)));
-  document.getElementById("caption").textContent = caption;
+// ---------- dirt burst ----------
+const dirt = [];
+const dirtMats = ["#6e4524", "#8a5a33", "#4f8f34"].map(c => new THREE.MeshLambertMaterial({ color: c }));
+for (let i = 0; i < 70; i++) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), dirtMats[i % 3]);
+  const side = i % 2 ? 1 : -1;
+  m.userData = {
+    o: new THREE.Vector3(side * (4.4 + Math.random() * 0.6), 0.1, -Math.random() * 6.4),
+    v: new THREE.Vector3(side * (1 + Math.random() * 4), 5 + Math.random() * 7, 1 + Math.random() * 4),
+    s: 0.15 + Math.random() * 0.35, spin: Math.random() * 10,
+  };
+  m.scale.setScalar(m.userData.s);
+  m.castShadow = true;
+  scene.add(m);
+  dirt.push(m);
+}
+function setDirt(tau) {
+  for (const m of dirt) {
+    const { o, v, spin } = m.userData;
+    m.visible = tau > 0 && tau < 3;
+    if (!m.visible) continue;
+    let y = o.y + v.y * tau - 9.8 * tau * tau;
+    m.position.set(o.x + v.x * tau, Math.max(0.1, y), o.z + v.z * tau);
+    m.rotation.set(spin * tau, spin * tau * 0.7, 0);
+  }
+}
+
+// ---------- timeline ----------
+const ease = x => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const cams = {
+  start:       { pos: V(0, 14, 44), look: V(0, 0, -12) },
+  intro:       { pos: V(0, 6, 26),  look: V(0, -3.6, -8) },
+  underground: { pos: V(0, -3, 24), look: V(0, -7, -4) },
+  boat:        { pos: V(0, 4.5, 16), look: V(0, -2.4, -3) },
+  balance:     { pos: V(0, 5, 17), look: V(0, -2, -3) },
+  drain:       { pos: V(0, 5, 17), look: V(0, -2, -3) },
+  push:        { pos: V(0, 2.5, 19), look: V(0, -3, -3) },
+  pop:         { pos: V(0, 4, 26),  look: V(0, 0, -6) },
+  outro:       { pos: V(0, 9, 36),  look: V(0, 0.5, -10) },
+};
+
+let TIMING;
+const captionEl = document.getElementById("caption");
+
+// group words into 1–2 word caption chunks
+function chunks(words) {
+  const out = [];
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i], next = words[i + 1];
+    const clean = s => s.word.replace(/\.\.\.$/, "");
+    if (!w.hl && next && !next.hl && (clean(w) + clean(next)).length <= 9 && !/[.,]$/.test(w.word)) {
+      out.push({ text: clean(w) + " " + clean(next), start: w.start, hl: false }); i++;
+    } else out.push({ text: clean(w), start: w.start, hl: w.hl });
+  }
+  return out;
+}
+
+function setCaption(t) {
+  const shot = TIMING.shots.find(s => t >= s.start && t < s.end) || TIMING.shots.at(-1);
+  const cs = chunks(shot.words);
+  let cur = null;
+  for (const c of cs) if (t >= c.start) cur = c;
+  if (!cur || t > shot.speechEnd + 0.25) { captionEl.textContent = ""; return; }
+  captionEl.textContent = cur.text.replace(/[.,]$/, "");
+  captionEl.style.color = cur.hl ? "#ffd400" : "#fff";
+  const dt = t - cur.start;
+  const sc = dt < 0.08 ? 0.7 + (dt / 0.08) * 0.42 : Math.max(1, 1.12 - (dt - 0.08) * 1.2);
+  captionEl.style.transform = `scale(${sc})`;
+}
+
+window.renderAt = (t) => {
+  const shots = TIMING.shots;
+  const i = Math.max(0, shots.findIndex(s => t >= s.start && t < s.end));
+  const idx = t >= TIMING.duration ? shots.length - 1 : i;
+  const S = shots[idx], name = S.shot;
+  const k = (t - S.start) / (S.end - S.start);
+  const at = n => shots.find(s => s.shot === n);
+  const prog = n => { const s = at(n); return (t - s.start) / (s.end - s.start); };
+
+  // camera: ease from previous shot's framing into this one's
+  const from = cams[idx ? shots[idx - 1].shot : "start"], to = cams[name];
+  const ck = ease(Math.min(1, k / 0.7));
+  camera.position.lerpVectors(from.pos, to.pos, ck);
+  const look = from.look.clone().lerp(to.look, ck);
+
+  // groundwater rises during "underground"
+  setWaterTable(lerp(GROUND_BOTTOM, -4.2, ease(prog("underground") / 0.8)));
+  gwTex.offset.set(t * 0.02, Math.sin(t * 1.3) * 0.01);
+
+  // pool water drains during "drain"
+  setPoolWater(1 - ease(prog("drain") / 0.85));
+
+  // arrows
+  const bal = prog("balance"), push = prog("push");
+  const upAmt = bal < 0 ? 0 : push < 0 ? 0.55 * ease(bal / 0.3) : lerp(0.55, 1.25, ease(push / 0.5));
+  upArrows.visible = upAmt > 0.01 && prog("outro") < 0;
+  upArrows.children.forEach((a, j) => {
+    const pulse = push > 0 ? 1 + 0.12 * Math.sin(t * 14 + j) : 1;
+    a.scale.setScalar(Math.max(0.01, upAmt * pulse));
+    a.position.y = a.userData.baseY + (push > 0 ? 0.3 * Math.sin(t * 7 + j) : 0);
+  });
+  const downAmt = bal < 0 ? 0 : ease(bal / 0.3) * (1 - ease(prog("drain") / 0.6));
+  downArrows.visible = downAmt > 0.01;
+  downArrows.children.forEach(a => a.scale.setScalar(Math.max(0.01, downAmt)));
+
+  // the pool: trembles while being pushed, then pops out and tilts
+  const pop = prog("pop");
+  let lift = 0, tilt = 0, shake = 0;
+  if (push > 0 && pop < 0) { lift = 0.25 * ease(push); shake = 0.05 + 0.1 * push; }
+  if (pop >= 0) {
+    const p = ease(Math.min(1, pop / 0.55));
+    lift = lerp(0.25, 4.2, p) - 0.6 * ease((pop - 0.55) / 0.3);
+    tilt = 0.16 * p;
+    shake = 0.35 * (1 - Math.min(1, pop / 0.8));
+  }
+  const jitter = (a, f) => shake * a * Math.sin(t * f);
+  poolRig.position.set(PIVOT.x + jitter(0.4, 41), PIVOT.y + lift + jitter(0.3, 53), PIVOT.z);
+  poolRig.rotation.z = tilt + jitter(0.02, 37);
+  setDirt(pop >= 0 ? (t - at("pop").start) * 1.1 : -1);
+
+  // camera shake follows the pool
+  camera.position.x += jitter(0.25, 47);
+  camera.position.y += jitter(0.2, 59);
+  camera.lookAt(look);
+
+  setCaption(t);
   renderer.render(scene, camera);
 };
-window.setState(Object.fromEntries(new URLSearchParams(location.search).entries().map(([k, v]) => [k, isNaN(v) ? v : Number(v)])));
+
+const params = new URLSearchParams(location.search);
+TIMING = await (await fetch(params.get("timing") || "/out/timing.json")).json();
+window.duration = TIMING.duration;
+window.renderAt(Number(params.get("t") || 0));
 window.ready = true;
 </script>
 </body>

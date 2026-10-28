@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "still": "node render/still.js"
+    "still": "node render/render.js still",
+    "render": "node render/render.js video"
   },
   "keywords": [],
   "author": "",

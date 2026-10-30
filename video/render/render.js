@@ -1,5 +1,5 @@
 // Renders a scene (scenes/<name>.js), either one frame or the full video.
-// Expects out/<name>/timing.json and out/<name>/voice.wav from tts/voice.py.
+// Expects out/<name>/timing.json and voice.wav from tts/voice.py (and mix.wav from audio/mix.py, if present).
 // Usage:
 //   node render/render.js still <name> <seconds> [out.png]
 //   node render/render.js video <name>              -> out/<name>/<name>.mp4
@@ -46,7 +46,8 @@ async function still(name, t, out = path.join(outDir(name), `t${t}.png`)) {
 
 async function video(name) {
   const out = path.join(outDir(name), `${name}.mp4`);
-  const audio = path.join(outDir(name), "voice.wav");
+  const mix = path.join(outDir(name), "mix.wav");
+  const audio = fs.existsSync(mix) ? mix : path.join(outDir(name), "voice.wav");
   const { page, close } = await openScene(name, 0);
   const duration = await page.evaluate(() => window.duration);
   const frames = Math.ceil(duration * FPS);

@@ -12,11 +12,13 @@
     text-shadow: 0 8px 0 rgba(0,0,0,.35);
     transform-origin: 50% 50%;
   }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
 </style>
 <script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
 </head>
 <body>
 <div id="caption"></div>
+<div id="flash"></div>
 <script type="module">
   const scene = new URLSearchParams(location.search).get("scene");
   import(`./${scene}.js`);

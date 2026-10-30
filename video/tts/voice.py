@@ -48,7 +48,7 @@ for i, shot in enumerate(script["shots"]):
         acc += wt
 
     end = t + dur + (TAIL if i == len(script["shots"]) - 1 else GAP)
-    shots.append({"shot": shot["shot"], "text": shot["text"], "start": round(t, 3),
+    shots.append({**shot, "start": round(t, 3),
                   "speechEnd": round(t + dur, 3), "end": round(end, 3), "words": timed})
     audio.append(samples)
     audio.append(np.zeros(int((end - t - dur) * sr), dtype=np.float32))

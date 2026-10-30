@@ -243,7 +243,8 @@ export function timeline(TIMING, t) {
   const S = shots[idx];
   const at = n => shots.find(s => s.shot === n);
   return {
-    idx, shot: S.shot, prev: idx ? shots[idx - 1].shot : "start",
+    // a cold open (replay) shot has no framing of its own, so the shot after it starts from "start"
+    idx, shot: S.shot, prev: idx && !shots[idx - 1].replay ? shots[idx - 1].shot : "start",
     k: (t - S.start) / (S.end - S.start),
     prog: n => { const s = at(n); return (t - s.start) / (s.end - s.start); },
     since: n => t - at(n).start,
@@ -288,9 +289,21 @@ export async function start(draw) {
   const params = new URLSearchParams(location.search);
   const TIMING = await (await fetch(params.get("timing"))).json();
   window.duration = TIMING.duration;
+  const flashEl = document.getElementById("flash");
   window.renderAt = t => {
-    draw(t, timeline(TIMING, t));
+    // a cold-open shot replays a later moment ("replay": shot name, "from": fraction into it)
+    const S = TIMING.shots.find(s => t >= s.start && t < s.end);
+    let st = t;
+    if (S?.replay) {
+      const target = TIMING.shots.find(s => s.shot === S.replay);
+      st = Math.min(TIMING.duration, target.start + (S.from ?? 0) * (target.end - target.start) + (t - S.start));
+    }
+    draw(st, timeline(TIMING, st));
     setCaption(TIMING, t);
+    // white flash as the cold open cuts back to the start of the story
+    const hook = TIMING.shots.find(s => s.replay);
+    const dt = hook ? t - hook.end : 99;
+    flashEl.style.opacity = dt > -0.08 && dt < 0.3 ? 0.9 * (1 - (dt < 0 ? -dt / 0.08 : dt / 0.3)) : 0;
     renderer.render(scene, camera);
   };
   window.renderAt(Number(params.get("t") || 0));

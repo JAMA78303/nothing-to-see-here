@@ -1,0 +1,28 @@
+{
+  "title": "What if you poured concrete into an ant hill?",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": ["hiding", "concrete", "every", "rock", "dug", "city", "twenty", "thousand", "tiny"],
+  "shots": [
+    { "shot": "hook",   "text": "This is what's hiding under an ant hill.", "replay": "reveal", "from": 0.2 },
+    { "shot": "intro",  "text": "Someone poured concrete into one to find out." },
+    { "shot": "pour",   "text": "It flows down into every single tunnel and room..." },
+    { "shot": "wait",   "text": "and after a few days, it's hard as rock." },
+    { "shot": "dig",    "text": "Then they dug all the dirt away..." },
+    { "shot": "reveal", "text": "and found an entire underground city." },
+    { "shot": "fact",   "text": "Some colonies go over twenty feet deep, with more than a thousand rooms." },
+    { "shot": "outro",  "text": "All built by ants, one tiny grain at a time." }
+  ],
+  "sfx": [
+    { "sound": "whoosh",  "shot": "hook", "at": 0.0, "length": 1.2, "gain": 0.9 },
+    { "sound": "rumble",  "shot": "hook", "at": 0.0, "length": 2.2, "gain": 0.5 },
+    { "sound": "rewind",  "shot": "hook", "at": -0.55, "length": 0.7, "gain": 1.0 },
+    { "sound": "whoosh",  "shot": "intro", "at": 0.1, "length": 0.9, "gain": 0.6 },
+    { "sound": "drain",   "shot": "pour", "at": 0.0, "length": 3.2, "gain": 1.0 },
+    { "sound": "water",   "shot": "pour", "at": 0.2, "length": 3.0, "gain": 0.5 },
+    { "sound": "whoosh",  "shot": "wait", "at": 0.0, "length": 1.0, "gain": 0.5 },
+    { "sound": "rumble",  "shot": "dig", "at": 0.0, "length": 2.4, "gain": 0.9 },
+    { "sound": "impact",  "shot": "reveal", "at": 0.0, "length": 1.8, "gain": 0.8 },
+    { "sound": "whoosh",  "shot": "reveal", "at": 0.1, "length": 1.4, "gain": 0.7 }
+  ]
+}

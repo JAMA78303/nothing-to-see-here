@@ -102,10 +102,10 @@ export function box(x0, x1, y0, y1, z0, z1, matFn, parent = scene) {
   return m;
 }
 // a ground region is cut into horizontal soil layers
-export function groundBox(x0, x1, y0, y1, z0, z1) {
+export function groundBox(x0, x1, y0, y1, z0, z1, parent = scene) {
   for (const L of layers) {
     const top = Math.min(y1, L.top), bot = Math.max(y0, L.bottom);
-    if (top > bot) box(x0, x1, bot, top, z0, z1, L.mat);
+    if (top > bot) box(x0, x1, bot, top, z0, z1, L.mat, parent);
   }
 }
 // ground everywhere except a hole x0..x1, zBack..0 whose floor depth may vary: floors = [[x0, x1, depth], ...]

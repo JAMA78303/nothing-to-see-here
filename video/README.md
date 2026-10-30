@@ -16,7 +16,7 @@ You also need `ffmpeg` and Playwright's Chromium.
 
 ## Make a video
 
-Each video is a script in `scripts/<name>.json` plus a scene in `scenes/<name>.js`. The current videos are `pool` and `basement`.
+Each video is a script in `scripts/<name>.json` plus a scene in `scenes/<name>.js`. The current videos are `pool`, `basement` and `anthill`.
 
 ```bash
 .venv/bin/python tts/voice.py scripts/basement.json out/basement/   # voice.wav + timing.json

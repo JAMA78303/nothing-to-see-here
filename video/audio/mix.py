@@ -71,7 +71,7 @@ def impact(d=1.5):
 
 def water(d=2.5):
     t = tt(d)
-    flow = lowpass(noise(d), 900 + 400 * np.sin(2 * np.pi * 3.1 * t))
+    flow = lowpass(lowpass(noise(d), 500 + 250 * np.sin(2 * np.pi * 3.1 * t)), 1200)
     return norm(flow * (0.7 + 0.3 * np.sin(2 * np.pi * 5.3 * t)) * env(d, 0.3, 0.6))
 
 def bubbles(d=2.5):
@@ -103,6 +103,9 @@ def drain(d=2.5):
     t = tt(d)
     gurgle = lowpass(noise(d), 300 + 250 * np.sin(2 * np.pi * 7 * t) ** 2)
     return norm(gurgle * env(d, 0.2, 0.8))
+
+# steady, hissy sounds read much louder than their level suggests, so they sit lower in the mix
+LEVEL = dict(water=0.4, drain=0.45, bubbles=0.5, drips=0.5, rain=0.4)
 
 SOUNDS = dict(whoosh=whoosh, rewind=lambda d: whoosh(d, reverse=True), rumble=rumble, impact=impact,
               water=water, bubbles=bubbles, drips=drips, rain=rain, drain=drain)
@@ -165,14 +168,16 @@ def main():
     bed = music(timing["duration"])
     level = lowpass(np.abs(voice), 8)
     duck = 1 - 0.55 * np.clip(level / (np.max(level) * 0.25), 0, 1)
-    bed *= 0.16 * duck
+    bed *= 0.13 * duck
 
     fx = np.zeros(n)
     for cue in script.get("sfx", []):
         s = shots[cue["shot"]]
         t0 = s["start"] + cue["at"] if cue["at"] >= 0 else s["end"] + cue["at"]
         length = cue.get("length", 1.5)
-        place(fx, SOUNDS[cue["sound"]](length), t0, 0.35 * cue.get("gain", 1.0))
+        level_ = LEVEL.get(cue["sound"], 1.0)
+        place(fx, SOUNDS[cue["sound"]](length), t0, 0.35 * level_ * cue.get("gain", 1.0))
+    fx *= 1 - 0.75 * np.clip(level / (np.max(level) * 0.25), 0, 1)  # effects dip under the voice too
 
     mix = norm(voice) * 0.9 + bed + fx
     mix = np.tanh(mix * 1.2) / np.tanh(1.2)  # gentle limiter

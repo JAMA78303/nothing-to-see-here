@@ -1,0 +1,29 @@
+{
+  "title": "Where your toilet water actually goes",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": ["actually", "flush", "walls", "sewer", "everyone", "treatment", "bacteria", "river", "drinking"],
+  "shots": [
+    { "shot": "hook",   "text": "This is where your toilet water actually goes.", "replay": "river", "from": 0.15 },
+    { "shot": "intro",  "text": "It all starts with one flush." },
+    { "shot": "pipe",   "text": "It drops down a pipe hidden in your walls..." },
+    { "shot": "sewer",  "text": "out under your yard, into the sewer under the street." },
+    { "shot": "flow",   "text": "There it joins everyone else's, flowing downhill for miles." },
+    { "shot": "plant",  "text": "Until it reaches a treatment plant." },
+    { "shot": "clean",  "text": "Bacteria eat the waste, the dirt settles out, and the water gets disinfected." },
+    { "shot": "river",  "text": "Then it's released back into a river..." },
+    { "shot": "outro",  "text": "where towns downstream pump their drinking water from." }
+  ],
+  "sfx": [
+    { "sound": "water",   "shot": "hook", "at": 0.0, "length": 2.6, "gain": 0.9 },
+    { "sound": "rewind",  "shot": "hook", "at": -0.55, "length": 0.7, "gain": 1.0 },
+    { "sound": "drain",   "shot": "intro", "at": 0.5, "length": 1.6, "gain": 1.2 },
+    { "sound": "whoosh",  "shot": "intro", "at": 0.6, "length": 0.8, "gain": 0.6 },
+    { "sound": "water",   "shot": "pipe", "at": 0.0, "length": 2.5, "gain": 0.6 },
+    { "sound": "water",   "shot": "sewer", "at": 0.0, "length": 3.0, "gain": 0.5 },
+    { "sound": "whoosh",  "shot": "flow", "at": 0.0, "length": 1.6, "gain": 0.7 },
+    { "sound": "water",   "shot": "flow", "at": 0.2, "length": 3.0, "gain": 0.6 },
+    { "sound": "bubbles", "shot": "clean", "at": 0.0, "length": 4.5, "gain": 0.7 },
+    { "sound": "water",   "shot": "river", "at": 0.0, "length": 2.6, "gain": 0.9 }
+  ]
+}

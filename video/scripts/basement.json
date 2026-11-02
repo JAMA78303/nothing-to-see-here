@@ -2,15 +2,71 @@
   "title": "Why basements flood on sunny days",
   "voice": "am_michael",
   "speed": 1.08,
-  "highlight": ["sunny", "flood", "rain", "snow", "rises", "presses", "cracks", "fills", "sump"],
+  "highlight": [
+    "sunny",
+    "flood",
+    "rain",
+    "snow",
+    "rises",
+    "presses",
+    "cracks",
+    "fills",
+    "sump"
+  ],
   "shots": [
-    { "shot": "intro",       "text": "Your basement can flood on a perfectly sunny day." },
-    { "shot": "underground", "text": "Here's what's going on under your house." },
-    { "shot": "soak",        "text": "After heavy rain or melting snow, water soaks deep into the ground." },
-    { "shot": "rise",        "text": "Days later, the water table rises, even when the sky is clear." },
-    { "shot": "press",       "text": "Now that water presses on your basement from every side." },
-    { "shot": "seep",        "text": "It forces its way through tiny cracks in the concrete..." },
-    { "shot": "flood",       "text": "and your basement fills up from below." },
-    { "shot": "outro",       "text": "That's why basements have a sump pump. Check yours before it's too late." }
-  ]
+    {
+      "shot": "intro",
+      "text": "Your basement can flood on a perfectly sunny day."
+    },
+    {
+      "shot": "underground",
+      "text": "Here's what's going on under your house."
+    },
+    {
+      "shot": "soak",
+      "text": "After heavy rain or melting snow, water soaks deep into the ground."
+    },
+    {
+      "shot": "rise",
+      "text": "Days later, the water table rises, even when the sky is clear."
+    },
+    {
+      "shot": "press",
+      "text": "Now that water presses on your basement from every side."
+    },
+    {
+      "shot": "seep",
+      "text": "It forces its way through tiny cracks in the concrete..."
+    },
+    {
+      "shot": "flood",
+      "text": "and your basement fills up from below."
+    },
+    {
+      "shot": "outro",
+      "text": "That's why basements have a sump pump. Check yours before it's too late."
+    }
+  ],
+  "youtube": {
+    "title": "Why Your Basement Floods on a Sunny Day 🌊 #shorts",
+    "description": "Your basement can flood even when it hasn't rained in days. Here's why 👇\n\nAfter heavy rain or melting snow, water soaks deep into the ground and the water table slowly rises. Days later, that groundwater presses against your basement walls and floor from every side. This is called hydrostatic pressure, and it forces water through tiny cracks in the concrete.\n\nThat's why so many homes have a sump pump. Test yours before you need it!\n\n💧 Have you ever had a flooded basement? Tell me in the comments.\n🔔 Follow for more \"how your house actually works\" videos.\n\n#shorts #basement #homeowner #flooding #sumppump #homeimprovement #howitworks #science",
+    "tags": [
+      "basement flooding",
+      "why basements flood",
+      "basement flood no rain",
+      "water table",
+      "hydrostatic pressure",
+      "sump pump",
+      "sump pump how it works",
+      "wet basement",
+      "basement leak",
+      "foundation cracks",
+      "homeowner tips",
+      "home maintenance",
+      "house explained",
+      "3d animation",
+      "science explained",
+      "shorts"
+    ]
+  }
 }

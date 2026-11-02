@@ -230,6 +230,64 @@ export function arrow(material = arrowMat) {
   return a;
 }
 
+// ---------- pipes ----------
+// above ground: a half pipe (back half only) so the water inside is visible
+const pipeMat = new THREE.MeshLambertMaterial({ color: 0x9aa0a6, side: THREE.DoubleSide });
+export function halfPipe(a, b, r) {
+  const d = b.clone().sub(a);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 16, 1, true, Math.PI / 2, Math.PI), pipeMat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);
+  m.rotation.z = Math.atan2(d.y, d.x) - Math.PI / 2;
+  scene.add(m);
+}
+// below ground: drawn on the cut face, like a cross-section diagram
+const pipeInside = new THREE.MeshBasicMaterial({ color: 0x2f3236 });
+const pipeWall = new THREE.MeshLambertMaterial({ color: 0xa3a9ae });
+export function pipeBand(points, r) {
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1], d = b.clone().sub(a), ang = Math.atan2(d.y, d.x);
+    const mid = a.clone().add(b).multiplyScalar(0.5);
+    const inner = new THREE.Mesh(new THREE.PlaneGeometry(d.length(), 2 * r), pipeInside);
+    inner.position.set(mid.x, mid.y, 0.02);
+    inner.rotation.z = ang;
+    scene.add(inner);
+    for (const side of [-1, 1]) {
+      const edge = new THREE.Mesh(new THREE.PlaneGeometry(d.length() + 0.12, 0.12), pipeWall);
+      edge.position.set(mid.x - Math.sin(ang) * side * r, mid.y + Math.cos(ang) * side * r, 0.03);
+      edge.rotation.z = ang;
+      scene.add(edge);
+    }
+    const joint = new THREE.Mesh(new THREE.CircleGeometry(r, 20), pipeInside);
+    joint.position.set(b.x, b.y, 0.021);
+    scene.add(joint);
+  }
+}
+
+
+// ---------- flowing water: blobs that run along a path once it has been reached ----------
+export const waterBlob = (color, emissive) => new THREE.MeshLambertMaterial({ color, emissive });
+export function flow(points, count, material, r, lapTime) {
+  const path = new THREE.CurvePath();
+  for (let i = 0; i < points.length - 1; i++) path.add(new THREE.LineCurve3(points[i], points[i + 1]));
+  const blobs = [];
+  for (let i = 0; i < count; i++) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r * (0.7 + Math.random() * 0.5), 10, 8), material);
+    m.userData.phase = i / count;
+    scene.add(m);
+    blobs.push(m);
+  }
+  // since: seconds since the flow started (< 0 = not yet); stop: seconds since it should drain out
+  return (since, stop = -1) => {
+    for (const m of blobs) {
+      const u = ((since / lapTime + m.userData.phase) % 1 + 1) % 1;
+      const reached = since / lapTime >= u;               // first lap: only up to the front
+      const drained = stop > 0 && stop / lapTime >= u;    // after stopping: empty from the top
+      m.visible = since > 0 && reached && !drained;
+      if (m.visible) m.position.copy(path.getPointAt(u));
+    }
+  };
+}
+
 // ---------- timeline helpers ----------
 export const ease = x => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 export const lerp = (a, b, k) => a + (b - a) * k;

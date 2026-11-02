@@ -2,7 +2,7 @@
 // right: house -> street sewer -> main -> treatment plant -> river -> town downstream.
 import {
   THREE, scene, camera, M, GROUND_BOTTOM, box, groundBox, solid, setWaterTable, canvasTex,
-  house, tree, cloud, ease, lerp, V, moveCamera, start,
+  house, tree, cloud, ease, lerp, V, moveCamera, start, halfPipe, pipeBand, flow, waterBlob,
 } from "./kit.js";
 
 const RIVER = { x0: 92, x1: 104, bed: -1.8, surface: -0.5 };
@@ -74,38 +74,6 @@ lamp2.position.set(4.3, 6.6, -3);
 scene.add(lamp2);
 
 // ---------- pipes ----------
-// above ground: a half pipe (back half only) so the water inside is visible
-const pipeMat = new THREE.MeshLambertMaterial({ color: 0x9aa0a6, side: THREE.DoubleSide });
-function halfPipe(a, b, r) {
-  const d = b.clone().sub(a);
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 16, 1, true, Math.PI / 2, Math.PI), pipeMat);
-  m.position.copy(a).add(b).multiplyScalar(0.5);
-  m.rotation.z = Math.atan2(d.y, d.x) - Math.PI / 2;
-  scene.add(m);
-}
-// below ground: drawn on the cut face, like a cross-section diagram
-const pipeInside = new THREE.MeshBasicMaterial({ color: 0x2f3236 });
-const pipeWall = new THREE.MeshLambertMaterial({ color: 0xa3a9ae });
-function pipeBand(points, r) {
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i], b = points[i + 1], d = b.clone().sub(a), ang = Math.atan2(d.y, d.x);
-    const mid = a.clone().add(b).multiplyScalar(0.5);
-    const inner = new THREE.Mesh(new THREE.PlaneGeometry(d.length(), 2 * r), pipeInside);
-    inner.position.set(mid.x, mid.y, 0.02);
-    inner.rotation.z = ang;
-    scene.add(inner);
-    for (const side of [-1, 1]) {
-      const edge = new THREE.Mesh(new THREE.PlaneGeometry(d.length() + 0.12, 0.12), pipeWall);
-      edge.position.set(mid.x - Math.sin(ang) * side * r, mid.y + Math.cos(ang) * side * r, 0.03);
-      edge.rotation.z = ang;
-      scene.add(edge);
-    }
-    const joint = new THREE.Mesh(new THREE.CircleGeometry(r, 20), pipeInside);
-    joint.position.set(b.x, b.y, 0.021);
-    scene.add(joint);
-  }
-}
-
 // the route from the toilet to the plant
 const STACK_X = 5.7;
 const house3d = [V(5.25, H.up + 0.95, -1.6), V(STACK_X, H.up + 0.2, -0.6), V(STACK_X, 0.05, -0.6)];
@@ -213,30 +181,8 @@ for (const [x, z, s] of [[-9, -10, 1.2], [10, -12, 1], [24, -9, 1.1], [36, -12, 
   [86, -14, 1.1], [98, -9, 1.3], [101, -16, 1], [109, -10, 1.2]]) tree(x, z, s);
 for (const [x, y, z, s] of [[-6, 20, -45, 2], [30, 24, -55, 2.4], [70, 21, -50, 2.2], [104, 23, -55, 2.4]]) cloud(x, y, z, s);
 
-// ---------- flowing water: blobs that run along a path once it has been reached ----------
-const dirty = new THREE.MeshLambertMaterial({ color: 0x8a7a42, emissive: 0x2a2410 });
-const clean = new THREE.MeshLambertMaterial({ color: 0x6fcdf5, emissive: 0x1a4f70 });
-function flow(points, count, material, r, lapTime) {
-  const path = new THREE.CurvePath();
-  for (let i = 0; i < points.length - 1; i++) path.add(new THREE.LineCurve3(points[i], points[i + 1]));
-  const blobs = [];
-  for (let i = 0; i < count; i++) {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r * (0.7 + Math.random() * 0.5), 10, 8), material);
-    m.userData.phase = i / count;
-    scene.add(m);
-    blobs.push(m);
-  }
-  // since: seconds since the flow started (< 0 = not yet); stop: seconds since it should drain out
-  return (since, stop = -1) => {
-    for (const m of blobs) {
-      const u = ((since / lapTime + m.userData.phase) % 1 + 1) % 1;
-      const reached = since / lapTime >= u;               // first lap: only up to the front
-      const drained = stop > 0 && stop / lapTime >= u;    // after stopping: empty from the top
-      m.visible = since > 0 && reached && !drained;
-      if (m.visible) m.position.copy(path.getPointAt(u));
-    }
-  };
-}
+const dirty = waterBlob(0x8a7a42, 0x2a2410);
+const clean = waterBlob(0x6fcdf5, 0x1a4f70);
 const fHouse = flow([...house3d, V(STACK_X, -0.05, 0.05)], 14, dirty, 0.13, 1.4);
 const fLateral = flow(lateral, 26, dirty, 0.14, 1.6);
 const fMain = flow(main, 160, dirty, 0.26, 6);

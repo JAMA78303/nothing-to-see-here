@@ -1,0 +1,158 @@
+{
+  "title": "Where rain goes after the storm drain",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": [
+    "street",
+    "road",
+    "everything",
+    "storm",
+    "toilet",
+    "treatment",
+    "giant",
+    "straight",
+    "wrapper",
+    "oil",
+    "river"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "This is where the rain from your street ends up.",
+      "replay": "outfall",
+      "from": 0.15
+    },
+    {
+      "shot": "intro",
+      "text": "It starts as rain hitting the road."
+    },
+    {
+      "shot": "gutter",
+      "text": "It runs along the curb, picking up everything in its way..."
+    },
+    {
+      "shot": "drain",
+      "text": "and drops through the storm drain."
+    },
+    {
+      "shot": "pipe",
+      "text": "But unlike your toilet water, it never goes to a treatment plant."
+    },
+    {
+      "shot": "rush",
+      "text": "It rushes through giant pipes under the town..."
+    },
+    {
+      "shot": "outfall",
+      "text": "and pours straight into the nearest river."
+    },
+    {
+      "shot": "trash",
+      "text": "Along with every wrapper, cigarette butt, and drop of oil it picked up."
+    },
+    {
+      "shot": "outro",
+      "text": "So whatever lands on your street ends up in the river."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "water",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 2.6,
+      "gain": 1.2
+    },
+    {
+      "sound": "rewind",
+      "shot": "hook",
+      "at": -0.55,
+      "length": 0.7,
+      "gain": 1.0
+    },
+    {
+      "sound": "rain",
+      "shot": "intro",
+      "at": 0.0,
+      "length": 2.4,
+      "gain": 1.0
+    },
+    {
+      "sound": "rain",
+      "shot": "gutter",
+      "at": 0.0,
+      "length": 3.2,
+      "gain": 0.8
+    },
+    {
+      "sound": "water",
+      "shot": "gutter",
+      "at": 0.0,
+      "length": 3.2,
+      "gain": 0.8
+    },
+    {
+      "sound": "drips",
+      "shot": "drain",
+      "at": 0.0,
+      "length": 2.2,
+      "gain": 1.0
+    },
+    {
+      "sound": "water",
+      "shot": "pipe",
+      "at": 0.0,
+      "length": 3.5,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "rush",
+      "at": 0.0,
+      "length": 1.6,
+      "gain": 0.7
+    },
+    {
+      "sound": "water",
+      "shot": "rush",
+      "at": 0.2,
+      "length": 2.8,
+      "gain": 0.9
+    },
+    {
+      "sound": "water",
+      "shot": "outfall",
+      "at": 0.0,
+      "length": 2.6,
+      "gain": 1.2
+    },
+    {
+      "sound": "water",
+      "shot": "trash",
+      "at": 0.0,
+      "length": 3.5,
+      "gain": 0.5
+    }
+  ],
+  "youtube": {
+    "title": "Where Rain Goes After the Storm Drain 🌧️ #shorts",
+    "description": "Ever wondered where the rain goes after it disappears down the drain? 🌧️\n\nIt runs along the curb, picking up everything in its way, and drops through the storm drain. But unlike your toilet water, in most towns it never goes to a treatment plant. It rushes through giant pipes under the town and pours straight into the nearest river or lake… along with every wrapper, cigarette butt, and drop of oil it picked up.\n\nSo whatever lands on your street ends up in the river 😳\n\n💧 Did you know this? Tell me in the comments.\n🔔 Follow for more \"where does it actually go\" videos.\n\n#shorts #stormdrain #rain #pollution #howitworks #science #didyouknow #environment",
+    "tags": [
+      "storm drain",
+      "where does rain go",
+      "where does storm drain water go",
+      "storm sewer",
+      "stormwater runoff",
+      "street drain",
+      "river pollution",
+      "litter",
+      "oil pollution",
+      "how it works",
+      "environment",
+      "science explained",
+      "did you know",
+      "3d animation",
+      "shorts"
+    ]
+  }
+}

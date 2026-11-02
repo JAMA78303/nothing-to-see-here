@@ -16,14 +16,17 @@ You also need `ffmpeg` and Playwright's Chromium.
 
 ## Make a video
 
-Each video is a script in `scripts/<name>.json` plus a scene in `scenes/<name>.js`. The current videos are `pool`, `basement`, `anthill`, `toilet` and `foundation`.
+Each video is a script in `scripts/<name>.json` plus a scene in `scenes/<name>.js`. The current videos are `pool`, `basement`, `anthill`, `toilet`, `foundation` and `stormdrain`.
 
 ```bash
 .venv/bin/python tts/voice.py scripts/basement.json out/basement/   # voice.wav + timing.json
 .venv/bin/python audio/mix.py scripts/basement.json out/basement/  # music + sound effects -> mix.wav
 npm run render -- basement                                         # out/basement/basement.mp4
 npm run still -- basement 16.5                                     # preview one moment (seconds)
+python3 publish/youtube.py scripts/basement.json out/basement/     # youtube.txt: title, description, tags
 ```
+
+Every script needs a `"youtube"` block (`title`, `description`, `tags`); `publish/youtube.py` writes it to `out/<name>/youtube.txt`, ready to paste when uploading.
 
 ### Script options
 

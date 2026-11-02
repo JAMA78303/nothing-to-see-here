@@ -104,11 +104,28 @@ def drain(d=2.5):
     gurgle = lowpass(noise(d), 300 + 250 * np.sin(2 * np.pi * 7 * t) ** 2)
     return norm(gurgle * env(d, 0.2, 0.8))
 
+def creak(d=1.2):
+    t = tt(d)
+    f = 70 + 25 * np.sin(2 * np.pi * 0.9 * t) + 8 * rng.standard_normal(len(t)).cumsum() / SR ** 0.5 / 40
+    saw = 2 * ((np.cumsum(f) / SR) % 1) - 1
+    grain = (rng.random(len(t)) < 0.15).astype(float)        # stick-slip texture
+    return norm(lowpass(saw * (0.4 + grain), 1400) * env(d, 0.1, 0.4))
+
+def shatter(d=1.0):
+    t, x = tt(d), highpass(noise(d), 3000) * np.exp(-tt(d) * 9)
+    for _ in range(14):                                       # tinkling shards
+        st = rng.uniform(0.02, d * 0.7)
+        bt = tt(0.25)
+        ring = np.sin(2 * np.pi * rng.uniform(2500, 6000) * bt) * np.exp(-bt * 25)
+        i = int(st * SR)
+        x[i:i + len(ring)] += 0.6 * ring[: len(x) - i]
+    return norm(x)
+
 # steady, hissy sounds read much louder than their level suggests, so they sit lower in the mix
 LEVEL = dict(water=0.4, drain=0.45, bubbles=0.5, drips=0.5, rain=0.4)
 
 SOUNDS = dict(whoosh=whoosh, rewind=lambda d: whoosh(d, reverse=True), rumble=rumble, impact=impact,
-              water=water, bubbles=bubbles, drips=drips, rain=rain, drain=drain)
+              water=water, bubbles=bubbles, drips=drips, rain=rain, drain=drain, creak=creak, shatter=shatter)
 
 
 # ---------- background music: a soft, mid-tempo loop (Am F C G) ----------
@@ -117,9 +134,9 @@ def midi(n):
 
 def music(d, bpm=100):
     beat, n = 60 / bpm, int(d * SR)
-    out = np.zeros(n + SR * 2)
     chords = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]]
     bar = 4 * beat
+    out = np.zeros(int((int(d / bar) + 2) * bar * SR))  # room for the last whole bar
     for b in range(int(d / bar) + 1):
         chord, i0 = chords[b % 4], int(b * bar * SR)
         pt = tt(bar)

@@ -17,7 +17,7 @@ const headRamp = (() => {
   t.needsUpdate = true;
   return t;
 })();
-const HEAD = new THREE.MeshToonMaterial({ color: 0xffffff, gradientMap: headRamp, emissive: 0xa0a0a0 });   // stays bright even in dim scenes   // nearly flat white, like a drawing
+export const HEAD = new THREE.MeshToonMaterial({ color: 0xffffff, gradientMap: headRamp, emissive: 0x606060 });   // scenes can raise emissive at night   // nearly flat white, like a drawing
 const R_HEAD = 0.36;
 
 // ---------- 2D faces ----------

@@ -1,14 +1,14 @@
 // Example frames for "What if the Sun disappeared" in the folk cartoon style:
 // day (waving at a smiling cartoon Sun), sudden night (scared), freezing (thermometer, frost).
 import { THREE, scene, camera, sun, hemi, setWaterTable, GROUND_BOTTOM, groundBox, house, tree, box, solid, V, start, fxOptions, ease } from "./kit.js";
-import { folk, outline, canvasPlane } from "./folk.js";
+import { folk, outline, canvasPlane, HEAD } from "./folk.js";
 
 const daySky = scene.background;
 
 fxOptions.ao = false;
 setWaterTable(GROUND_BOTTOM - 1, 0);
 groundBox(-40, 40, GROUND_BOTTOM, 0, -60, 10);
-const home = house(0, -9, 11);
+const home = house(6, -12, 11);
 const trees = [tree(-7, -6, 1.2), tree(7.5, -8, 1.3)];
 // cartoon ink outlines on the set too
 const toOutline = [];
@@ -25,8 +25,8 @@ const sunFace = canvasPlane(6, 6, (g, w, h) => {
   g.lineWidth = 12; g.beginPath(); g.arc(c, c + 20, 55, Math.PI * 0.15, Math.PI * 0.85); g.stroke();
   g.fillStyle = "rgba(255,120,80,0.6)"; for (const sx of [-1, 1]) { g.beginPath(); g.ellipse(c + sx * 90, c + 30, 22, 12, 0, 0, 7); g.fill(); }
 });
-sunFace.position.set(-1.6, 7.2, -6);
-sunFace.scale.setScalar(0.55);
+sunFace.position.set(-3, 16, -25);
+sunFace.scale.setScalar(0.9);
 scene.add(sunFace);
 
 const kyle = folk({ body: 0xe03a2e, outfit: "polo", name: "Kyle", hairStyle: "tuft", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "grin" });
@@ -39,7 +39,7 @@ const thermo = canvasPlane(1.2, 0.6, (g, w, h) => {
   g.fillStyle = "#7fd3ff"; g.font = "bold 96px Arial"; g.textAlign = "center"; g.fillText("-20°C", w / 2, h * 0.66);
 });
 thermo.position.set(-0.55, 1.95, 0.0); scene.add(thermo);
-box(-0.59, -0.51, 0, 1.65, -0.05, 0.05, solid(0x5d4037));
+const post = box(-0.59, -0.51, 0, 1.65, -0.05, 0.05, solid(0x5d4037));
 const stars = new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 600 }, () => V((Math.random() - 0.5) * 120, 6 + Math.random() * 40, -40 - Math.random() * 20))),
   new THREE.PointsMaterial({ color: 0xffffff, size: 2.5, sizeAttenuation: false }));
 scene.add(stars);
@@ -56,7 +56,8 @@ start((time, tl) => {
   hemi.color.set(night ? 0x7f95c8 : 0xdff1ff);
   for (const w of windows) w.material.emissive?.setRGB(night ? 1.1 : 0, night ? 0.8 : 0, night ? 0.35 : 0);
   frost.material.opacity = tl.shot === "cold" ? 0.75 : 0;
-  thermo.visible = tl.shot === "cold";
+  thermo.visible = post.visible = tl.shot === "cold";
+  HEAD.emissive.setHex(night ? 0xa0a0a0 : 0x404040);   // heads stay white at night without glowing by day
   if (tl.shot === "day") { kyle.pose({ armL: [2.4, 0.2, 0.3 + 0.3 * Math.sin(time * 8)], armR: [0.3, 0.1, 0.2], headTilt: -0.35 }); kyle.setFace("grin"); kyle.rotation.y = 0.35; }
   if (tl.shot === "night") { kyle.pose({ armL: [0.9, 0.9, 1.6], armR: [0.9, 0.9, 1.6], headTilt: -0.15, lean: -0.08 }); kyle.setFace("scared", { sweat: true }); kyle.rotation.y = 0.15; }
   if (tl.shot === "cold") { kyle.pose({ armL: [0.5, 1.3, 2.3], armR: [0.5, 1.3, 2.3], sway: 0.05 * Math.sin(time * 40) }); kyle.setFace("grumpy"); kyle.rotation.y = -0.1; kyle.position.x = 0.45; } else kyle.position.x = 0.3;

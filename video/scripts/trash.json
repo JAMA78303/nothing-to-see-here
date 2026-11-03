@@ -1,0 +1,180 @@
+{
+  "title": "Where your trash actually goes",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": [
+    "actually",
+    "bin",
+    "crushes",
+    "landfill",
+    "flattened",
+    "toxic",
+    "methane",
+    "power",
+    "barely",
+    "readable",
+    "park",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "This is where your trash actually ends up.",
+      "replay": "gas",
+      "from": 0.25
+    },
+    {
+      "shot": "intro",
+      "text": "It starts in the bin outside your house."
+    },
+    {
+      "shot": "truck",
+      "text": "A truck crushes it down and hauls it away..."
+    },
+    {
+      "shot": "landfill",
+      "text": "to a landfill: a giant hole lined with clay and plastic."
+    },
+    {
+      "shot": "layers",
+      "text": "Every day, it's flattened and buried under dirt."
+    },
+    {
+      "shot": "juice",
+      "text": "Rain soaks through, making a toxic juice that pipes suck away."
+    },
+    {
+      "shot": "gas",
+      "text": "As it rots, it makes methane gas, which gets burned for power."
+    },
+    {
+      "shot": "slow",
+      "text": "But down there, it barely rots. Old newspapers come out still readable."
+    },
+    {
+      "shot": "outro",
+      "text": "And when it's full? They build a park on top."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "bubbles",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 2.6,
+      "gain": 0.8
+    },
+    {
+      "sound": "rumble",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 2.4,
+      "gain": 0.6
+    },
+    {
+      "sound": "rewind",
+      "shot": "hook",
+      "at": -0.55,
+      "length": 0.7,
+      "gain": 1.0
+    },
+    {
+      "sound": "whoosh",
+      "shot": "intro",
+      "at": 0.1,
+      "length": 0.9,
+      "gain": 0.6
+    },
+    {
+      "sound": "impact",
+      "shot": "truck",
+      "at": 0.6,
+      "length": 1.2,
+      "gain": 0.8
+    },
+    {
+      "sound": "rumble",
+      "shot": "truck",
+      "at": 0.3,
+      "length": 2.6,
+      "gain": 0.7
+    },
+    {
+      "sound": "whoosh",
+      "shot": "landfill",
+      "at": 0.0,
+      "length": 1.2,
+      "gain": 0.6
+    },
+    {
+      "sound": "rumble",
+      "shot": "layers",
+      "at": 0.0,
+      "length": 3.0,
+      "gain": 0.7
+    },
+    {
+      "sound": "rain",
+      "shot": "juice",
+      "at": 0.0,
+      "length": 2.0,
+      "gain": 0.8
+    },
+    {
+      "sound": "drips",
+      "shot": "juice",
+      "at": 0.6,
+      "length": 3.2,
+      "gain": 1.0
+    },
+    {
+      "sound": "bubbles",
+      "shot": "gas",
+      "at": 0.0,
+      "length": 4.0,
+      "gain": 0.8
+    },
+    {
+      "sound": "whoosh",
+      "shot": "slow",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "outro",
+      "at": 0.0,
+      "length": 1.2,
+      "gain": 0.6
+    }
+  ],
+  "youtube": {
+    "title": "Where Your Trash ACTUALLY Goes 🗑️ #shorts",
+    "description": "This is where your trash actually ends up 🤢\n\nA truck crushes it and hauls it to a landfill: a giant hole lined with clay and plastic so nothing leaks out. Every day the trash is flattened and buried under dirt. Rain trickling through makes a toxic juice called leachate that pipes at the bottom suck away, and as it rots it makes methane gas that gets piped out and burned, often for electricity.\n\nBut down there it barely rots. Archaeologists digging into landfills have found decades-old newspapers you could still read. And when a landfill is full? They cover it in grass and build a park on top 😳\n\n🗑️ Did you know this? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #trash #landfill #garbage #recycling #howitworks #science #didyouknow",
+    "tags": [
+      "where does trash go",
+      "where does garbage go",
+      "landfill",
+      "how landfills work",
+      "landfill explained",
+      "garbage truck",
+      "leachate",
+      "methane gas",
+      "landfill gas",
+      "trash",
+      "garbage",
+      "waste management",
+      "landfill park",
+      "how it works",
+      "science explained",
+      "did you know",
+      "3d animation",
+      "shorts"
+    ]
+  }
+}

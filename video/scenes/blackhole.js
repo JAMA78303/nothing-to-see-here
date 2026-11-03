@@ -255,14 +255,14 @@ const RED = new THREE.Color(0x8a1206), RED_GLOW = new THREE.Color(0x3a0400);
 // ---------- timeline ----------
 const cams = {
   start:   { pos: V(0, 3, 60),     look: V(0, 0, 0) },
-  intro:   { pos: V(0, 2.2, 30),   look: V(0, 0, 0) },
-  disk:    { pos: V(-14, 6, 20),   look: V(0, 0, 0) },
-  lens:    { pos: V(0, 0.9, 19),   look: V(0, 0.2, 0) },
-  closer:  { pos: V(5.4, 4.3, 7.8), look: V(2.6, 2.1, 0.2) },
-  stretch: { pos: V(2.0, 2.2, 12), look: V(2.4, 1.7, 0.4) },
-  frozen:  { pos: V(0.8, 1.5, 13), look: V(0.9, 0.9, 0.3) },
+  intro:   { pos: V(0, 2.8, 38),   look: V(0, 0, 0) },
+  disk:    { pos: V(-19, 8, 27),   look: V(0, 0, 0) },
+  lens:    { pos: V(0, 1.4, 27),   look: V(0, 0.3, 0) },
+  closer:  { pos: V(6.5, 5.2, 15), look: V(2.0, 1.6, 0) },
+  stretch: { pos: V(2.8, 2.8, 20), look: V(1.4, 1.1, 0) },
+  frozen:  { pos: V(0.8, 2.0, 21), look: V(0.6, 0.6, 0) },
   through: { pos: V(0, 0.3, 4),    look: V(0, 0, 0) },
-  cta:     { pos: V(0, 2.5, 26),   look: V(0, 0, 0) },
+  cta:     { pos: V(0, 3, 36),     look: V(0, 0, 0) },
 };
 
 start((time, tl) => {

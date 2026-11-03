@@ -3,6 +3,8 @@
 // Usage:
 //   node render/render.js still <name> <seconds> [out.png]
 //   node render/render.js video <name>              -> out/<name>/<name>.mp4
+//   node render/render.js frames <name> [from] [to]  -> out/<name>/frames/*.jpg (resumable)
+//   node render/render.js assemble <name>           -> out/<name>/<name>.mp4 from those frames
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -72,8 +74,45 @@ async function video(name) {
   console.log("wrote", out);
 }
 
+// Resumable rendering for heavy scenes: frames are saved as JPEGs and existing ones are skipped,
+// so a long render can be split across several runs. Then `assemble` muxes them with the audio.
+async function frames(name, from = 0, to = Infinity) {
+  const dir = path.join(outDir(name), "frames");
+  fs.mkdirSync(dir, { recursive: true });
+  const { page, close } = await openScene(name, 0);
+  const total = Math.ceil((await page.evaluate(() => window.duration)) * FPS);
+  const end = Math.min(total, to);
+  const started = Date.now();
+  let done = 0;
+  for (let f = from; f < end; f++) {
+    const file = path.join(dir, `${String(f).padStart(5, "0")}.jpg`);
+    if (fs.existsSync(file)) continue;
+    await page.evaluate(t => window.renderAt(t), f / FPS);
+    fs.writeFileSync(file + ".tmp", await page.screenshot({ type: "jpeg", quality: 92, timeout: 180000 }));
+    fs.renameSync(file + ".tmp", file);
+    if (++done % 20 === 0) console.log(`frame ${f + 1}/${total} (${((Date.now() - started) / done / 1000).toFixed(1)}s per frame)`);
+  }
+  await close();
+  const have = fs.readdirSync(dir).filter(f => f.endsWith(".jpg")).length;
+  console.log(`${have}/${total} frames rendered`);
+}
+
+async function assemble(name) {
+  const dir = path.join(outDir(name), "frames");
+  const mix = path.join(outDir(name), "mix.wav");
+  const audio = fs.existsSync(mix) ? mix : path.join(outDir(name), "voice.wav");
+  const out = path.join(outDir(name), `${name}.mp4`);
+  await new Promise((res, rej) => spawn("ffmpeg", [
+    "-y", "-loglevel", "error", "-framerate", String(FPS), "-i", path.join(dir, "%05d.jpg"), "-i", audio,
+    "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",
+    "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out,
+  ], { stdio: "inherit" }).on("close", c => (c ? rej(new Error("ffmpeg exit " + c)) : res())));
+  console.log("wrote", out);
+}
+
 const [mode, name, t, out] = process.argv.slice(2);
-(mode === "still" ? still(name, Number(t || 0), out) : video(name)).catch(e => {
+const run = { still: () => still(name, Number(t || 0), out), frames: () => frames(name, Number(t || 0), Number(out || Infinity)), assemble: () => assemble(name) };
+(run[mode] || (() => video(name)))().catch(e => {
   console.error(e);
   process.exit(1);
 });

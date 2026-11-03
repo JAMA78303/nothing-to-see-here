@@ -382,15 +382,19 @@ const GradeShader = {
       gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
     }`,
 };
+// scenes can switch off the heavier effects (e.g. ambient occlusion in empty space)
+export const fxOptions = { ao: true };
 function makeComposer() {
   const target = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
   const composer = new EffectComposer(renderer, target);
   composer.setPixelRatio(1);
   composer.addPass(new RenderPass(scene, camera));
-  const ao = new GTAOPass(scene, camera, W, H);
-  ao.updateGtaoMaterial({ radius: 2.4, distanceExponent: 1.2, thickness: 2.5, scale: 1.6, samples: 12 });
-  ao.blendIntensity = 1.0;
-  composer.addPass(ao);
+  if (fxOptions.ao) {
+    const ao = new GTAOPass(scene, camera, W, H);
+    ao.updateGtaoMaterial({ radius: 2.4, distanceExponent: 1.2, thickness: 2.5, scale: 1.6, samples: 12 });
+    ao.blendIntensity = 1.0;
+    composer.addPass(ao);
+  }
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(W / 2, H / 2), 0.32, 0.55, 0.9));
   composer.addPass(new OutputPass());
   const grade = new ShaderPass(GradeShader);

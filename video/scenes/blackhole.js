@@ -1,6 +1,8 @@
 // "What happens if you fall into a black hole": a ray-traced black hole (light bent by gravity,
 // glowing accretion disk, starfield) behind a stylised astronaut who gets stretched and reddened.
-import { THREE, scene, camera, renderer, sun, hemi, setWaterTable, ease, lerp, V, moveCamera, start } from "./kit.js";
+import { THREE, scene, camera, renderer, sun, hemi, setWaterTable, fxOptions, ease, lerp, V, moveCamera, start } from "./kit.js";
+
+fxOptions.ao = false;   // nothing in empty space for ambient occlusion to shade
 
 // space, not a back yard
 scene.background = new THREE.Color(0x000000);
@@ -134,8 +136,19 @@ const bh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMateria
     }`,
 }));
 bh.frustumCulled = false;
-bh.renderOrder = -1;
-scene.add(bh);
+// the ray tracer is the expensive part: trace at half resolution, then upscale onto the background
+const bhScene = new THREE.Scene();
+bhScene.add(bh);
+const bhTarget = new THREE.WebGLRenderTarget(540, 960, { type: THREE.HalfFloatType });
+const bhView = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  uniforms: { tMap: { value: bhTarget.texture } },
+  depthTest: false, depthWrite: false,
+  vertexShader: "varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.9999, 1.0); }",
+  fragmentShader: "uniform sampler2D tMap; varying vec2 vUv; void main() { gl_FragColor = texture2D(tMap, vUv); }",
+}));
+bhView.frustumCulled = false;
+bhView.renderOrder = -1;
+scene.add(bhView);
 
 // ---------- astronaut: a detailed suit built from primitives ----------
 // reflections for the visor and suit: a dark sky with the disk's orange glow around the horizon
@@ -261,6 +274,9 @@ start((time, tl) => {
   bhUniforms.uInvProj.value.copy(camera.projectionMatrixInverse);
   bhUniforms.uTime.value = time;
   bhUniforms.uDiskGain.value = tl.shot === "through" ? 1 - 0.8 * ease(tl.k / 0.8) : 1;
+  renderer.setRenderTarget(bhTarget);
+  renderer.render(bhScene, camera);
+  renderer.setRenderTarget(null);
 
   // the astronaut drifts in, stretches toward the hole, then reddens and freezes
   const closer = tl.prog("closer"), stretch = tl.prog("stretch"), frozen = tl.prog("frozen");

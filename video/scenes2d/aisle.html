@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html, body { margin: 0; background: #000; } canvas { display: block; }</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Style test: an illustrated stick-figure scene drawn entirely with Canvas 2D.
+const cv = document.getElementById("c"), g = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const INK = "#2a2422";
+let seed = 7;
+const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+function poly(pts, fill, stroke = INK, lw = 6) {
+  g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath();
+  if (fill) { g.fillStyle = fill; g.fill(); }
+  if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.lineJoin = "round"; g.stroke(); }
+}
+function line(x1, y1, x2, y2, w = 8, c = INK) {
+  g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokeStyle = c; g.lineWidth = w; g.lineCap = "round"; g.stroke();
+}
+
+// ---------- background: a supermarket aisle in one-point perspective ----------
+const VX = 540, VY = 820;                    // vanishing point
+const lerp = (a, b, t) => a + (b - a) * t;
+const toward = ([x, y], t) => [lerp(x, VX, t), lerp(y, VY, t)];
+// ceiling, floor, back wall
+poly([[0, 0], [W, 0], toward([W, 0], 0.86), toward([0, 0], 0.86)], "#6b5a55", null);
+poly([[0, H], [W, H], toward([W, H], 0.86), toward([0, H], 0.86)], "#8a7a6a", null);
+const back = [toward([0, 0], 0.86), toward([W, 0], 0.86), toward([W, H], 0.86), toward([0, H], 0.86)];
+poly(back, "#c9b9a4", INK, 4);
+// floor tiles
+for (let i = 1; i < 14; i++) {
+  const t = 1 - Math.pow(0.82, i);
+  const a = toward([0, H], t), b = toward([W, H], t);
+  line(a[0], a[1], b[0], b[1], 2, "rgba(42,36,34,0.35)");
+}
+for (let i = -6; i <= 6; i++) { const x = W / 2 + i * 260; const a = [x, H], b = toward([x, H], 0.86); line(a[0], a[1], b[0], b[1], 2, "rgba(42,36,34,0.3)"); }
+// ceiling lights
+for (let i = 0; i < 6; i++) {
+  const t = 1 - Math.pow(0.7, i + 1);
+  const [x, y] = toward([W / 2, 30], t);
+  const s = 1 - t;
+  g.fillStyle = "#fff6d8"; g.beginPath(); g.ellipse(x, y, 70 * s + 8, 14 * s + 3, 0, 0, 7); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+}
+// side walls above the shelves
+poly([[0, 0], toward([0, 0], 0.86), toward([0, 330], 0.86), [0, 330]], "#4e4250", INK, 3);
+poly([[W, 0], toward([W, 0], 0.86), toward([W, 330], 0.86), [W, 330]], "#4e4250", INK, 3);
+// shelves on both sides: stacked bands of products receding to the vanishing point
+function shelfSide(side) {
+  const x0 = side < 0 ? 0 : W;
+  const rows = 6;
+  for (let r = 0; r < rows; r++) {
+    const yTop = 330 + r * 240, yBot = yTop + 240;
+    // shelf face (front edge band)
+    const near = [[x0, yTop], [x0, yBot]], far = [toward([x0, yTop], 0.8), toward([x0, yBot], 0.8)];
+    poly([near[0], far[0], far[1], near[1]], r % 2 ? "#6d5f6e" : "#625566", INK, 3);
+    // products: boxes along the shelf with perspective
+    for (let k = 0; k < 26; k++) {
+      const t0 = 1 - Math.pow(0.9, k), t1 = 1 - Math.pow(0.9, k + 0.85);
+      const p0 = toward([x0, yBot - 22], t0), p1 = toward([x0, yBot - 22], t1);
+      const h0 = (180 - rand() * 50) * (1 - t0), h1 = h0 * (1 - t1) / (1 - t0);
+      const colors = ["#c0573f", "#d9a441", "#4f7f8c", "#8c5a7a", "#e2d2b0", "#6f8f4f", "#b8423a"];
+      poly([p0, p1, [p1[0], p1[1] - h1], [p0[0], p0[1] - h0]], colors[Math.floor(rand() * colors.length)], INK, 2);
+      if (k < 10 && rand() < 0.6) line(lerp(p0[0], p1[0], 0.2), p0[1] - h0 * 0.55, lerp(p0[0], p1[0], 0.8), p1[1] - h1 * 0.55, 3, "rgba(255,255,255,0.5)");
+    }
+    const e0 = [x0, yBot - 22], e1 = toward(e0, 0.8);
+    line(e0[0], e0[1], e1[0], e1[1], 10, "#3d3440");
+  }
+}
+shelfSide(-1); shelfSide(1);
+// hanging aisle sign
+poly([[380, 560], [700, 560], [700, 650], [380, 650]], "#3f8a7e", INK, 5);
+line(420, 560, 420, 470, 3); line(660, 560, 660, 470, 3);
+g.fillStyle = "#f3ead8"; g.beginPath(); g.arc(425, 605, 28, 0, 7); g.fill(); g.stroke();
+g.fillStyle = INK; g.font = "bold 36px Arial"; g.textAlign = "center"; g.fillText("4", 425, 618);
+g.fillStyle = "#f3ead8"; g.font = "bold 30px Arial"; g.textAlign = "left";
+g.fillText("SNACKS", 470, 600); g.font = "bold 22px Arial"; g.fillText("CHIPS · CANDY", 470, 632);
+
+// ---------- characters ----------
+// a stick figure: round head, dot eyes, coloured shirt, stick limbs. pose angles in radians.
+function person(x, y, s, o) {
+  const { shirt = "#5a8fb0", pants = INK, skin = "#f4f1ea", face = "worried", hat, hair, badge, arms = [-0.4, 0.5], legs = [0.12, -0.12], lean = 0 } = o;
+  g.save(); g.translate(x, y); g.scale(s, s); g.rotate(lean);
+  const hip = [0, -210], neck = [0, -420];
+  // legs
+  for (const a of legs) line(hip[0], hip[1], hip[0] + Math.sin(a) * 210, hip[1] + Math.cos(a) * 210, 16, pants);
+  // shirt: a rounded trapezoid torso
+  poly([[-70, -425], [70, -425], [84, -200], [-84, -200]], shirt, INK, 7);
+  if (badge) { line(-30, -420, 0, -330, 4, "#e0b23a"); line(30, -420, 0, -330, 4, "#e0b23a"); poly([[-22, -330], [22, -330], [22, -285], [-22, -285]], "#f3ead8", INK, 3); }
+  // arms with round hands
+  arms.forEach((a, i) => {
+    const sx = i ? 62 : -62, ex = sx + Math.sin(a) * 170 * (i ? 1 : -1), ey = -400 + Math.cos(a) * 170;
+    line(sx, -400, ex, ey, 14, INK);
+    g.fillStyle = skin; g.beginPath(); g.arc(ex, ey, 18, 0, 7); g.fill(); g.strokeStyle = INK; g.lineWidth = 5; g.stroke();
+  });
+  // head
+  g.fillStyle = skin; g.beginPath(); g.arc(0, -510, 92, 0, 7); g.fill(); g.lineWidth = 7; g.strokeStyle = INK; g.stroke();
+  if (hair === "bun") { g.fillStyle = "#5a4a44"; g.beginPath(); g.arc(0, -600, 34, 0, 7); g.fill(); g.stroke(); g.beginPath(); g.arc(0, -540, 92, Math.PI * 1.05, Math.PI * 1.95); g.fill(); g.stroke(); }
+  if (hat) {
+    g.fillStyle = hat; g.beginPath(); g.arc(0, -535, 96, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.ellipse(-90, -540, 95, 20, -0.1, 0, 7); g.fill(); g.stroke();
+  }
+  // face
+  g.fillStyle = INK;
+  for (const ex of [-30, 18]) { g.beginPath(); g.arc(ex, -505, 13, 0, 7); g.fill(); }
+  if (face === "shock") { g.beginPath(); g.ellipse(-6, -462, 14, 20, 0, 0, 7); g.fill(); }
+  else { g.beginPath(); g.arc(-6, -445, 24, Math.PI * 1.15, Math.PI * 1.85); g.lineWidth = 6; g.stroke(); }
+  g.restore();
+}
+// background shoppers (smaller, further down the aisle)
+const shoppers = [[430, 1180, 0.42, "#7a6a9a"], [520, 1150, 0.36, "#8a5a6a"], [610, 1170, 0.4, "#5f7f9a"], [690, 1200, 0.46, "#9a7a5a"]];
+for (const [x, y, s, c] of shoppers) person(x, y, s, { shirt: c, face: "shock", skin: "#cfc8bd", arms: [-0.2 - rand() * 0.6, 0.2 + rand() * 0.8] });
+person(300, 1600, 0.95, { shirt: "#7d4f66", hair: "bun", badge: true, face: "shock", arms: [-0.3, 1.9], legs: [0.1, -0.15] });
+person(830, 1820, 1.25, { shirt: "#3fa9a0", hat: "#d8553f", face: "shock", arms: [0.3, 2.4], legs: [0.08, -0.1], lean: -0.04 });
+
+// ---------- finish: vignette and paper grain ----------
+const vg = g.createRadialGradient(W / 2, H * 0.45, H * 0.2, W / 2, H * 0.5, H * 0.75);
+vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(30,15,10,0.55)");
+g.fillStyle = vg; g.fillRect(0, 0, W, H);
+const img = g.getImageData(0, 0, W, H), d = img.data;
+for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * 18; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+g.putImageData(img, 0, 0);
+window.ready = true;
+</script>
+</body>
+</html>

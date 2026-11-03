@@ -1,0 +1,146 @@
+{
+  "title": "What if the Sun disappeared",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": [
+    "sun",
+    "eight",
+    "nothing",
+    "gravity",
+    "black",
+    "moon",
+    "straight",
+    "freezer",
+    "freeze",
+    "deep",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "If the Sun disappeared right now, this is what would happen.",
+      "replay": "dark",
+      "from": 0.0
+    },
+    {
+      "shot": "intro",
+      "text": "For eight minutes, nothing. Its last light is still on the way."
+    },
+    {
+      "shot": "gravity",
+      "text": "Even its gravity takes eight minutes to let go."
+    },
+    {
+      "shot": "dark",
+      "text": "Then the sky turns black, and the Moon vanishes too. It only shines with sunlight."
+    },
+    {
+      "shot": "drift",
+      "text": "Earth stops circling and drifts off into space in a straight line."
+    },
+    {
+      "shot": "cold",
+      "text": "Within a week, the whole planet is colder than a freezer."
+    },
+    {
+      "shot": "ice",
+      "text": "The oceans freeze over on top..."
+    },
+    {
+      "shot": "deep",
+      "text": "but deep below the ice, near volcanic vents, some life could keep going."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "rumble",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 3.0,
+      "gain": 0.7
+    },
+    {
+      "sound": "rewind",
+      "shot": "hook",
+      "at": -0.55,
+      "length": 0.7,
+      "gain": 1.0
+    },
+    {
+      "sound": "whoosh",
+      "shot": "intro",
+      "at": 0.0,
+      "length": 1.2,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "gravity",
+      "at": 0.0,
+      "length": 1.4,
+      "gain": 0.6
+    },
+    {
+      "sound": "impact",
+      "shot": "dark",
+      "at": 0.0,
+      "length": 1.6,
+      "gain": 0.6
+    },
+    {
+      "sound": "rumble",
+      "shot": "dark",
+      "at": 0.2,
+      "length": 3.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "drift",
+      "at": 0.2,
+      "length": 2.0,
+      "gain": 0.8
+    },
+    {
+      "sound": "creak",
+      "shot": "ice",
+      "at": 0.2,
+      "length": 1.5,
+      "gain": 0.8
+    },
+    {
+      "sound": "bubbles",
+      "shot": "deep",
+      "at": 0.0,
+      "length": 3.5,
+      "gain": 0.7
+    }
+  ],
+  "youtube": {
+    "title": "What If the Sun Disappeared? ☀️ #shorts",
+    "description": "If the Sun disappeared right now, this is what would happen 😳\n\nFor about eight minutes, nothing: its last light is still on its way to us, and even its gravity takes about eight minutes to let go. Then the sky turns black, and the Moon vanishes too, because it only shines with reflected sunlight. Earth stops circling and drifts off into space in a straight line.\n\nWithin a week, the whole planet would be colder than a freezer, and the oceans would freeze over on top. But deep below the ice, near volcanic vents on the sea floor, some life could keep going.\n\n☀️ What would you do in those 8 minutes? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #sun #space #whatif #astronomy #science #universe #didyouknow",
+    "tags": [
+      "what if the sun disappeared",
+      "sun disappeared",
+      "what if",
+      "sun",
+      "space",
+      "8 minutes",
+      "speed of light",
+      "gravity",
+      "earth orbit",
+      "frozen earth",
+      "hydrothermal vents",
+      "astronomy",
+      "universe",
+      "science explained",
+      "did you know",
+      "3d animation",
+      "shorts"
+    ]
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "title": "What happens if you fall into a black hole",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": [
+    "you",
+    "hole",
+    "glowing",
+    "millions",
+    "bends",
+    "back",
+    "feet",
+    "noodle",
+    "spaghettification",
+    "red",
+    "freeze",
+    "forever",
+    "light",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "This is what would happen to you inside a black hole.",
+      "replay": "stretch",
+      "from": 0.2
+    },
+    {
+      "shot": "intro",
+      "text": "From far away, it's a hole in space with a glowing ring."
+    },
+    {
+      "shot": "disk",
+      "text": "That's gas, spinning so fast it hits millions of degrees."
+    },
+    {
+      "shot": "lens",
+      "text": "Its gravity bends light, so the back of the ring wraps over the top."
+    },
+    {
+      "shot": "closer",
+      "text": "Near a small one, gravity pulls your feet harder than your head..."
+    },
+    {
+      "shot": "stretch",
+      "text": "stretching you like a noodle. Scientists call it spaghettification."
+    },
+    {
+      "shot": "frozen",
+      "text": "From outside, you'd turn red and freeze at the edge, forever."
+    },
+    {
+      "shot": "through",
+      "text": "But you'd keep falling. Not even light gets out."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "rumble",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 3.0,
+      "gain": 0.9
+    },
+    {
+      "sound": "rewind",
+      "shot": "hook",
+      "at": -0.55,
+      "length": 0.7,
+      "gain": 1.0
+    },
+    {
+      "sound": "whoosh",
+      "shot": "intro",
+      "at": 0.0,
+      "length": 1.4,
+      "gain": 0.7
+    },
+    {
+      "sound": "rumble",
+      "shot": "disk",
+      "at": 0.0,
+      "length": 3.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "lens",
+      "at": 0.2,
+      "length": 1.6,
+      "gain": 0.6
+    },
+    {
+      "sound": "rumble",
+      "shot": "closer",
+      "at": 0.0,
+      "length": 3.2,
+      "gain": 0.8
+    },
+    {
+      "sound": "creak",
+      "shot": "stretch",
+      "at": 0.2,
+      "length": 1.6,
+      "gain": 0.8
+    },
+    {
+      "sound": "rumble",
+      "shot": "stretch",
+      "at": 0.0,
+      "length": 3.5,
+      "gain": 1.0
+    },
+    {
+      "sound": "whoosh",
+      "shot": "through",
+      "at": 0.3,
+      "length": 1.8,
+      "gain": 0.9
+    },
+    {
+      "sound": "impact",
+      "shot": "through",
+      "at": 1.6,
+      "length": 1.5,
+      "gain": 0.6
+    }
+  ],
+  "youtube": {
+    "title": "What Happens If You Fall Into a Black Hole? 🕳️ #shorts",
+    "description": "This is what would happen to you if you fell into a black hole 😳\n\nFrom far away it looks like a hole in space wrapped in a glowing ring: gas spinning so fast it heats up to millions of degrees. Its gravity is so strong it bends light, so you can see the back of the ring wrapped over the top.\n\nNear a small black hole, gravity pulls much harder on your feet than your head, stretching you into a noodle. Scientists really call it spaghettification. To anyone watching from far away, you'd seem to slow down, turn red and freeze at the edge. But for you, there's no way back. Not even light can escape.\n\n🕳️ Would you look inside? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #blackhole #space #astronomy #physics #science #universe #didyouknow",
+    "tags": [
+      "black hole",
+      "falling into a black hole",
+      "what happens if you fall into a black hole",
+      "spaghettification",
+      "event horizon",
+      "gravitational lensing",
+      "accretion disk",
+      "time dilation",
+      "space",
+      "astronomy",
+      "physics",
+      "universe",
+      "science explained",
+      "did you know",
+      "3d animation",
+      "shorts"
+    ]
+  }
+}

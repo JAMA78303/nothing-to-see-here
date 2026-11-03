@@ -1,0 +1,162 @@
+{
+  "title": "Where your text messages actually go",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "highlight": [
+    "actually",
+    "send",
+    "radio",
+    "tower",
+    "light",
+    "data",
+    "ocean",
+    "satellite",
+    "second",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "This is where your text message actually goes.",
+      "replay": "ocean",
+      "from": 0.3
+    },
+    {
+      "shot": "intro",
+      "text": "Hit send, and your phone turns it into invisible radio waves..."
+    },
+    {
+      "shot": "tower",
+      "text": "that fly to the nearest cell tower."
+    },
+    {
+      "shot": "fiber",
+      "text": "There it becomes flashes of light, racing through underground glass cables."
+    },
+    {
+      "shot": "data",
+      "text": "A giant data center figures out where it's going."
+    },
+    {
+      "shot": "ocean",
+      "text": "If your friend is far away, it dives to cables on the ocean floor."
+    },
+    {
+      "shot": "fact",
+      "text": "Most data between continents travels this way, not by satellite."
+    },
+    {
+      "shot": "arrive",
+      "text": "Then it hops to another tower, and onto their phone."
+    },
+    {
+      "shot": "outro",
+      "text": "All in less than a second."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "whoosh",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 1.6,
+      "gain": 0.8
+    },
+    {
+      "sound": "bubbles",
+      "shot": "hook",
+      "at": 0.2,
+      "length": 2.2,
+      "gain": 0.5
+    },
+    {
+      "sound": "rewind",
+      "shot": "hook",
+      "at": -0.55,
+      "length": 0.7,
+      "gain": 1.0
+    },
+    {
+      "sound": "whoosh",
+      "shot": "intro",
+      "at": 1.2,
+      "length": 0.8,
+      "gain": 0.7
+    },
+    {
+      "sound": "whoosh",
+      "shot": "tower",
+      "at": 0.0,
+      "length": 1.2,
+      "gain": 0.7
+    },
+    {
+      "sound": "whoosh",
+      "shot": "fiber",
+      "at": 0.2,
+      "length": 1.4,
+      "gain": 0.8
+    },
+    {
+      "sound": "rumble",
+      "shot": "data",
+      "at": 0.0,
+      "length": 3.0,
+      "gain": 0.4
+    },
+    {
+      "sound": "whoosh",
+      "shot": "ocean",
+      "at": 0.0,
+      "length": 1.6,
+      "gain": 0.8
+    },
+    {
+      "sound": "bubbles",
+      "shot": "ocean",
+      "at": 0.3,
+      "length": 3.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "arrive",
+      "at": 0.6,
+      "length": 1.0,
+      "gain": 0.7
+    },
+    {
+      "sound": "impact",
+      "shot": "arrive",
+      "at": 1.9,
+      "length": 0.8,
+      "gain": 0.4
+    }
+  ],
+  "youtube": {
+    "title": "Where Your Text Messages ACTUALLY Go 📱 #shorts",
+    "description": "This is where your text message actually goes 😳\n\nThe second you hit send, your phone turns it into invisible radio waves that fly to the nearest cell tower. From there it becomes flashes of light racing through glass fiber-optic cables, stops at a data center that figures out where it's going, and if your friend is far away, it dives into cables lying on the bottom of the ocean. Almost all data between continents travels through these undersea cables, not satellites.\n\nThen it hops to another tower and lands on their phone. The whole trip can take less than a second.\n\n📱 Did you know this? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #phone #internet #technology #howitworks #science #didyouknow #texting",
+    "tags": [
+      "where do text messages go",
+      "how texting works",
+      "how the internet works",
+      "undersea cables",
+      "submarine cables",
+      "fiber optic cable",
+      "cell tower",
+      "data center",
+      "how phones work",
+      "radio waves",
+      "technology explained",
+      "how it works",
+      "science explained",
+      "did you know",
+      "3d animation",
+      "shorts"
+    ]
+  }
+}

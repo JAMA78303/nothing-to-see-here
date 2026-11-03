@@ -1,0 +1,290 @@
+// "Where your text messages actually go": phone -> radio waves -> cell tower -> fibre (pulses of
+// light) -> data center -> undersea cable -> tower -> friend's phone. One long cut-away world.
+import {
+  THREE, scene, camera, GROUND_BOTTOM, box, groundBox, solid, setWaterTable, canvasTex,
+  house, tree, cloud, ease, lerp, V, moveCamera, start, pipeBand, flow,
+} from "./kit.js";
+
+const SEA = { x0: 46, x1: 92, floor: -8, surface: -0.4 };
+groundBox(-30, SEA.x0, GROUND_BOTTOM, 0, -40, 0);
+groundBox(SEA.x0, SEA.x1, GROUND_BOTTOM, SEA.floor, -40, 0);
+groundBox(SEA.x1, 150, GROUND_BOTTOM, 0, -40, 0);
+const water = box(SEA.x0, SEA.x1, SEA.floor, SEA.surface, -40, 0,
+  () => new THREE.MeshPhongMaterial({ color: 0x1f6fb2, transparent: true, opacity: 0.78, shininess: 80, depthWrite: false }));
+water.renderOrder = 2;
+
+// ---------- phones with a little chat screen ----------
+function chatTex(state, name) {
+  return canvasTex(360, 720, (g, w, h) => {
+    g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h);
+    g.fillStyle = "#f2f2f7"; g.fillRect(0, 0, w, 110);
+    g.fillStyle = "#c7c7cc"; g.beginPath(); g.arc(w / 2, 48, 26, 0, 7); g.fill();
+    g.fillStyle = "#111"; g.font = "bold 24px Arial"; g.textAlign = "center"; g.fillText(name, w / 2, 98);
+    const bubble = (text, right, color, tc) => {
+      g.font = "bold 34px Arial";
+      const bw = g.measureText(text).width + 48, bx = right ? w - bw - 16 : 16, by = 170;
+      g.fillStyle = color; g.beginPath(); g.roundRect(bx, by, bw, 76, 36); g.fill();
+      g.fillStyle = tc; g.textAlign = "left"; g.fillText(text, bx + 24, by + 50);
+    };
+    if (state === "sent") { bubble("Hey! You up?", true, "#0a84ff", "#fff"); g.fillStyle = "#8e8e93"; g.font = "18px Arial"; g.textAlign = "right"; g.fillText("Delivered", w - 26, 278); }
+    if (state === "received") bubble("Hey! You up?", false, "#e5e5ea", "#111");
+    // input bar
+    g.fillStyle = "#f2f2f7"; g.fillRect(0, h - 100, w, 100);
+    g.fillStyle = "#fff"; g.strokeStyle = "#d1d1d6"; g.lineWidth = 2; g.beginPath(); g.roundRect(18, h - 80, w - 100, 56, 28); g.fill(); g.stroke();
+    g.fillStyle = state === "typing" ? "#111" : "#a0a0a6"; g.font = "bold 26px Arial"; g.textAlign = "left";
+    g.fillText(state === "typing" ? "Hey! You up?" : "Message", 40, h - 44);
+    g.fillStyle = "#0a84ff"; g.beginPath(); g.arc(w - 46, h - 52, 26, 0, 7); g.fill();
+    g.fillStyle = "#fff"; g.beginPath(); g.moveTo(w - 46, h - 66); g.lineTo(w - 34, h - 50); g.lineTo(w - 58, h - 50); g.fill();
+    g.fillRect(w - 49, h - 52, 6, 14);
+  });
+}
+function phone(states, name) {
+  const g = new THREE.Group();
+  const bodyM = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.4, 0.025), new THREE.MeshStandardMaterial({ color: 0x1c1c1e, roughness: 0.3, metalness: 0.6 }));
+  g.add(bodyM);
+  const texs = Object.fromEntries(states.map(s => [s, chatTex(s, name)]));
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.182, 0.37), new THREE.MeshBasicMaterial({ map: texs[states[0]] }));
+  screen.position.z = 0.0131;
+  g.add(screen);
+  g.userData.show = s => (screen.material.map = texs[s]);
+  return g;
+}
+function person(x, z, shirt, ph) {
+  const g = new THREE.Group();
+  const skin = new THREE.MeshLambertMaterial({ color: 0xe8b98f });
+  const top = new THREE.MeshLambertMaterial({ color: shirt });
+  const legsM = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.5, 6, 12), top); torso.position.y = 1.15; g.add(torso);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 14), skin); head.position.y = 1.72; g.add(head);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.21, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: 0x3b2a20 }));
+  hair.position.y = 1.74; hair.rotation.x = -0.25; g.add(hair);
+  for (const s of [-1, 1]) {
+    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.62, 4, 8), legsM); leg.position.set(0.11 * s, 0.4, 0); g.add(leg);
+  }
+  const armL = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.5, 4, 8), top); armL.position.set(-0.3, 1.1, 0); armL.rotation.z = 0.15; g.add(armL);
+  const armR = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.42, 4, 8), top); armR.position.set(0.22, 1.28, 0.2); armR.rotation.set(-1.2, 0, 0.5); g.add(armR);
+  ph.position.set(0.02, 1.48, 0.42); ph.rotation.x = -0.2;
+  g.add(ph);
+  g.position.set(x, 0, z);
+  scene.add(g);
+  return g;
+}
+const phone1 = phone(["typing", "sent"], "Alex");
+const phone2 = phone(["empty", "received"], "Sam");
+person(2, -2.6, 0x3fa9a0, phone1);
+person(104, -2.6, 0xd8553f, phone2);
+
+// ---------- cell towers ----------
+function tower(x) {
+  const g = new THREE.Group();
+  const steel = new THREE.MeshLambertMaterial({ color: 0xb8bcc2 });
+  const H = 12;
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, H, 6), steel);
+    leg.position.set(dx * 0.55, H / 2, dz * 0.55); leg.rotation.set(dz * 0.035, 0, -dx * 0.035);
+    g.add(leg);
+  }
+  for (let y = 1.5; y < H; y += 1.5) {
+    const s = 1.1 - y / H * 0.6;
+    for (const [a, b, c, d] of [[-s, -s, s, -s], [-s, s, s, s], [-s, -s, -s, s], [s, -s, s, s]]) {
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, Math.hypot(c - a, d - b), 4), steel);
+      bar.position.set((a + c) / 2 * 0.5, y, (b + d) / 2 * 0.5); bar.rotation.set(Math.PI / 2, 0, Math.atan2(d - b, c - a) + Math.PI / 2);
+      bar.rotation.order = "YXZ"; bar.rotation.set(0, -Math.atan2(d - b, c - a), Math.PI / 2);
+      g.add(bar);
+    }
+  }
+  for (let i = 0; i < 3; i++) {
+    const a = i * Math.PI * 2 / 3;
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.3, 0.12), new THREE.MeshLambertMaterial({ color: 0xf2f2f2 }));
+    panel.position.set(Math.cos(a) * 0.55, H - 0.6, Math.sin(a) * 0.55); panel.rotation.y = -a + Math.PI / 2;
+    g.add(panel);
+  }
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 0.3, 0.2) }));
+  beacon.position.y = H + 0.2;
+  g.add(beacon);
+  g.position.set(x, 0, -2.5);
+  scene.add(g);
+  return { g, top: V(x, H - 0.6, -2.5), beacon };
+}
+const tower1 = tower(14), tower2 = tower(98);
+
+// ---------- data center: open-front building full of server racks ----------
+const DC = { x0: 26, x1: 38, zBack: -9, h: 5 };
+const wallM = solid(0xdfe3e8, 0x151515);
+box(DC.x0, DC.x1, 0, 0.15, DC.zBack, 0, solid(0x8a9099));
+box(DC.x0, DC.x1, DC.h, DC.h + 0.3, DC.zBack, 0, wallM);
+box(DC.x0, DC.x1, 0, DC.h, DC.zBack, DC.zBack + 0.3, wallM);
+box(DC.x0, DC.x0 + 0.3, 0, DC.h, DC.zBack, 0, wallM);
+box(DC.x1 - 0.3, DC.x1, 0, DC.h, DC.zBack, 0, wallM);
+for (const x of [28, 31, 34]) box(x, x + 1.6, DC.h + 0.3, DC.h + 1.1, -6, -3, solid(0x9aa3ad));   // roof AC units
+const leds = [];
+const ledColors = [new THREE.Color(0.2, 2.2, 0.6), new THREE.Color(0.3, 1.2, 3.0), new THREE.Color(2.4, 1.6, 0.2)];
+for (const z of [-7.2, -4.8, -2.4]) {
+  for (let x = 27; x < 37; x += 1.15) {
+    box(x, x + 0.9, 0.15, 3.6, z - 0.7, z, solid(0x16181c));
+    for (let r = 0; r < 9; r++) {
+      const led = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.06), new THREE.MeshBasicMaterial({ color: ledColors[(r + Math.floor(x)) % 3].clone() }));
+      led.position.set(x + 0.15 + (r % 3) * 0.3, 0.6 + Math.floor(r / 3) * 1.0 + (r % 2) * 0.2, z + 0.005);
+      led.userData.phase = Math.random() * 10;
+      scene.add(led);
+      leds.push(led);
+    }
+  }
+}
+const coolLight = new THREE.PointLight(0x7fb2ff, 6, 14);
+coolLight.position.set(32, 4.2, -3);
+scene.add(coolLight);
+
+// ---------- fibre route, drawn on the cut face, with pulses of light ----------
+const ROUTE = [
+  V(14, 0, 0), V(14, -2.5, 0), V(32, -2.5, 0), V(32, 0, 0),               // tower -> data center
+  V(32, -3.2, 0), V(SEA.x0, -3.2, 0), V(SEA.x0 + 1.5, SEA.floor + 0.25, 0), // out to the coast, down the cliff
+  V(SEA.x1 - 1.5, SEA.floor + 0.25, 0), V(SEA.x1, -3.2, 0), V(98, -3.2, 0), V(98, 0, 0),
+];
+pipeBand(ROUTE.slice(0, 4), 0.18);
+pipeBand(ROUTE.slice(3), 0.18);
+const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.6, 2.6, 3.2) });
+const P = pts => pts.map(p => V(p.x, p.y, 0.06));
+const fFiber = flow(P(ROUTE.slice(0, 4)), 40, glow, 0.11, 1.4);
+const fCoast = flow(P(ROUTE.slice(3, 7)), 40, glow, 0.11, 1.4);
+const fSea = flow(P(ROUTE.slice(6, 8)), 70, glow, 0.13, 1.6);
+const fLand = flow(P(ROUTE.slice(7)), 34, glow, 0.11, 1.2);
+
+// radio waves: rings that travel from a phone to a tower top (and from a tower to a phone)
+function waves(from, to) {
+  const rings = [];
+  const ringM = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.8, 2.4, 3.4), transparent: true, depthWrite: false });
+  for (let i = 0; i < 9; i++) {
+    const r = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.05, 6, 40), ringM.clone());
+    r.userData.phase = i / 9;
+    scene.add(r);
+    rings.push(r);
+  }
+  const dir = to.clone().sub(from).normalize();
+  return on => rings.forEach(r => {
+    const u = (performanceTime * 0.9 + r.userData.phase) % 1;
+    r.visible = on;
+    r.position.copy(from).lerp(to, u);
+    r.lookAt(r.position.clone().add(dir));
+    r.scale.setScalar(0.4 + u * 2.4);
+    r.material.opacity = 0.9 * (1 - u);
+  });
+}
+let performanceTime = 0;
+const wavesUp = waves(V(2.05, 1.6, -2.1), tower1.top);
+const wavesDown = waves(tower2.top, V(104.05, 1.6, -2.1));
+
+// ---------- the ocean: fish, a curious shark, a satellite overhead ----------
+const fish = [];
+for (let i = 0; i < 16; i++) {
+  const f = new THREE.Group();
+  const c = [0xff9f1c, 0xffd23f, 0x3ec1d3, 0xf25f5c][i % 4];
+  const bodyF = new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 8), new THREE.MeshLambertMaterial({ color: c }));
+  bodyF.scale.set(1.6, 0.8, 0.5);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.3, 3), new THREE.MeshLambertMaterial({ color: c }));
+  tail.rotation.z = Math.PI / 2; tail.position.x = -0.5;
+  f.add(bodyF, tail);
+  f.userData = { x: SEA.x0 + 4 + Math.random() * 38, y: -1.5 - Math.random() * 5.5, z: -0.8 - Math.random() * 5, sp: 0.6 + Math.random() * 0.8, ph: Math.random() * 6 };
+  scene.add(f);
+  fish.push(f);
+}
+const shark = new THREE.Group();
+const sharkM = new THREE.MeshLambertMaterial({ color: 0x6f7d8c });
+const sb = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 10), sharkM); sb.scale.set(3, 0.8, 0.8); shark.add(sb);
+const fin = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.8, 3), sharkM); fin.position.set(0.1, 0.7, 0); fin.rotation.z = -0.3; shark.add(fin);
+const st = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.9, 3), sharkM); st.position.set(-1.9, 0.15, 0); st.rotation.z = Math.PI / 2 + 0.4; shark.add(st);
+scene.add(shark);
+const sat = new THREE.Group();
+sat.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.7, roughness: 0.3 })));
+for (const s of [-1, 1]) {
+  const p = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.05, 0.9), new THREE.MeshStandardMaterial({ color: 0x1a3d7c, metalness: 0.3, roughness: 0.4 }));
+  p.position.x = s * 1.6; sat.add(p);
+}
+sat.position.set(68, 10, -4);
+sat.scale.setScalar(1.8);
+scene.add(sat);
+const cross = new THREE.Group();
+for (const a of [Math.PI / 4, -Math.PI / 4]) {
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.45, 0.1), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 0.15, 0.1) }));
+  bar.rotation.z = a; cross.add(bar);
+}
+cross.position.set(68, 10, -2.6);
+cross.scale.setScalar(1.7);
+scene.add(cross);
+
+// sea floor: sand, rocks and swaying seaweed
+box(SEA.x0, SEA.x1, SEA.floor, SEA.floor + 0.15, -40, 0, solid(0xd8c38f));
+const weeds = [];
+for (let i = 0; i < 40; i++) {
+  const x = SEA.x0 + 2 + Math.random() * (SEA.x1 - SEA.x0 - 4), z = -0.6 - Math.random() * 6;
+  if (i % 3 === 0) {
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.4), new THREE.MeshLambertMaterial({ color: 0x6b6f75, flatShading: true }));
+    rock.position.set(x, SEA.floor + 0.2, z); rock.scale.y = 0.6;
+    scene.add(rock);
+  } else {
+    const w = new THREE.Mesh(new THREE.ConeGeometry(0.12, 1.2 + Math.random() * 1.4, 5), new THREE.MeshLambertMaterial({ color: i % 2 ? 0x2e8b57 : 0x4caf50 }));
+    w.position.set(x, SEA.floor + 0.8, z);
+    w.userData.ph = Math.random() * 6;
+    scene.add(w);
+    weeds.push(w);
+  }
+}
+
+// ---------- backdrop ----------
+house(-6, -14, 11); house(108, -14, 10);
+for (const [x, z, s] of [[-14, -9, 1.2], [8, -12, 1.1], [22, -10, 1], [41, -9, 1.2], [96, -10, 1.1], [116, -9, 1.3]]) tree(x, z, s);
+for (const [x, y, z, s] of [[0, 20, -45, 2], [30, 23, -55, 2.4], [70, 21, -50, 2.2], [104, 22, -50, 2.4]]) cloud(x, y, z, s);
+
+// ---------- timeline ----------
+const cams = {
+  start:  { pos: V(2, 3.2, 9),     look: V(2, 1.5, -2) },
+  intro:  { pos: V(2.06, 1.6, -1.2), look: V(2.04, 1.5, -2.2) },
+  tower:  { pos: V(9.5, 6.5, 20),  look: V(11, 6.2, -2.5) },
+  fiber:  { pos: V(20, -0.5, 15),  look: V(21, -1.8, -1) },
+  data:   { pos: V(32, 3, 13),     look: V(32, 1.8, -4) },
+  ocean:  { pos: V(62, -5.2, 9),   look: V(62, -6.9, -2) },
+  fact:   { pos: V(68, 1.5, 27),   look: V(68, 1.5, -4) },
+  arrive: { pos: V(104.06, 1.6, -1.2), look: V(104.04, 1.5, -2.2) },
+  outro:  { pos: V(56, 16, 95),    look: V(56, -1, -5) },
+  cta:    { pos: V(56, 18, 100),   look: V(56, -1, -5) },
+};
+
+start((time, tl) => {
+  performanceTime = time;
+  const look = moveCamera(cams, tl);
+  setWaterTable(GROUND_BOTTOM - 1, time);
+  const at = n => tl.since(n);
+  const intro = tl.prog("intro"), arrive = tl.prog("arrive"), fact = tl.prog("fact");
+
+  // sender's phone: typed, then sent; receiver's phone lights up when it arrives
+  phone1.userData.show(intro > 0.3 || intro < 0 && tl.prog("tower") > 0 ? "sent" : "typing");
+  phone2.userData.show(arrive > 0.55 || tl.prog("outro") > 0 ? "received" : "empty");
+
+  wavesUp(intro > 0.4 && tl.prog("fiber") < 0.3);
+  wavesDown(arrive > 0.05 && arrive < 0.6);
+  fFiber(at("fiber") - 0.2);
+  fCoast(at("data") + 1.2);
+  fSea(at("ocean") - 0.1);
+  fLand(arrive > -0.2 ? at("arrive") + 0.6 : -1);
+
+  for (const l of leds) {
+    const on = Math.sin(time * 9 + l.userData.phase * 7) > -0.3;
+    l.visible = on;
+  }
+  tower1.beacon.visible = tower2.beacon.visible = Math.sin(time * 4) > 0;
+
+  for (const f of fish) {
+    const { x, y, z, sp, ph } = f.userData;
+    const fx = SEA.x0 + 3 + ((x - SEA.x0 - 3 + time * sp) % 40);
+    f.position.set(fx, y + 0.2 * Math.sin(time * 2 + ph), z);
+    f.rotation.z = 0.1 * Math.sin(time * 3 + ph);
+  }
+  shark.position.set(64 + 4 * Math.sin(time * 0.35), SEA.floor + 1.6 + 0.2 * Math.sin(time), -1.8);
+  shark.rotation.y = Math.cos(time * 0.35) > 0 ? 0 : Math.PI;
+
+  for (const w of weeds) w.rotation.z = 0.15 * Math.sin(time * 1.5 + w.userData.ph);
+  cross.visible = fact > 0.45 && fact < 1.05;
+  sat.rotation.y = time * 0.3;
+
+  camera.lookAt(look);
+});

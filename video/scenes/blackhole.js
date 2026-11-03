@@ -32,18 +32,35 @@ const bh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMateria
     float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.1; a *= 0.5; } return v; }
     vec3 stars(vec3 d) {
       vec3 col = vec3(0.0);
-      for (int k = 0; k < 3; k++) {
-        float scale = k == 0 ? 140.0 : k == 1 ? 300.0 : 650.0;
+      // four layers, from a dense haze of faint stars to a few bright ones with glow and sparkle
+      for (int k = 0; k < 4; k++) {
+        float scale = k == 0 ? 120.0 : k == 1 ? 260.0 : k == 2 ? 520.0 : 1000.0;
+        float thresh = k == 0 ? 0.975 : k == 1 ? 0.95 : k == 2 ? 0.9 : 0.82;
         vec3 p = d * scale, cell = floor(p);
-        float h = hash(cell);
-        float thresh = k == 0 ? 0.992 : 0.982;
-        if (h > thresh) {
-          vec3 c = cell + vec3(hash(cell + 1.3), hash(cell + 2.7), hash(cell + 4.1));
-          float dist = length(p - c);
+        for (int n = 0; n < 2; n++) {                       // also check the neighbouring cell along the view
+          vec3 cc = cell + (n == 0 ? vec3(0.0) : sign(p - cell - 0.5));
+          float h = hash(cc);
+          if (h <= thresh) continue;
+          vec3 c = normalize(cc + vec3(hash(cc + 1.3), hash(cc + 2.7), hash(cc + 4.1))) * scale;   // on the sky sphere
+          vec3 off = p - c;
+          float dist = length(off);
           float b = (h - thresh) / (1.0 - thresh);
-          float core = smoothstep(0.2, 0.0, dist) * b * (k == 0 ? 3.0 : 1.4);
-          float halo = k == 0 ? exp(-dist * 5.0) * b * 0.35 : 0.0;
-          col += (core + halo) * mix(vec3(0.65, 0.78, 1.0), vec3(1.0, 0.82, 0.62), hash(cell + 9.0));
+          float size = k == 0 ? 0.32 : k == 1 ? 0.26 : 0.22;
+          float twinkle = 0.85 + 0.15 * sin(uTime * (2.0 + 5.0 * hash(cc + 7.0)) + h * 40.0);
+          float core = smoothstep(size, 0.0, dist) * b;
+          float bright = k == 0 ? 4.0 : k == 1 ? 2.2 : k == 2 ? 1.3 : 0.7;
+          vec3 tint = mix(vec3(0.62, 0.74, 1.0), vec3(1.0, 0.8, 0.58), hash(cc + 9.0));
+          col += core * bright * twinkle * tint;
+          if (k == 0) {
+            col += exp(-dist * 3.0) * b * 0.5 * tint;                     // soft glow
+            if (b > 0.55) {                                               // four-point sparkle on the brightest
+              vec3 u = normalize(cross(d, vec3(0.0, 1.0, 0.0)));
+              vec3 v = cross(d, u);
+              float x = abs(dot(off, u)), y = abs(dot(off, v));
+              float spike = exp(-x * 14.0) * exp(-y * 1.6) + exp(-y * 14.0) * exp(-x * 1.6);
+              col += spike * (b - 0.55) * 2.2 * twinkle * tint;
+            }
+          }
         }
       }
       // a Milky Way band: dusty glow along a great circle

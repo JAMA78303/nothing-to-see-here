@@ -7,6 +7,7 @@ import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { BokehPass } from "three/addons/postprocessing/BokehPass.js";
 export { THREE };
 
 // cinematic look (soft contact shadows, glow, grading); ?fx=0 renders the plain version
@@ -383,7 +384,7 @@ const GradeShader = {
     }`,
 };
 // scenes can switch off the heavier effects (e.g. ambient occlusion in empty space)
-export const fxOptions = { ao: true };
+export const fxOptions = { ao: true, dof: null };   // dof: { focus, aperture, maxblur }
 function makeComposer() {
   const target = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
   const composer = new EffectComposer(renderer, target);
@@ -395,6 +396,7 @@ function makeComposer() {
     ao.blendIntensity = 1.0;
     composer.addPass(ao);
   }
+  if (fxOptions.dof) composer.addPass(new BokehPass(scene, camera, fxOptions.dof));
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(W / 2, H / 2), 0.32, 0.55, 0.9));
   composer.addPass(new OutputPass());
   const grade = new ShaderPass(GradeShader);

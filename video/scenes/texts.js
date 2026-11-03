@@ -21,18 +21,18 @@ function chatTex(state, name) {
     g.fillStyle = "#c7c7cc"; g.beginPath(); g.arc(w / 2, 48, 26, 0, 7); g.fill();
     g.fillStyle = "#111"; g.font = "bold 24px Arial"; g.textAlign = "center"; g.fillText(name, w / 2, 98);
     const bubble = (text, right, color, tc) => {
-      g.font = "bold 34px Arial";
-      const bw = g.measureText(text).width + 48, bx = right ? w - bw - 16 : 16, by = 170;
-      g.fillStyle = color; g.beginPath(); g.roundRect(bx, by, bw, 76, 36); g.fill();
-      g.fillStyle = tc; g.textAlign = "left"; g.fillText(text, bx + 24, by + 50);
+      g.font = "bold 96px Arial";
+      const bw = g.measureText(text).width + 70, bx = right ? w - bw - 16 : 16, by = 170;
+      g.fillStyle = color; g.beginPath(); g.roundRect(bx, by, bw, 130, 56); g.fill();
+      g.fillStyle = tc; g.textAlign = "left"; g.fillText(text, bx + 35, by + 100);
     };
-    if (state === "sent") { bubble("Hey! You up?", true, "#0a84ff", "#fff"); g.fillStyle = "#8e8e93"; g.font = "18px Arial"; g.textAlign = "right"; g.fillText("Delivered", w - 26, 278); }
-    if (state === "received") bubble("Hey! You up?", false, "#e5e5ea", "#111");
+    if (state === "sent") { bubble("67", true, "#0a84ff", "#fff"); g.fillStyle = "#8e8e93"; g.font = "20px Arial"; g.textAlign = "right"; g.fillText("Delivered", w - 26, 330); }
+    if (state === "received") bubble("67", false, "#e5e5ea", "#111");
     // input bar
     g.fillStyle = "#f2f2f7"; g.fillRect(0, h - 100, w, 100);
     g.fillStyle = "#fff"; g.strokeStyle = "#d1d1d6"; g.lineWidth = 2; g.beginPath(); g.roundRect(18, h - 80, w - 100, 56, 28); g.fill(); g.stroke();
-    g.fillStyle = state === "typing" ? "#111" : "#a0a0a6"; g.font = "bold 26px Arial"; g.textAlign = "left";
-    g.fillText(state === "typing" ? "Hey! You up?" : "Message", 40, h - 44);
+    g.fillStyle = state === "typing" ? "#111" : "#a0a0a6"; g.font = "bold 30px Arial"; g.textAlign = "left";
+    g.fillText(state === "typing" ? "67" : "Message", 40, h - 42);
     g.fillStyle = "#0a84ff"; g.beginPath(); g.arc(w - 46, h - 52, 26, 0, 7); g.fill();
     g.fillStyle = "#fff"; g.beginPath(); g.moveTo(w - 46, h - 66); g.lineTo(w - 34, h - 50); g.lineTo(w - 58, h - 50); g.fill();
     g.fillRect(w - 49, h - 52, 6, 14);
@@ -49,30 +49,105 @@ function phone(states, name) {
   g.userData.show = s => (screen.material.map = texs[s]);
   return g;
 }
-function person(x, z, shirt, ph) {
+
+// a stylised person: face, hair, hoodie, jeans and sneakers, holding a phone in both hands
+function seg(parent, a, b, r, m) {
+  const d = b.clone().sub(a);
+  const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(r, d.length(), 6, 12), m);
+  mesh.position.copy(a).add(b).multiplyScalar(0.5);
+  mesh.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize());
+  parent.add(mesh);
+  return mesh;
+}
+function person(x, z, o) {
   const g = new THREE.Group();
-  const skin = new THREE.MeshLambertMaterial({ color: 0xe8b98f });
-  const top = new THREE.MeshLambertMaterial({ color: shirt });
-  const legsM = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.5, 6, 12), top); torso.position.y = 1.15; g.add(torso);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 14), skin); head.position.y = 1.72; g.add(head);
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.21, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: 0x3b2a20 }));
-  hair.position.y = 1.74; hair.rotation.x = -0.25; g.add(hair);
-  for (const s of [-1, 1]) {
-    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.62, 4, 8), legsM); leg.position.set(0.11 * s, 0.4, 0); g.add(leg);
+  const skin = new THREE.MeshStandardMaterial({ color: o.skin, roughness: 0.7 });
+  const top = new THREE.MeshStandardMaterial({ color: o.shirt, roughness: 0.85 });
+  const topDark = new THREE.MeshStandardMaterial({ color: new THREE.Color(o.shirt).multiplyScalar(0.75), roughness: 0.85 });
+  const jeans = new THREE.MeshStandardMaterial({ color: 0x34495e, roughness: 0.9 });
+  const shoe = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.6 });
+  const hairM = new THREE.MeshStandardMaterial({ color: o.hair, roughness: 0.8 });
+  const dark = new THREE.MeshBasicMaterial({ color: 0x1b1b1b });
+  const white = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  // legs and sneakers
+  for (const sx of [-1, 1]) {
+    seg(g, V(0.1 * sx, 0.88, 0), V(0.11 * sx, 0.12, 0.02), 0.085, jeans);
+    const sneaker = new THREE.Mesh(new THREE.CapsuleGeometry(0.075, 0.12, 6, 10), shoe);
+    sneaker.rotation.x = Math.PI / 2; sneaker.position.set(0.11 * sx, 0.07, 0.07);
+    g.add(sneaker);
   }
-  const armL = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.5, 4, 8), top); armL.position.set(-0.3, 1.1, 0); armL.rotation.z = 0.15; g.add(armL);
-  const armR = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.42, 4, 8), top); armR.position.set(0.22, 1.28, 0.2); armR.rotation.set(-1.2, 0, 0.5); g.add(armR);
-  ph.position.set(0.02, 1.48, 0.42); ph.rotation.x = -0.2;
-  g.add(ph);
+  // hoodie: torso, hood around the neck, front pocket, drawstrings
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.4, 8, 16), top);
+  torso.position.y = 1.12; torso.scale.z = 0.72;
+  g.add(torso);
+  const hood = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.055, 8, 20), topDark);
+  hood.rotation.x = Math.PI / 2 - 0.3; hood.position.set(0, 1.42, -0.04);
+  g.add(hood);
+  const pocket = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.11, 0.02), topDark);
+  pocket.position.set(0, 0.97, 0.175);
+  g.add(pocket);
+  for (const sx of [-1, 1]) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.14, 5), white); st.position.set(0.045 * sx, 1.32, 0.17); g.add(st); }
+  // arms bent up to hold the phone at chest height
+  for (const sx of [-1, 1]) {
+    const shoulder = V(0.26 * sx, 1.36, 0), elbow = V(0.24 * sx, 1.04, 0.12), hand = V(0.075 * sx, 1.18, 0.3);
+    seg(g, shoulder, elbow, 0.07, top);
+    seg(g, elbow, hand, 0.062, top);
+    const h = new THREE.Mesh(new THREE.SphereGeometry(0.052, 12, 10), skin); h.position.copy(hand); g.add(h);
+  }
+  // neck and head (tilted down toward the phone)
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.12, 12), skin);
+  neck.position.y = 1.46; g.add(neck);
+  const head = new THREE.Group();
+  head.position.set(0, 1.66, 0.02); head.rotation.x = 0.32;
+  g.add(head);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.19, 28, 20), skin); skull.scale.set(0.95, 1.07, 1); head.add(skull);
+  for (const sx of [-1, 1]) {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8), skin); ear.position.set(0.18 * sx, 0, 0); ear.scale.z = 0.6; head.add(ear);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 10), white); eye.position.set(0.068 * sx, 0.025, 0.165); eye.scale.z = 0.5; head.add(eye);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.019, 10, 8), dark); pupil.position.set(0.068 * sx, 0.012, 0.18); head.add(pupil);
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.014, 0.012), hairM); brow.position.set(0.07 * sx, 0.085, 0.17); brow.rotation.z = -0.15 * sx; head.add(brow);
+  }
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 8), skin); nose.position.set(0, -0.02, 0.188); head.add(nose);
+  const smile = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.009, 6, 16, Math.PI), dark);
+  smile.rotation.z = Math.PI; smile.position.set(0, -0.06, 0.172); head.add(smile);
+  const laugh = new THREE.Mesh(new THREE.CircleGeometry(0.055, 18, Math.PI, Math.PI), new THREE.MeshBasicMaterial({ color: 0x5a1a1a, side: THREE.DoubleSide }));
+  laugh.position.set(0, -0.055, 0.177); laugh.visible = false; head.add(laugh);
+  // hair
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.2, 28, 18, 0, Math.PI * 2, 0, Math.PI * 0.42), hairM);
+  cap.position.y = 0.02; cap.rotation.x = -0.35; head.add(cap);
+  const back = new THREE.Mesh(new THREE.SphereGeometry(0.195, 24, 16, 0, Math.PI * 2, Math.PI * 0.3, Math.PI * 0.4), hairM);
+  back.rotation.x = -0.9; back.position.set(0, 0.0, -0.02); head.add(back);
+  if (o.style === "bun") { const bun = new THREE.Mesh(new THREE.SphereGeometry(0.08, 14, 10), hairM); bun.position.set(0, 0.17, -0.12); head.add(bun); }
+  else { const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.08), hairM); fringe.position.set(0.03, 0.155, 0.1); fringe.rotation.set(0.75, 0, -0.2); fringe.scale.set(0.9, 0.7, 0.8); head.add(fringe); }
+  // phone in both hands, screen turned toward the face
+  o.phone.position.set(0, 1.22, 0.33);
+  o.phone.rotation.set(0, Math.PI, 0);
+  o.phone.rotateX(0.55);
+  g.add(o.phone);
   g.position.set(x, 0, z);
+  g.userData.setLaugh = on => { laugh.visible = on; smile.visible = !on; };
   scene.add(g);
   return g;
 }
-const phone1 = phone(["typing", "sent"], "Alex");
-const phone2 = phone(["empty", "received"], "Sam");
-person(2, -2.6, 0x3fa9a0, phone1);
-person(104, -2.6, 0xd8553f, phone2);
+const phone1 = phone(["typing", "sent"], "Sam");
+const phone2 = phone(["empty", "received"], "Alex");
+const alex = person(2, -2.6, { phone: phone1, shirt: 0x3fa9a0, hair: 0x3b2a20, skin: 0xe8b98f, style: "short" });
+const sam = person(104, -2.6, { phone: phone2, shirt: 0xe0604a, hair: 0x6b3e26, skin: 0xc68e62, style: "bun" });
+
+// the phone screen pops up on screen as a card, so the message is big and readable
+const card = document.createElement("div");
+Object.assign(card.style, { position: "absolute", left: "640px", top: "330px", width: "380px", height: "760px", borderRadius: "54px",
+  background: "#111", padding: "18px", boxSizing: "border-box", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", transformOrigin: "50% 100%", opacity: 0, rotate: "4deg" });
+const cardImg = document.createElement("img");
+Object.assign(cardImg.style, { width: "100%", height: "100%", borderRadius: "48px", display: "block" });
+card.appendChild(cardImg);
+document.body.insertBefore(card, document.getElementById("caption"));
+const screens = Object.fromEntries([["typing", "Sam"], ["sent", "Sam"], ["empty", "Alex"], ["received", "Alex"]].map(([st, n]) => [st, chatTex(st, n).image.toDataURL()]));
+function showCard(state, k) {        // k: 0 hidden .. 1 fully shown
+  card.style.opacity = Math.min(1, k * 1.5);
+  card.style.transform = `translateY(${(1 - k) * 260}px) scale(${0.85 + 0.15 * k})`;
+  if (state && cardImg.dataset.state !== state) { cardImg.src = screens[state]; cardImg.dataset.state = state; }
+}
 
 // ---------- cell towers ----------
 function tower(x) {
@@ -171,8 +246,8 @@ function waves(from, to) {
   });
 }
 let performanceTime = 0;
-const wavesUp = waves(V(2.05, 1.6, -2.1), tower1.top);
-const wavesDown = waves(tower2.top, V(104.05, 1.6, -2.1));
+const wavesUp = waves(V(2, 1.3, -2.25), tower1.top);
+const wavesDown = waves(tower2.top, V(104, 1.3, -2.25));
 
 // ---------- the ocean: fish, a curious shark, a satellite overhead ----------
 const fish = [];
@@ -237,15 +312,15 @@ for (const [x, y, z, s] of [[0, 20, -45, 2], [30, 23, -55, 2.4], [70, 21, -50, 2
 
 // ---------- timeline ----------
 const cams = {
-  start:  { pos: V(2, 3.2, 9),     look: V(2, 1.5, -2) },
-  intro:  { pos: V(2.06, 1.6, -1.2), look: V(2.04, 1.5, -2.2) },
+  start:  { pos: V(2.3, 1.9, 1.2), look: V(2, 1.5, -2.6) },
+  intro:  { pos: V(2.3, 1.62, -0.6), look: V(2.38, 1.5, -2.6) },
   tower:  { pos: V(9.5, 6.5, 20),  look: V(11, 6.2, -2.5) },
   fiber:  { pos: V(20, -0.5, 15),  look: V(21, -1.8, -1) },
   data:   { pos: V(32, 3, 13),     look: V(32, 1.8, -4) },
   ocean:  { pos: V(62, -5.2, 9),   look: V(62, -6.9, -2) },
   fact:   { pos: V(68, 1.5, 27),   look: V(68, 1.5, -4) },
-  arrive: { pos: V(104.06, 1.6, -1.2), look: V(104.04, 1.5, -2.2) },
-  outro:  { pos: V(56, 16, 95),    look: V(56, -1, -5) },
+  arrive: { pos: V(104.3, 1.62, -0.6), look: V(104.38, 1.5, -2.6) },
+  outro:  { pos: V(104.05, 1.68, -1.0), look: V(104, 1.58, -2.6) },
   cta:    { pos: V(56, 18, 100),   look: V(56, -1, -5) },
 };
 
@@ -259,7 +334,12 @@ start((time, tl) => {
   // sender's phone: typed, then sent; receiver's phone lights up when it arrives
   phone1.userData.show(intro > 0.3 || intro < 0 && tl.prog("tower") > 0 ? "sent" : "typing");
   phone2.userData.show(arrive > 0.55 || tl.prog("outro") > 0 ? "received" : "empty");
+  sam.userData.setLaugh(arrive > 0.75 || tl.prog("outro") > 0);
 
+  const pop = (p, a, b) => ease(Math.min((p - a) / 0.12, (b - p) / 0.12, 1));
+  if (intro > 0.12 && intro < 0.95) showCard(intro > 0.55 ? "sent" : "typing", pop(intro, 0.12, 0.95));
+  else if (arrive > 0.25 && arrive < 1.0) showCard(arrive > 0.55 ? "received" : "empty", pop(arrive, 0.25, 1.0));
+  else showCard(null, 0);
   wavesUp(intro > 0.4 && tl.prog("fiber") < 0.3);
   wavesDown(arrive > 0.05 && arrive < 0.6);
   fFiber(at("fiber") - 0.2);

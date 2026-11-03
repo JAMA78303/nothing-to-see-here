@@ -11,15 +11,69 @@ const toonRamp = (() => {
 })();
 const toon = color => new THREE.MeshToonMaterial({ color, gradientMap: toonRamp });
 const INK = new THREE.MeshBasicMaterial({ color: 0x161313 });
-const HEAD = toon(0xfbf9f5);
+const headRamp = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([200, 255]), 2, 1, THREE.RedFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+})();
+const HEAD = new THREE.MeshToonMaterial({ color: 0xffffff, gradientMap: headRamp, emissive: 0xa0a0a0 });   // stays bright even in dim scenes   // nearly flat white, like a drawing
+const R_HEAD = 0.36;
+
+// ---------- 2D faces ----------
+const FACE_INK = "#1b1717";
+function drawFace(g, name, extras = {}) {
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, 512, 512);
+  g.translate(256, 262); g.scale(1.5, 1.5); g.translate(-256, -262);   // big, bold features like the references
+  g.lineCap = "round"; g.lineJoin = "round";
+  const ex = 92, ey = 236, by = 176, my = 334;
+  const line = (pts, w = 16, c = FACE_INK) => { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+  const brow = (side, tilt, lift = 0, len = 74) => { const x = 256 + side * ex, y = by - lift; line([[x - len / 2, y + tilt * side * -1], [x + len / 2, y - tilt * side * -1]], 17); };
+  const oval = (x, y, rx, ry, c) => { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 7); g.fill(); };
+  const lidEye = side => { const x = 256 + side * ex; oval(x, ey + 6, 26, 22, "#6d6d6d"); g.fillStyle = "#fff"; g.fillRect(x - 30, ey - 26, 60, 26); line([[x - 32, ey], [x + 32, ey]], 9); };
+  const dotEye = side => oval(256 + side * ex, ey, 15, 21, FACE_INK);
+  const ringEye = (side, r = 46, pr = 13) => { const x = 256 + side * ex; g.fillStyle = "#fff"; g.beginPath(); g.arc(x, ey, r, 0, 7); g.fill(); g.strokeStyle = FACE_INK; g.lineWidth = 11; g.stroke(); oval(x, ey + 4, pr, pr, "#3a3a3a"); };
+  const happyEye = side => { const x = 256 + side * ex; g.strokeStyle = FACE_INK; g.lineWidth = 13; g.beginPath(); g.arc(x, ey + 12, 26, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); };
+  const teeth = (w, h, curve) => {
+    g.fillStyle = "#fff"; g.strokeStyle = FACE_INK; g.lineWidth = 10;
+    g.beginPath(); g.moveTo(256 - w, my - h / 2); g.quadraticCurveTo(256, my - h / 2 + curve * 0.4, 256 + w, my - h / 2);
+    g.quadraticCurveTo(256 + w * 0.9, my + h / 2 + curve, 256, my + h / 2 + curve); g.quadraticCurveTo(256 - w * 0.9, my + h / 2 + curve, 256 - w, my - h / 2); g.closePath(); g.fill(); g.stroke();
+    g.lineWidth = 6; for (let i = -2; i <= 2; i++) line([[256 + i * w / 3, my - h / 2 + 6], [256 + i * w / 3, my + h / 2 + curve * 0.7]], 6);
+    line([[256 - w * 0.9, my + curve * 0.3], [256 + w * 0.9, my + curve * 0.3]], 6);
+  };
+  const faces = {
+    neutral:   () => { brow(-1, 4); brow(1, 4); dotEye(-1); dotEye(1); g.strokeStyle = FACE_INK; g.lineWidth = 11; g.beginPath(); g.arc(256, my - 30, 30, Math.PI * 0.2, Math.PI * 0.8); g.stroke(); },
+    bored:     () => { brow(-1, 0, 4, 80); brow(1, 0, 4, 80); lidEye(-1); lidEye(1); oval(250, my, 22, 8, "#9a9a9a"); },
+    grumpy:    () => { brow(-1, -14, -8); brow(1, -14, -8); lidEye(-1); lidEye(1); g.strokeStyle = FACE_INK; g.lineWidth = 11; g.beginPath(); g.arc(256, my + 22, 26, Math.PI * 1.2, Math.PI * 1.8); g.stroke(); },
+    smug:      () => { brow(-1, 10, 18); brow(1, -4, 0); lidEye(-1); lidEye(1); oval(272, my, 13, 8, FACE_INK); },
+    surprised: () => { brow(-1, 8, 30); brow(1, 8, 30); ringEye(-1, 40, 11); ringEye(1, 40, 11); oval(256, my + 6, 20, 28, FACE_INK); },
+    grin:      () => { brow(-1, 6, 12); brow(1, 6, 12); happyEye(-1); happyEye(1); teeth(64, 46, 18); },
+    crazy:     () => { ringEye(-1, 50, 14); ringEye(1, 50, 14); teeth(118, 34, 30); },
+    talk:      () => { brow(-1, 3, 6); brow(1, 3, 6); dotEye(-1); dotEye(1); oval(256, my + 4, 52, 30, "#3a1414"); g.fillStyle = "#fff"; g.fillRect(222, my - 22, 68, 14); oval(256, my + 22, 28, 10, "#d9534f"); },
+    scared:    () => { brow(-1, -12, 34); brow(1, -12, 34); ringEye(-1, 38, 8); ringEye(1, 38, 8); line([[200, my + 6], [218, my - 8], [238, my + 8], [256, my - 8], [274, my + 8], [294, my - 8], [312, my + 6]], 9); },
+  };
+  (faces[name] || faces.neutral)();
+  if (extras.sweat) {                     // a cartoon sweat drop at the top of the head
+    g.fillStyle = "#6fc3ff"; g.strokeStyle = "#2a6fb0"; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(430, 60); g.quadraticCurveTo(470, 130, 430, 150); g.quadraticCurveTo(390, 130, 430, 60); g.fill(); g.stroke();
+  }
+}
 // cartoon outline: the back faces of the mesh pushed out along the normals, drawn in ink
 const OUTLINE = new THREE.ShaderMaterial({
   side: THREE.BackSide,
-  uniforms: { w: { value: 0.012 } },
+  uniforms: { w: { value: 0.016 } },
   vertexShader: "uniform float w; void main() { vec3 p = position + normal * w; gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }",
   fragmentShader: "void main() { gl_FragColor = vec4(0.086, 0.075, 0.075, 1.0); }",
 });
-function outline(mesh) {
+export function canvasPlane(w, h, draw) {
+  const c = document.createElement("canvas");
+  c.width = Math.round(512 * w / Math.max(w, h)); c.height = Math.round(512 * h / Math.max(w, h));
+  draw(c.getContext("2d"), c.width, c.height);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
+}
+export function outline(mesh) {
   const o = new THREE.Mesh(mesh.geometry, OUTLINE);
   o.raycast = () => {};
   mesh.add(o);
@@ -27,7 +81,7 @@ function outline(mesh) {
 }
 
 // a thin limb from the group's origin along -y, of the given length
-function stick(len, r = 0.022) {
+function stick(len, r = 0.032) {
   const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 8), INK);
   m.position.y = -len / 2;
   return m;
@@ -79,29 +133,32 @@ export function folk(opts = {}) {
   neck.position.y = 0.55;
   torso.add(neck);
   const head = new THREE.Group();
-  head.position.y = 0.27;
+  head.position.y = 0.3;
   neck.add(head);
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.3, 40, 30), HEAD);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD, 40, 30), HEAD);
   skull.scale.set(1.0, 0.92, 0.95);
   head.add(outline(skull));
-  // drawn-on face: bold brows, eyes and a small mouth, sitting on the front of the head
-  const R = 0.3;
-  const onFace = (m, x, y, lift = 0.004) => { m.position.set(x, y, Math.sqrt(Math.max(0, R * R - x * x - y * y)) * 0.95 + lift); head.add(m); return m; };
-  const faces = {};
-  const face = (name, build) => { const g = new THREE.Group(); const prev = head; build((m, x, y, l) => { onFace(m, x, y, l); prev.remove(m); g.add(m); }); head.add(g); g.visible = false; faces[name] = g; };
-  const brow = (ang, len = 0.12) => { const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.02, len, 4, 8), INK); m.rotation.z = Math.PI / 2 + ang; m.scale.z = 0.4; return m; };
-  const eye = (w, h) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.034, 14, 10), INK); m.scale.set(w, h, 0.35); return m; };
-  const mouthArc = (r, up) => { const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.011, 6, 16, Math.PI * 0.8), INK); m.rotation.z = up ? Math.PI * 1.1 : Math.PI * 0.1; m.scale.z = 0.4; return m; };
-  const dot = (w, h) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.02, 12, 8), INK); m.scale.set(w, h, 0.35); return m; };
-  face("neutral", put => { put(brow(0.05), -0.1, 0.12); put(brow(-0.05), 0.1, 0.12); put(eye(0.9, 1.3), -0.09, 0.03); put(eye(0.9, 1.3), 0.09, 0.03); put(mouthArc(0.035, true), 0, -0.1); });
-  face("grumpy", put => { put(brow(-0.38), -0.095, 0.1); put(brow(0.38), 0.095, 0.1); put(eye(1.25, 0.65), -0.09, 0.03); put(eye(1.25, 0.65), 0.09, 0.03); put(mouthArc(0.04, false), 0, -0.12); });
-  face("smug", put => { put(brow(0.25), -0.1, 0.13); put(brow(-0.05), 0.1, 0.11); put(eye(1.3, 0.55), -0.09, 0.03); put(eye(1.3, 0.55), 0.09, 0.03); put(dot(1.2, 0.7), 0.04, -0.1); });
-  face("surprised", put => { put(brow(0.12), -0.1, 0.16); put(brow(-0.12), 0.1, 0.16); put(eye(0.9, 1.5), -0.09, 0.04); put(eye(0.9, 1.5), 0.09, 0.04); put(dot(1.3, 1.7), 0, -0.11); });
-  face("happy", put => { put(brow(0.12), -0.1, 0.13); put(brow(-0.12), 0.1, 0.13); put(mouthArc(0.035, false), -0.09, 0.04); put(mouthArc(0.035, false), 0.09, 0.04); put(mouthArc(0.06, true), 0, -0.08); });
-  const setFace = name => Object.entries(faces).forEach(([k, g]) => (g.visible = k === name));
+  // drawn-on 2D face: a canvas painted onto a patch over the front of the head
+  const faceCanvas = document.createElement("canvas");
+  faceCanvas.width = faceCanvas.height = 512;
+  const faceTex = new THREE.CanvasTexture(faceCanvas);
+  faceTex.colorSpace = THREE.SRGBColorSpace;
+  const patch = new THREE.Mesh(
+    new THREE.SphereGeometry(R_HEAD * 1.004, 48, 48, Math.PI / 2 - 0.85, 1.7, Math.PI / 2 - 0.85, 1.7),
+    new THREE.MeshBasicMaterial({ map: faceTex, transparent: true, alphaTest: 0.05 }),
+  );
+  skull.add(patch);
+  let currentFace = null;
+  const setFace = (name, extras = {}) => {
+    const key = name + JSON.stringify(extras);
+    if (key === currentFace) return;
+    currentFace = key;
+    drawFace(faceCanvas.getContext("2d"), name, extras);
+    faceTex.needsUpdate = true;
+  };
   setFace(o.face);
   if (o.hairStyle !== "none") {
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.315, 40, 24, 0, Math.PI * 2, 0, Math.PI * (o.hairStyle === "bowl" ? 0.5 : 0.42)), hairM);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.05, 40, 24, 0, Math.PI * 2, 0, Math.PI * (o.hairStyle === "bowl" || o.hairStyle === "tuft" ? 0.5 : 0.42)), hairM);
     cap.scale.set(1.0, 0.95, 0.98);
     cap.rotation.x = o.hairStyle === "slick" ? -0.55 : -0.2;
     cap.position.y = 0.01;
@@ -112,8 +169,15 @@ export function folk(opts = {}) {
       head.add(curl);
     }
     if (o.hairStyle === "bowl") {            // a fringe that hangs over the forehead
-      const fringe = new THREE.Mesh(new THREE.SphereGeometry(0.32, 40, 16, -Math.PI * 0.45, Math.PI * 0.9, Math.PI * 0.32, Math.PI * 0.16), hairM);
+      const fringe = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.06, 40, 16, -Math.PI * 0.45, Math.PI * 0.9, Math.PI * 0.32, Math.PI * 0.16), hairM);
       head.add(fringe);
+    }
+    if (o.hairStyle === "tuft") {            // bowl cut plus a curly tuft sticking up on top
+      const fringe = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.06, 40, 16, -Math.PI * 0.45, Math.PI * 0.9, Math.PI * 0.3, Math.PI * 0.14), hairM);
+      head.add(fringe);
+      const tuft = outline(new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.035, 10, 20, Math.PI * 0.9), hairM));
+      tuft.position.set(0.0, R_HEAD + 0.05, -0.02); tuft.rotation.set(0, Math.PI / 2, Math.PI * 0.55);
+      head.add(tuft);
     }
     if (o.hairStyle === "bun") {
       const bun = new THREE.Mesh(new THREE.SphereGeometry(0.11, 18, 14), hairM);
@@ -151,6 +215,31 @@ export function folk(opts = {}) {
     for (const sx of [-1, 1]) { const pk = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.012, 0.01), INK); pk.position.set(0.1 * sx, 0.3, 0.17); torso.add(pk); }
   }
 
+  // outfits drawn onto the front of the body
+  const onBody = (m, x, y, z = 0.178) => { m.position.set(x, y, z); torso.add(m); return m; };
+  if (o.outfit === "polo") {
+    for (const sx of [-1, 1]) { const c = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.1, 3), toon(new THREE.Color(o.body).multiplyScalar(0.8))); c.rotation.set(0, 0, sx * 2.4); c.scale.z = 0.3; onBody(c, 0.05 * sx, 0.5, 0.15); }
+    const placket = onBody(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.1, 0.01), toon(new THREE.Color(o.body).multiplyScalar(0.85))), 0, 0.44, 0.165);
+    onBody(new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), toon(0xffffff)), 0, 0.46, 0.172);
+    void placket;
+    const badge = canvasPlane(0.17, 0.06, (g, w, h) => {
+      g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.strokeStyle = "#111"; g.lineWidth = 10; g.strokeRect(5, 5, w - 10, h - 10);
+      g.fillStyle = "#d62f2f"; g.fillRect(10, 10, w - 20, 16);
+      g.fillStyle = "#111"; g.font = "bold 62px Arial"; g.textAlign = "center"; g.fillText((o.name || "KYLE").toUpperCase(), w / 2, h - 18);
+    });
+    onBody(badge, 0.08, 0.34, 0.172).rotation.y = 0.35;
+    const logo = canvasPlane(0.07, 0.07, (g, w, h) => {
+      g.fillStyle = "#f2d48a"; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 4, 0, 7); g.fill(); g.strokeStyle = "#111"; g.lineWidth = 8; g.stroke();
+      g.fillStyle = "#2a7fd4"; g.beginPath(); g.ellipse(w / 2, h / 2, w * 0.28, h * 0.14, 0, 0, 7); g.fill();
+    });
+    onBody(logo, -0.09, 0.35, 0.168).rotation.y = -0.4;
+  }
+  if (o.outfit === "suit") {
+    const shirt = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 3), toon(0xffffff)); shirt.rotation.set(Math.PI, 0, 0); shirt.scale.z = 0.25; onBody(shirt, 0, 0.44, 0.16);
+    const tie = outline(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.2, 0.01), toon(o.tie || 0xf2b632))); onBody(tie, 0, 0.36, 0.175);
+    for (const sx of [-1, 1]) { const lap = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.2, 3), toon(new THREE.Color(o.body).multiplyScalar(0.75))); lap.rotation.set(Math.PI, 0, sx * 0.35); lap.scale.z = 0.25; onBody(lap, 0.07 * sx, 0.4, 0.168); }
+  }
+
   // arms: shoulder -> elbow -> small round hand
   const arm = side => {
     const shoulder = new THREE.Group();
@@ -161,7 +250,7 @@ export function folk(opts = {}) {
     elbow.position.y = -0.26;
     shoulder.add(elbow);
     elbow.add(stick(0.24));
-    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 10), INK);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.046, 12, 10), INK);
     hand.position.y = -0.25;
     elbow.add(hand);
     return { shoulder, elbow };
@@ -171,11 +260,11 @@ export function folk(opts = {}) {
     const hip = new THREE.Group();
     hip.position.set(0.075 * side, 0.02, 0);
     hips.add(hip);
-    hip.add(stick(0.3, 0.024));
+    hip.add(stick(0.3, 0.034));
     const knee = new THREE.Group();
     knee.position.y = -0.3;
     hip.add(knee);
-    knee.add(stick(0.27, 0.024));
+    knee.add(stick(0.27, 0.034));
     const shoe = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 14), shoeM);
     shoe.scale.set(0.95, 0.55, 1.45);
     shoe.position.set(0, -0.3, 0.05);

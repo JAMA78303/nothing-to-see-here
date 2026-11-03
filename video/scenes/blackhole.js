@@ -32,38 +32,58 @@ const bh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMateria
     float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.1; a *= 0.5; } return v; }
     vec3 stars(vec3 d) {
       vec3 col = vec3(0.0);
-      for (int k = 0; k < 2; k++) {
-        float scale = k == 0 ? 220.0 : 520.0;
+      for (int k = 0; k < 3; k++) {
+        float scale = k == 0 ? 140.0 : k == 1 ? 300.0 : 650.0;
         vec3 p = d * scale, cell = floor(p);
         float h = hash(cell);
-        if (h > 0.985) {
+        float thresh = k == 0 ? 0.992 : 0.982;
+        if (h > thresh) {
           vec3 c = cell + vec3(hash(cell + 1.3), hash(cell + 2.7), hash(cell + 4.1));
           float dist = length(p - c);
-          float b = smoothstep(0.22, 0.0, dist) * (h - 0.985) * 90.0;
-          col += b * mix(vec3(0.7, 0.8, 1.0), vec3(1.0, 0.85, 0.7), hash(cell + 9.0));
+          float b = (h - thresh) / (1.0 - thresh);
+          float core = smoothstep(0.2, 0.0, dist) * b * (k == 0 ? 3.0 : 1.4);
+          float halo = k == 0 ? exp(-dist * 5.0) * b * 0.35 : 0.0;
+          col += (core + halo) * mix(vec3(0.65, 0.78, 1.0), vec3(1.0, 0.82, 0.62), hash(cell + 9.0));
         }
       }
-      // faint nebula haze
-      float n = fbm(d.xy * 3.0 + d.z * 2.0);
-      col += vec3(0.07, 0.03, 0.11) * smoothstep(0.55, 0.95, n) * 0.5 + vec3(0.004, 0.008, 0.016) * n;
+      // a Milky Way band: dusty glow along a great circle
+      vec3 axis = normalize(vec3(0.35, 1.0, 0.2));
+      float band = exp(-pow(dot(d, axis) / 0.14, 2.0));
+      float dust = fbm(vec2(atan(d.z, d.x) * 6.0, d.y * 9.0));
+      float clouds = fbm(vec2(atan(d.z, d.x) * 14.0, d.y * 20.0) + 3.0);
+      col += band * (vec3(0.025, 0.022, 0.035) * (0.3 + clouds) * smoothstep(0.4, 0.85, dust) + vec3(0.006, 0.005, 0.006) * clouds);
+      col += vec3(0.03, 0.012, 0.05) * smoothstep(0.65, 0.95, fbm(d.xy * 2.5 + d.z)) * 0.5;
       return col;
     }
+    vec3 diskCol(float t) {          // black-body-ish ramp: deep red -> orange -> white
+      return mix(mix(vec3(0.65, 0.12, 0.02), vec3(1.0, 0.5, 0.12), smoothstep(0.0, 0.45, t)), vec3(1.0, 0.93, 0.82), smoothstep(0.45, 1.0, t));
+    }
+    // emission of the disk at a point near the y = 0 plane
     vec3 disk(vec3 hit, vec3 rayDir, out float alpha) {
       float r = length(hit.xz);
-      float inner = 2.6, outer = 13.0;
-      float edge = smoothstep(inner, inner + 0.6, r) * smoothstep(outer, outer - 4.0, r);
+      float inner = 2.6, outer = 16.0;
+      float edge = smoothstep(inner - 0.1, inner + 0.35, r) * pow(1.0 - smoothstep(inner, outer, r), 1.6);
       float phi = atan(hit.z, hit.x);
-      float spin = uTime * 3.0 / pow(r, 1.5);
-      float swirl = fbm(vec2(r * 1.6 + fbm(vec2(phi * 2.0 + spin, r)) * 2.0, (phi + spin) * 4.0 + r * 0.7));
-      float bands = 0.7 + 0.3 * sin(r * 3.2 + swirl * 9.0);
-      float t = clamp(pow(inner / r, 1.1), 0.0, 1.0);
-      vec3 hot = vec3(1.0, 0.96, 0.88), mid = vec3(1.0, 0.62, 0.22), cool = vec3(0.75, 0.22, 0.06);
-      vec3 col = mix(mix(cool, mid, smoothstep(0.15, 0.5, t)), hot, smoothstep(0.55, 1.0, t));
-      // relativistic beaming: the side spinning toward us is brighter
+      float spin = uTime * 2.4 / pow(r, 1.5);
+      float a = phi + spin;
+      // domain-warped turbulence, stretched along the orbit into filaments
+      vec2 q = vec2(r * 2.2, a * 2.0);
+      vec2 w = vec2(fbm(q + vec2(0.0, uTime * 0.05)), fbm(q + vec2(5.2, 1.3)));
+      float gas = fbm(vec2(r * 3.0 + w.x * 2.5, a * 7.0 + w.y * 3.0));
+      float fil = fbm(vec2(r * 14.0 + gas * 3.0, a * 2.5));
+      float clumps = pow(fbm(vec2(r * 1.3, a * 5.0 - uTime * 0.2)), 2.2) * 2.0;
+      float dens = edge * (0.15 + 0.7 * gas + 1.1 * pow(fil, 1.6) + clumps);
+      // Doppler: approaching side brighter and bluer, receding side dimmer and redder
       vec3 orbit = normalize(vec3(-hit.z, 0.0, hit.x));
-      float beam = pow(clamp(1.0 + 0.75 * dot(orbit, -rayDir), 0.25, 1.9), 2.0);
-      float I = edge * (0.35 + 0.9 * swirl) * bands * pow(inner / r, 1.2) * beam * 3.2 * uDiskGain;
-      alpha = clamp(I * 0.8, 0.0, 0.97);
+      float beta = 0.38 / sqrt(r / inner);
+      float dop = 1.0 / (1.0 - beta * dot(orbit, -rayDir));
+      dop = clamp(dop, 0.5, 1.8);
+      float gred = sqrt(clamp(1.0 - 1.0 / r, 0.0, 1.0));       // gravitational redshift near the hole
+      float temp = clamp(pow(inner / r, 0.9) * dop * gred * 1.05, 0.0, 1.4);
+      vec3 col = diskCol(min(temp, 1.0));
+      col = mix(col, vec3(0.75, 0.85, 1.0), smoothstep(1.05, 1.4, temp) * 0.6);   // blue-white where it's hottest
+      float I = dens * pow(dop, 2.2) * gred * pow(inner / r, 1.35) * 1.7 * uDiskGain;
+      alpha = clamp(dens * 0.85, 0.0, 0.96);
       return col * I;
     }
     void main() {
@@ -73,14 +93,18 @@ const bh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMateria
       vec3 hcross = cross(pos, vel);
       float h2 = dot(hcross, hcross);
       vec3 col = vec3(0.0); float trans = 1.0; bool absorbed = false;
-      for (int i = 0; i < 360; i++) {
+      for (int i = 0; i < 480; i++) {
         float r = length(pos);
         if (r < 1.0) { absorbed = true; break; }
-        if (r > 70.0) break;
-        float dt = clamp(0.06 * r, 0.03, 1.2);
+        if (r > 80.0) break;
+        float dt = clamp(0.045 * r * smoothstep(0.9, 3.0, r) + 0.012, 0.012, 1.1);
         vec3 prev = pos;
         vel += -1.5 * h2 * pos / pow(r, 5.0) * dt;   // light bending around a Schwarzschild black hole
         pos += vel * dt;
+        // soft glowing haze hugging the disk (hot gas above and below the plane)
+        float rr = length(pos.xz);
+        float haze = exp(-pow(pos.y / (0.12 + 0.035 * rr), 2.0)) * smoothstep(2.4, 3.2, rr) * (1.0 - smoothstep(4.0, 15.0, rr));
+        col += trans * diskCol(pow(2.6 / max(rr, 2.6), 0.8)) * haze * dt * 0.035 * uDiskGain / max(rr * 0.25, 0.6);
         if (prev.y * pos.y < 0.0) {
           vec3 hit = mix(prev, pos, prev.y / (prev.y - pos.y));
           float a; vec3 c = disk(hit, normalize(vel), a);

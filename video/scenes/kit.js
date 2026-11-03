@@ -1,7 +1,16 @@
 // Shared scene kit: renderer, yard, soil layers, groundwater, house, props, captions.
 // A scene module builds its own set pieces on top and calls start(renderAt).
 import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 export { THREE };
+
+// cinematic look (soft contact shadows, glow, grading); ?fx=0 renders the plain version
+const FX = new URLSearchParams(location.search).get("fx") !== "0";
 
 const W = 1080, H = 1920;
 export const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -10,6 +19,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.localClippingEnabled = true;
+if (FX) {
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 1.2;
+}
 document.body.prepend(renderer.domElement);
 
 export const scene = new THREE.Scene();
@@ -21,10 +34,11 @@ export const camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 300);
 // ---------- lights ----------
 export const hemi = new THREE.HemisphereLight(0xdff1ff, 0x6b4a2b, 1.1);
 scene.add(hemi);
-export const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+export const sun = new THREE.DirectionalLight(FX ? 0xfff0d8 : 0xffffff, 2.2);
 sun.position.set(-12, 25, 18);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.normalBias = 0.02;
 Object.assign(sun.shadow.camera, { left: -25, right: 25, top: 25, bottom: -25, far: 80 });
 scene.add(sun);
 
@@ -42,8 +56,14 @@ export function canvasTex(w, h, draw, repeatX = 1, repeatY = 1) {
 function skyTexture() {
   return canvasTex(4, 256, (g, w, h) => {
     const grad = g.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, "#5aa9e6");
-    grad.addColorStop(1, "#d6eefb");
+    if (FX) {
+      grad.addColorStop(0, "#4f9be0");
+      grad.addColorStop(0.65, "#8cc4ee");
+      grad.addColorStop(1, "#f3e9d8");               // warm haze at the horizon
+    } else {
+      grad.addColorStop(0, "#5aa9e6");
+      grad.addColorStop(1, "#d6eefb");
+    }
     g.fillStyle = grad; g.fillRect(0, 0, w, h);
   });
 }
@@ -343,11 +363,47 @@ function setCaption(TIMING, t) {
 }
 
 // Loads timing, exposes window.renderAt for the renderer, and draws the first frame.
+// colour grade, vignette and a touch of film grain, applied after tone mapping
+const GradeShader = {
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 } },
+  vertexShader: "varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform float time; varying vec2 vUv;
+    void main() {
+      vec3 c = texture2D(tDiffuse, vUv).rgb;
+      c = (c - 0.5) * 1.04 + 0.5;
+      float l = dot(c, vec3(0.299, 0.587, 0.114));
+      c = mix(vec3(l), c, 0.92);
+      c += vec3(0.015, 0.008, -0.005) * smoothstep(0.55, 1.0, l) + vec3(-0.005, 0.0, 0.012) * (1.0 - smoothstep(0.0, 0.35, l));
+      vec2 d = (vUv - 0.5) * vec2(0.75, 1.0);
+      c *= mix(0.8, 1.0, smoothstep(0.75, 0.3, length(d)));
+      float n = fract(sin(dot(vUv * vec2(1080.0, 1920.0) + time, vec2(12.9898, 78.233))) * 43758.5453);
+      c += (n - 0.5) * 0.02;
+      gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+    }`,
+};
+function makeComposer() {
+  const target = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
+  const composer = new EffectComposer(renderer, target);
+  composer.setPixelRatio(1);
+  composer.addPass(new RenderPass(scene, camera));
+  const ao = new GTAOPass(scene, camera, W, H);
+  ao.updateGtaoMaterial({ radius: 2.4, distanceExponent: 1.2, thickness: 2.5, scale: 1.6, samples: 12 });
+  ao.blendIntensity = 1.0;
+  composer.addPass(ao);
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(W / 2, H / 2), 0.32, 0.55, 0.9));
+  composer.addPass(new OutputPass());
+  const grade = new ShaderPass(GradeShader);
+  composer.addPass(grade);
+  return { render: t => { grade.uniforms.time.value = t % 10; composer.render(); } };
+}
+
 export async function start(draw) {
   const params = new URLSearchParams(location.search);
   const TIMING = await (await fetch(params.get("timing"))).json();
   window.duration = TIMING.duration;
   const flashEl = document.getElementById("flash");
+  const composer = FX ? makeComposer() : null;
   window.renderAt = t => {
     // a cold-open shot replays a later moment ("replay": shot name, "from": fraction into it)
     const S = TIMING.shots.find(s => t >= s.start && t < s.end);
@@ -362,7 +418,7 @@ export async function start(draw) {
     const hook = TIMING.shots.find(s => s.replay);
     const dt = hook ? t - hook.end : 99;
     flashEl.style.opacity = dt > -0.08 && dt < 0.3 ? 0.9 * (1 - (dt < 0 ? -dt / 0.08 : dt / 0.3)) : 0;
-    renderer.render(scene, camera);
+    if (composer) composer.render(t); else renderer.render(scene, camera);
   };
   window.renderAt(Number(params.get("t") || 0));
   window.ready = true;

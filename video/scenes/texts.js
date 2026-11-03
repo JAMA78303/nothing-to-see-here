@@ -4,6 +4,10 @@ import {
   THREE, scene, camera, GROUND_BOTTOM, box, groundBox, solid, setWaterTable, canvasTex,
   house, tree, cloud, ease, lerp, V, moveCamera, start, pipeBand, flow,
 } from "./kit.js";
+import { folk, outline } from "./folk.js";
+
+// cartoon mode (scenes/textsfolk.js sets this): folk characters and ink outlines on the set
+const FOLK = !!window.FOLK;
 
 const SEA = { x0: 46, x1: 92, floor: -8, surface: -0.4 };
 groundBox(-30, SEA.x0, GROUND_BOTTOM, 0, -40, 0);
@@ -131,8 +135,25 @@ function person(x, z, o) {
 }
 const phone1 = phone(["typing", "sent"], "Sam");
 const phone2 = phone(["empty", "received"], "Alex");
-const alex = person(2, -2.6, { phone: phone1, shirt: 0x3fa9a0, hair: 0x3b2a20, skin: 0xe8b98f, style: "short" });
-const sam = person(104, -2.6, { phone: phone2, shirt: 0xe0604a, hair: 0x6b3e26, skin: 0xc68e62, style: "bun" });
+// cartoon version: a folk character holding the phone at chest height
+function folkPerson(x, z, o, ph, face) {
+  const f = folk(o).pose({ armL: [0.25, 1.15, 0.9], armR: [0.25, 1.15, 0.9], headTilt: 0.3 });
+  ph.position.set(0, 1.02, 0.3);
+  ph.rotation.set(0, Math.PI, 0);
+  ph.rotateX(0.5);
+  f.add(ph);
+  f.position.set(x, 0, z);
+  f.userData.setLaugh = on => f.setFace(on ? "crazy" : face);
+  f.userData.setLaugh(false);
+  scene.add(f);
+  return f;
+}
+const alex = FOLK
+  ? folkPerson(2, -2.6, { body: 0x3fa9a0, outfit: "polo", name: "Sam", hairStyle: "tuft", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "smug" }, phone1, "smug")
+  : person(2, -2.6, { phone: phone1, shirt: 0x3fa9a0, hair: 0x3b2a20, skin: 0xe8b98f, style: "short" });
+const sam = FOLK
+  ? folkPerson(104, -2.6, { body: 0xe0604a, hairStyle: "bun", hair: 0x6b3e26, shoes: 0x283a6b, face: "bored" }, phone2, "bored")
+  : person(104, -2.6, { phone: phone2, shirt: 0xe0604a, hair: 0x6b3e26, skin: 0xc68e62, style: "bun" });
 
 // the phone screen pops up on screen as a card, so the message is big and readable
 const card = document.createElement("div");
@@ -306,8 +327,13 @@ for (let i = 0; i < 40; i++) {
 }
 
 // ---------- backdrop ----------
-house(-6, -14, 11); house(108, -14, 10);
-for (const [x, z, s] of [[-14, -9, 1.2], [8, -12, 1.1], [22, -10, 1], [41, -9, 1.2], [96, -10, 1.1], [116, -9, 1.3]]) tree(x, z, s);
+const sets = [house(-6, -14, 11), house(108, -14, 10), tower1.g, tower2.g];
+for (const [x, z, s] of [[-14, -9, 1.2], [8, -12, 1.1], [22, -10, 1], [41, -9, 1.2], [96, -10, 1.1], [116, -9, 1.3]]) sets.push(tree(x, z, s));
+if (FOLK) {
+  const meshes = [];
+  for (const g of sets) g.traverse(m => { if (m.isMesh && m.geometry.type !== "ExtrudeGeometry") meshes.push(m); });
+  meshes.forEach(outline);
+}
 for (const [x, y, z, s] of [[0, 20, -45, 2], [30, 23, -55, 2.4], [70, 21, -50, 2.2], [104, 22, -50, 2.4]]) cloud(x, y, z, s);
 
 // ---------- timeline ----------
@@ -319,10 +345,17 @@ const cams = {
   data:   { pos: V(32, 3, 13),     look: V(32, 1.8, -4) },
   ocean:  { pos: V(62, -5.2, 9),   look: V(62, -6.9, -2) },
   fact:   { pos: V(68, 1.5, 27),   look: V(68, 1.5, -4) },
-  arrive: { pos: V(104.3, 1.62, -0.6), look: V(104.38, 1.5, -2.6) },
+  arrive: { pos: V(104.2, 1.62, -0.6), look: V(104.24, 1.5, -2.6) },
   outro:  { pos: V(104.05, 1.68, -1.0), look: V(104, 1.58, -2.6) },
   cta:    { pos: V(56, 18, 100),   look: V(56, -1, -5) },
 };
+
+// the cartoon heads are bigger: frame the close-ups a little wider
+if (FOLK) Object.assign(cams, {
+  intro:  { pos: V(2.3, 1.8, 0.5),     look: V(2.4, 1.5, -2.6) },
+  arrive: { pos: V(104.25, 1.8, 0.5),  look: V(104.32, 1.5, -2.6) },
+  outro:  { pos: V(104.05, 1.75, -0.1), look: V(104, 1.62, -2.6) },
+});
 
 start((time, tl) => {
   performanceTime = time;

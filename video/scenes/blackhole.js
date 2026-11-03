@@ -1,6 +1,6 @@
 // "What happens if you fall into a black hole": a ray-traced black hole (light bent by gravity,
 // glowing accretion disk, starfield) behind a stylised astronaut who gets stretched and reddened.
-import { THREE, scene, camera, sun, hemi, setWaterTable, ease, lerp, V, moveCamera, start } from "./kit.js";
+import { THREE, scene, camera, renderer, sun, hemi, setWaterTable, ease, lerp, V, moveCamera, start } from "./kit.js";
 
 // space, not a back yard
 scene.background = new THREE.Color(0x000000);
@@ -137,27 +137,93 @@ bh.frustumCulled = false;
 bh.renderOrder = -1;
 scene.add(bh);
 
-// ---------- astronaut (built from simple shapes, lit by the disk's glow) ----------
-const suit = new THREE.MeshStandardMaterial({ color: 0xf2f2f2, roughness: 0.55, metalness: 0.05 });
-const visorMat = new THREE.MeshStandardMaterial({ color: 0xffb347, roughness: 0.12, metalness: 0.9, emissive: 0x331800 });
+// ---------- astronaut: a detailed suit built from primitives ----------
+// reflections for the visor and suit: a dark sky with the disk's orange glow around the horizon
+const envTex = (() => {
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 256;
+  const g = c.getContext("2d");
+  g.fillStyle = "#000"; g.fillRect(0, 0, 512, 256);
+  const band = g.createLinearGradient(0, 96, 0, 160);
+  band.addColorStop(0, "rgba(255,150,60,0)"); band.addColorStop(0.5, "rgba(255,190,110,1)"); band.addColorStop(1, "rgba(255,120,40,0)");
+  g.fillStyle = band; g.fillRect(0, 96, 512, 64);
+  g.fillStyle = "#fff";
+  for (let i = 0; i < 260; i++) g.fillRect(Math.random() * 512, Math.random() * 256, 1, 1);
+  const t = new THREE.CanvasTexture(c);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.PMREMGenerator(renderer).fromEquirectangular(t).texture;
+})();
+const astroMats = [];
+const mat = (color, opts = {}) => {
+  const m = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.0, envMap: envTex, envMapIntensity: 0.6, ...opts });
+  m.userData.base = m.color.clone();
+  m.userData.baseEmissive = m.emissive.clone();
+  astroMats.push(m);
+  return m;
+};
+const suit = mat(0xf1f1ee, { roughness: 0.7 });
+const seam = mat(0xd9d9d4, { roughness: 0.75 });
+const metal = mat(0xb9bec4, { roughness: 0.35, metalness: 0.8, envMapIntensity: 1.0 });
+const dark = mat(0x5d6168, { roughness: 0.6 });
+const stripe = mat(0xc8302b, { roughness: 0.6 });
+const visorMat = mat(0xffc66e, { roughness: 0.06, metalness: 1.0, envMapIntensity: 2.2, emissive: 0x2a1400 });
+const lightMats = [0xff3b30, 0x34c759, 0x0a84ff, 0xffd60a].map(c => mat(c, { emissive: c, emissiveIntensity: 1.6 }));
+
 const astro = new THREE.Group();
 const body = new THREE.Group();
 astro.add(body);
-const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.42, 0.7, 6, 16), suit);
-torso.position.y = 0.2;
-const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 18), suit);
-helmet.position.y = 1.15;
-const visor = new THREE.Mesh(new THREE.SphereGeometry(0.34, 24, 18, -Math.PI * 0.42, Math.PI * 0.84, Math.PI * 0.28, Math.PI * 0.42), visorMat);
-visor.position.set(0, 1.15, 0.12);
-const pack = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.85, 0.35), new THREE.MeshStandardMaterial({ color: 0xc9ccd1, roughness: 0.6 }));
-pack.position.set(0, 0.35, -0.45);
-const limb = (len, r) => new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 10), suit);
-const armL = limb(0.6, 0.13), armR = limb(0.6, 0.13), legL = limb(0.7, 0.16), legR = limb(0.7, 0.16);
-armL.position.set(-0.6, 0.35, 0.05); armL.rotation.z = 0.6;
-armR.position.set(0.6, 0.45, 0.05); armR.rotation.z = -1.0;
-legL.position.set(-0.22, -0.75, 0); legL.rotation.z = 0.15;
-legR.position.set(0.22, -0.75, 0); legR.rotation.z = -0.25;
-for (const m of [torso, helmet, visor, pack, armL, armR, legL, legR]) body.add(m);
+const add = (geo, m, x, y, z, parent = body, rx = 0, ry = 0, rz = 0) => {
+  const mesh = new THREE.Mesh(geo, m);
+  mesh.position.set(x, y, z);
+  mesh.rotation.set(rx, ry, rz);
+  parent.add(mesh);
+  return mesh;
+};
+// torso, waist, chest panel with lights
+add(new THREE.CapsuleGeometry(0.4, 0.5, 8, 20), suit, 0, 0.3, 0).scale.set(1.05, 1, 0.8);
+add(new THREE.TorusGeometry(0.36, 0.05, 10, 28), seam, 0, -0.08, 0, body, Math.PI / 2).scale.set(1.05, 0.8, 1);
+add(new THREE.SphereGeometry(0.4, 20, 14), suit, 0, -0.28, 0).scale.set(1.0, 0.7, 0.8);
+add(new THREE.BoxGeometry(0.42, 0.26, 0.1), dark, 0, 0.4, 0.33);
+lightMats.forEach((m, i) => add(new THREE.CylinderGeometry(0.03, 0.03, 0.03, 10), m, -0.13 + i * 0.087, 0.44, 0.39, body, Math.PI / 2));
+add(new THREE.BoxGeometry(0.3, 0.05, 0.02), metal, 0, 0.33, 0.385);
+// backpack (life support) with tanks and an antenna
+add(new THREE.BoxGeometry(0.72, 0.9, 0.32), seam, 0, 0.35, -0.48);
+for (const x of [-0.2, 0.2]) add(new THREE.CylinderGeometry(0.1, 0.1, 0.75, 14), metal, x, 0.38, -0.68);
+add(new THREE.CylinderGeometry(0.012, 0.012, 0.5, 6), dark, 0.28, 1.0, -0.5);
+// helmet: shell, neck ring and a gold mirror visor
+add(new THREE.TorusGeometry(0.27, 0.06, 10, 28), metal, 0, 0.88, 0, body, Math.PI / 2);
+add(new THREE.SphereGeometry(0.42, 32, 24), suit, 0, 1.22, 0);
+add(new THREE.SphereGeometry(0.39, 32, 24, -Math.PI * 0.4, Math.PI * 0.8, Math.PI * 0.22, Math.PI * 0.42), visorMat, 0, 1.22, 0.06);
+add(new THREE.TorusGeometry(0.33, 0.025, 8, 32, Math.PI * 0.9), seam, 0, 1.25, 0.12, body, 0, 0, Math.PI * 0.05).scale.set(1.15, 1.05, 1);
+// limbs: upper part, joint ring, lower part, glove or boot
+function limb(parent, x, y, angle, upper, lower, r, isLeg) {
+  const g = new THREE.Group();
+  g.position.set(x, y, 0);
+  g.rotation.z = angle;
+  parent.add(g);
+  add(new THREE.SphereGeometry(r * 1.25, 16, 12), suit, 0, 0, 0, g);                          // shoulder / hip
+  add(new THREE.CapsuleGeometry(r, upper, 6, 14), suit, 0, -upper / 2 - r * 0.4, 0, g);
+  if (!isLeg) add(new THREE.TorusGeometry(r * 1.02, 0.025, 8, 20), stripe, 0, -upper * 0.35, 0, g, Math.PI / 2);
+  const j = new THREE.Group();
+  j.position.y = -upper - r * 0.6;
+  j.rotation.z = isLeg ? -angle * 0.6 : angle * 0.35;
+  g.add(j);
+  add(new THREE.TorusGeometry(r * 1.05, 0.04, 8, 20), seam, 0, 0, 0, j, Math.PI / 2);          // elbow / knee ring
+  add(new THREE.CapsuleGeometry(r * 0.95, lower, 6, 14), suit, 0, -lower / 2 - r * 0.3, 0, j);
+  if (isLeg) {
+    add(new THREE.CapsuleGeometry(r * 1.15, 0.12, 6, 14), dark, 0, -lower - r * 0.7, 0.04, j).scale.set(1, 1, 1.15);   // boot
+    add(new THREE.BoxGeometry(r * 2.3, 0.07, r * 3.2), dark, 0, -lower - r * 1.55, 0.09, j);                            // sole
+  } else {
+    add(new THREE.TorusGeometry(r * 0.95, 0.03, 8, 18), metal, 0, -lower - r * 0.2, 0, j, Math.PI / 2);               // wrist ring
+    add(new THREE.SphereGeometry(r * 1.05, 14, 10), dark, 0, -lower - r * 0.75, 0, j).scale.set(1, 1.25, 0.8);       // glove
+  }
+}
+limb(body, -0.5, 0.55, 0.75, 0.32, 0.3, 0.12, false);
+limb(body, 0.5, 0.6, -1.05, 0.32, 0.3, 0.12, false);
+limb(body, -0.2, -0.42, 0.18, 0.36, 0.34, 0.15, true);
+limb(body, 0.2, -0.42, -0.28, 0.36, 0.34, 0.15, true);
+body.traverse(o => { if (o.isMesh) o.castShadow = o.receiveShadow = false; });
 scene.add(astro);
 
 // light from the disk: warm key from below/behind, cool rim from the starfield
@@ -171,13 +237,15 @@ scene.add(rim);
 const fill = new THREE.PointLight(0xff8a3d, 10, 30);
 scene.add(fill);
 
+const RED = new THREE.Color(0x8a1206), RED_GLOW = new THREE.Color(0x3a0400);
+
 // ---------- timeline ----------
 const cams = {
   start:   { pos: V(0, 3, 60),     look: V(0, 0, 0) },
   intro:   { pos: V(0, 2.2, 30),   look: V(0, 0, 0) },
   disk:    { pos: V(-14, 6, 20),   look: V(0, 0, 0) },
   lens:    { pos: V(0, 0.9, 19),   look: V(0, 0.2, 0) },
-  closer:  { pos: V(2.2, 2.8, 14), look: V(3.0, 2.4, 0.6) },
+  closer:  { pos: V(5.4, 4.3, 7.8), look: V(2.6, 2.1, 0.2) },
   stretch: { pos: V(2.0, 2.2, 12), look: V(2.4, 1.7, 0.4) },
   frozen:  { pos: V(0.8, 1.5, 13), look: V(0.9, 0.9, 0.3) },
   through: { pos: V(0, 0.3, 4),    look: V(0, 0, 0) },
@@ -209,9 +277,13 @@ start((time, tl) => {
   body.scale.set(lerp(1, 0.42, s), lerp(1, 3.3, s), lerp(1, 0.42, s));
   astro.scale.setScalar(0.68);
   const red = ease(Math.min(1, Math.max(0, frozen) / 0.7));
-  suit.color.setRGB(lerp(0.95, 0.75, red), lerp(0.95, 0.12, red), lerp(0.95, 0.08, red));
-  suit.emissive.setRGB(0.25 * red, 0.02 * red, 0);
+  // redshift: the whole suit drains to deep red, then fades
   const fade = 1 - ease((frozen - 0.6) / 0.4);
-  for (const m of [suit, visorMat]) { m.transparent = fade < 1; m.opacity = fade; }
+  for (const m of astroMats) {
+    m.color.copy(m.userData.base).lerp(RED, 0.85 * red);
+    m.emissive.copy(m.userData.baseEmissive).lerp(RED_GLOW, red);
+    m.transparent = fade < 1;
+    m.opacity = fade;
+  }
   fill.position.set(astro.position.x, astro.position.y - 1.5, astro.position.z - 2);
 });

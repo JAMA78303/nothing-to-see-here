@@ -31,7 +31,7 @@ async function openScene(name, t = 0) {
   page.on("pageerror", e => console.error("page error:", e.message));
   const timing = `/out/${name}/timing.json`;
   await page.goto(`http://localhost:${server.address().port}/scenes/index.html?scene=${name}&timing=${timing}&t=${t}&fx=${process.env.FX ?? 1}`);
-  await page.waitForFunction(() => window.ready, null, { timeout: 60000 });
+  await page.waitForFunction(() => window.ready, null, { timeout: 180000 });
   const close = async () => { await browser.close(); server.close(); };
   return { page, close };
 }
@@ -39,7 +39,7 @@ async function openScene(name, t = 0) {
 async function still(name, t, out = path.join(outDir(name), `t${t}.png`)) {
   const { page, close } = await openScene(name, t);
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
-  await page.screenshot({ path: out });
+  await page.screenshot({ path: out, timeout: 180000 });
   await close();
   console.log("wrote", out);
 }
@@ -62,7 +62,7 @@ async function video(name) {
   const started = Date.now();
   for (let f = 0; f < frames; f++) {
     await page.evaluate(t => window.renderAt(t), f / FPS);
-    const img = await page.screenshot({ type: "jpeg", quality: 92 });
+    const img = await page.screenshot({ type: "jpeg", quality: 92, timeout: 180000 });
     if (!ffmpeg.stdin.write(img)) await new Promise(r => ffmpeg.stdin.once("drain", r));
     if (f % 60 === 0) console.log(`frame ${f}/${frames} (${((Date.now() - started) / 1000).toFixed(0)}s)`);
   }

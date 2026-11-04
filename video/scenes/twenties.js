@@ -121,7 +121,7 @@ const note = canvasPlane(0.42, 0.2, (g, w, h) => {      // a made-up colourful m
   g.fillStyle = "#2f5a3a"; g.font = "bold 120px Arial"; g.fillText("20", 26, h * 0.72); g.textAlign = "right"; g.fillText("20", w - 26, h * 0.72);
   g.strokeStyle = "rgba(47,90,58,0.5)"; g.lineWidth = 6; for (let r = 30; r < 110; r += 18) { g.beginPath(); g.arc(w / 2, h / 2, r, 0, 7); g.stroke(); }
 });
-const maxShop = folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0xffffff, face: "scared" }).pose({ armR: [0.5, 1.3, 0.6], armL: [0.3, 0.2, 0.3] });
+const maxShop = folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0xffffff, face: "scared" }).pose({ armL: [0.35, 1.15, 0.5], armR: [0.3, 0.2, 0.3] });
 note.scale.setScalar(1.6); note.position.set(99.55, 1.45, 1.05); note.rotation.set(0, -0.2, 0.12); scene.add(note);
 maxShop.position.set(SET.shop - 0.9, 0.0, 1.0); maxShop.rotation.y = 0.5; scene.add(maxShop);
 maxShop.setFace("scared", { sweat: true });
@@ -143,7 +143,7 @@ let lampLight, flame;
   const noPlug = canvasPlane(0.5, 0.5, (g, w, h) => { g.strokeStyle = "#d62f2f"; g.lineWidth = 26; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 20, 0, 7); g.stroke(); g.beginPath(); g.moveTo(w * 0.2, h * 0.2); g.lineTo(w * 0.8, h * 0.8); g.stroke(); g.fillStyle = "#f2f2f2"; g.fillRect(w * 0.38, h * 0.36, w * 0.24, h * 0.28); });
   add(noPlug, X - 1.6, 0.7, -2.38);
 }
-const maxHome = folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0xffffff, face: "scared" }).pose({ armR: [0.5, 1.3, 0.9], armL: [0.3, 0.2, 0.3], headTurn: -0.4 });
+const maxHome = folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0xffffff, face: "scared" }).pose({ armL: [0.3, 0.95, 1.4], armR: [0.3, 0.2, 0.3], headTurn: 0.3, headTilt: 0.1 });
 const charger = new THREE.Group();
 charger.add(ink(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.08), toon(0xf2f2f2))));
 for (const dx of [-0.03, 0.03]) { const pin = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.06, 0.015), toon(0xc9c9c9)); pin.position.set(dx, 0.09, 0); charger.add(pin); }
@@ -153,6 +153,12 @@ charger.scale.setScalar(1.6); charger.position.set(200.45, 1.35, 0.85); charger.
 maxHome.position.set(SET.house + 0.0, 0, 0.3); maxHome.rotation.y = 0.25; scene.add(maxHome);
 
 inked.forEach(outline);
+// [prop, holder, offset from the hand to the prop's centre]
+const held = [
+  [phone, maxNow, V(0.0, 0.2, -0.03)],
+  [note, maxShop, V(0.3, 0.02, -0.03)],
+  [charger, maxHome, V(0.0, 0.09, -0.02)],
+];
 
 // ---------- timeline ----------
 const cams = {
@@ -184,10 +190,16 @@ start((time, tl) => {
   swirl.visible = hook && tl.k < 0.6;
   swirl.rotation.z = -time * 4; swirl.scale.setScalar(1 + 0.15 * Math.sin(time * 8));
   if (hook) { maxNow.setFace("surprised"); maxNow.pose({ armL: [0.9, 0.3, 0.4], armR: [0.9, 0.3, 0.4] }); setCrowd("surprised"); }
-  if (tl.shot === "phone") { maxNow.setFace("grumpy"); maxNow.pose({ armR: [0.6, 1.3, 0.5], armL: [0.3, 0.2, 0.3], headTilt: 0.1 }); }
+  if (tl.shot === "phone") { maxNow.setFace("grumpy"); maxNow.pose({ armL: [0.25, 0.9, 1.5], armR: [0.3, 0.2, 0.3], headTilt: 0.1, headTurn: 0.25 }); }
   const sick = tl.shot === "sick";
   if (sick) { maxNow.setFace(tl.k > 0.25 ? "sneeze" : "neutral"); maxNow.pose({ lean: tl.k > 0.25 ? 0.25 : -0.1, armL: [0.3, 0.6, 1.4], armR: [0.3, 0.6, 1.4] }); setCrowd("scared", -0.15); }
   const st = sick ? (tl.k - 0.25) * 3 : -1;
   for (const d of spray) { const u = Math.max(0, st - d.userData.ph * 0.3); d.visible = sick && u > 0 && u < 1.2; d.position.set(maxNow.position.x + d.userData.v.x * u, 1.45 + d.userData.v.y * u - 1.5 * u * u, maxNow.position.z + 0.3 + d.userData.v.z * u); }
+  // props live in world space (so they always face the camera) but follow the hand
+  for (const [prop, who, off] of held) {
+    who.updateMatrixWorld(true);
+    const hand = who.userData.parts.armL.elbow.localToWorld(V(0, -0.25, 0));
+    prop.position.copy(hand).add(off);
+  }
   if (fitting) { maxFit.pose({ armL: [0.9, -0.2, 2.2], armR: [0.25, 0.25, 0.25], headTilt: 0.05 }); setCrowd("grin"); }
 });

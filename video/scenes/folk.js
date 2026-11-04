@@ -52,6 +52,8 @@ function drawFace(g, name, extras = {}) {
     grin:      () => { brow(-1, 6, 12); brow(1, 6, 12); happyEye(-1); happyEye(1); teeth(64, 46, 18); },
     crazy:     () => { ringEye(-1, 50, 14); ringEye(1, 50, 14); teeth(118, 34, 30); },
     talk:      () => { brow(-1, 3, 6); brow(1, 3, 6); dotEye(-1); dotEye(1); oval(256, my + 4, 52, 30, "#3a1414"); g.fillStyle = "#fff"; g.fillRect(222, my - 22, 68, 14); oval(256, my + 22, 28, 10, "#d9534f"); },
+    gross:     () => { brow(-1, -10, 26); brow(1, -10, 26); line([[ex * -1 + 256 - 26, ey - 14], [256 - ex + 22, ey], [256 - ex - 26, ey + 14]], 12); line([[256 + ex + 26, ey - 14], [256 + ex - 22, ey], [256 + ex + 26, ey + 14]], 12);
+                     line([[204, my], [222, my - 10], [242, my + 4], [262, my - 10], [282, my + 4], [304, my - 8]], 10); oval(268, my + 22, 20, 16, "#e8708a"); },
     scared:    () => { brow(-1, -12, 34); brow(1, -12, 34); ringEye(-1, 38, 8); ringEye(1, 38, 8); line([[200, my + 6], [218, my - 8], [238, my + 8], [256, my - 8], [274, my + 8], [294, my - 8], [312, my + 6]], 9); },
   };
   (faces[name] || faces.neutral)();
@@ -233,6 +235,14 @@ export function folk(opts = {}) {
     crown.scale.y = 0.8; crown.position.y = 0.2; head.add(crown);
     const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.025, 32), hatM)); brim.position.y = 0.2; brim.scale.z = 0.92; head.add(brim);
     head.rotation.z = 0;
+  }
+  if (o.hat === "hardhat") {
+    const hh = toon(o.hatColor === 0x1d1a1a ? 0xf5c518 : o.hatColor);
+    const dome = outline(new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 0.98, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), hh));
+    dome.position.y = R_HEAD * 0.32; dome.scale.y = 0.8; head.add(dome);
+    const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.12, R_HEAD * 1.12, 0.03, 32), hh));
+    brim.position.set(0, R_HEAD * 0.32, 0.05); brim.scale.z = 1.12; head.add(brim);
+    const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, R_HEAD * 1.9), hh); ridge.position.y = R_HEAD * 0.32 + R_HEAD * 0.74; head.add(ridge);
   }
   if (o.hat === "porkpie") {
     const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.2, 0.15, 28), hatM)); crown.position.y = 0.3; head.add(crown);

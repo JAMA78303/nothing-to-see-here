@@ -1,0 +1,153 @@
+{
+  "title": "What happens to your poop after you flush",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "highlight": [
+    "poop",
+    "flush",
+    "rakes",
+    "phones",
+    "sludge",
+    "egg",
+    "bacteria",
+    "power",
+    "farm",
+    "food",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "This is where your poop actually ends up.",
+      "replay": "farm",
+      "from": 0.35
+    },
+    {
+      "shot": "flush",
+      "text": "When you flush, it rides the sewer to a treatment plant."
+    },
+    {
+      "shot": "screen",
+      "text": "Giant rakes pull out wipes, toys, even phones."
+    },
+    {
+      "shot": "settle",
+      "text": "Then it sinks into a huge tank of thick brown sludge."
+    },
+    {
+      "shot": "eggs",
+      "text": "The sludge gets pumped into giant egg-shaped tanks..."
+    },
+    {
+      "shot": "bugs",
+      "text": "where bacteria eat it for weeks, making gas to power the plant."
+    },
+    {
+      "shot": "farm",
+      "text": "What's left gets spread on farm fields as fertilizer."
+    },
+    {
+      "shot": "outro",
+      "text": "So your poop might be helping grow your food."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "whoosh",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "rewind",
+      "shot": "hook",
+      "at": -0.55,
+      "length": 0.7,
+      "gain": 1.0
+    },
+    {
+      "sound": "drain",
+      "shot": "flush",
+      "at": 0.3,
+      "length": 1.6,
+      "gain": 1.1
+    },
+    {
+      "sound": "water",
+      "shot": "screen",
+      "at": 0.0,
+      "length": 3.5,
+      "gain": 0.5
+    },
+    {
+      "sound": "creak",
+      "shot": "screen",
+      "at": 0.5,
+      "length": 1.4,
+      "gain": 0.7
+    },
+    {
+      "sound": "bubbles",
+      "shot": "settle",
+      "at": 0.0,
+      "length": 3.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "eggs",
+      "at": 0.0,
+      "length": 1.4,
+      "gain": 0.7
+    },
+    {
+      "sound": "bubbles",
+      "shot": "bugs",
+      "at": 0.0,
+      "length": 3.8,
+      "gain": 0.9
+    },
+    {
+      "sound": "whoosh",
+      "shot": "farm",
+      "at": 0.0,
+      "length": 1.2,
+      "gain": 0.6
+    },
+    {
+      "sound": "impact",
+      "shot": "outro",
+      "at": 0.6,
+      "length": 0.8,
+      "gain": 0.4
+    }
+  ],
+  "youtube": {
+    "title": "What Happens to Your Poop After You Flush 💩 #shorts",
+    "description": "This is where your poop actually ends up 😳\n\nWhen you flush, it rides the sewer to a treatment plant. Giant rakes pull out everything that shouldn't be there (wipes, toys, even phones), then the poop sinks to the bottom of a huge tank as thick brown sludge. The sludge is pumped into giant egg-shaped tanks called digesters, where bacteria eat it for weeks and make gas that helps power the plant.\n\nWhat's left is dried into 'biosolids', and in many places it's spread on farm fields as fertilizer. So your poop might be helping grow your food 🌽\n\n💩 Did you know this? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #poop #toilet #sewage #howitworks #science #didyouknow #gross",
+    "tags": [
+      "what happens to poop after you flush",
+      "where does poop go",
+      "where does toilet water go",
+      "sewage treatment",
+      "wastewater treatment",
+      "sludge",
+      "anaerobic digester",
+      "egg shaped digesters",
+      "biosolids",
+      "fertilizer",
+      "toilet",
+      "flush",
+      "how it works",
+      "science explained",
+      "did you know",
+      "animation",
+      "shorts"
+    ]
+  }
+}

@@ -23,20 +23,23 @@ script = json.loads(script_path.read_text())
 out_dir.mkdir(parents=True, exist_ok=True)
 
 kokoro = Kokoro(str(ROOT / "voices/kokoro-v1.0.onnx"), str(ROOT / "voices/voices-v1.0.bin"))
+say = script.get("say", {})
 highlight = {w.lower() for w in script.get("highlight", [])}
 
 audio, shots, t = [], [], LEAD
 sr = 24000
 audio.append(np.zeros(int(LEAD * sr), dtype=np.float32))
 for i, shot in enumerate(script["shots"]):
-    samples, sr = kokoro.create(shot["text"], voice=script["voice"], speed=script["speed"], lang="en-us")
+    # "say" swaps how a word is spoken without changing the caption, e.g. {"1928": "nineteen twenty-eight"}
+    spoken = re.sub(r"[\w']+", lambda m: say.get(m.group(0), m.group(0)), shot["text"])
+    samples, sr = kokoro.create(spoken, voice=script["voice"], speed=script["speed"], lang="en-us")
     # trim the model's own leading/trailing silence so timings line up
     loud = np.where(np.abs(samples) > 0.01)[0]
     samples = samples[max(0, loud[0] - 600): loud[-1] + 1200]
     dur = len(samples) / sr
 
     words = shot["text"].split()
-    weights = [len(re.sub(r"\W", "", w)) + 2 for w in words]
+    weights = [len(re.sub(r"\W", "", say.get(re.sub(r"[^\w']", "", w), w))) + 2 for w in words]
     total, acc, timed = sum(weights), 0, []
     for w, wt in zip(words, weights):
         timed.append({

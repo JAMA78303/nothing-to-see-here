@@ -2,6 +2,10 @@
   "title": "What if you traveled back to the 1920s",
   "voice": "am_michael",
   "speed": 1.1,
+  "say": {
+    "1928": "nineteen twenty-eight",
+    "1920s": "nineteen twenties"
+  },
   "highlight": [
     "1920s",
     "useless",

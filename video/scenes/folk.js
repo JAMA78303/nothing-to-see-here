@@ -54,9 +54,17 @@ function drawFace(g, name, extras = {}) {
     talk:      () => { brow(-1, 3, 6); brow(1, 3, 6); dotEye(-1); dotEye(1); oval(256, my + 4, 52, 30, "#3a1414"); g.fillStyle = "#fff"; g.fillRect(222, my - 22, 68, 14); oval(256, my + 22, 28, 10, "#d9534f"); },
     gross:     () => { brow(-1, -10, 26); brow(1, -10, 26); line([[ex * -1 + 256 - 26, ey - 14], [256 - ex + 22, ey], [256 - ex - 26, ey + 14]], 12); line([[256 + ex + 26, ey - 14], [256 + ex - 22, ey], [256 + ex + 26, ey + 14]], 12);
                      line([[204, my], [222, my - 10], [242, my + 4], [262, my - 10], [282, my + 4], [304, my - 8]], 10); oval(268, my + 22, 20, 16, "#e8708a"); },
+    sneeze:    () => { brow(-1, 12, 30); brow(1, 12, 30); line([[256 - ex - 28, ey], [256 - ex + 28, ey + 4]], 12); line([[256 + ex - 28, ey + 4], [256 + ex + 28, ey]], 12); oval(256, my + 6, 46, 38, "#3a1414"); },
     scared:    () => { brow(-1, -12, 34); brow(1, -12, 34); ringEye(-1, 38, 8); ringEye(1, 38, 8); line([[200, my + 6], [218, my - 8], [238, my + 8], [256, my - 8], [274, my + 8], [294, my - 8], [312, my + 6]], 9); },
   };
   (faces[name] || faces.neutral)();
+  if (extras.mustache) {                  // a thick old-fashioned moustache
+    g.fillStyle = extras.mustache; g.strokeStyle = FACE_INK; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(256, my - 34);
+    g.bezierCurveTo(226, my - 50, 176, my - 40, 168, my - 14); g.bezierCurveTo(200, my - 22, 230, my - 18, 256, my - 22);
+    g.bezierCurveTo(282, my - 18, 312, my - 22, 344, my - 14); g.bezierCurveTo(336, my - 40, 286, my - 50, 256, my - 34);
+    g.fill(); g.stroke();
+  }
   if (extras.sweat) {                     // a cartoon sweat drop at the top of the head
     g.fillStyle = "#6fc3ff"; g.strokeStyle = "#2a6fb0"; g.lineWidth = 6;
     g.beginPath(); g.moveTo(430, 60); g.quadraticCurveTo(470, 130, 430, 150); g.quadraticCurveTo(390, 130, 430, 60); g.fill(); g.stroke();
@@ -231,9 +239,9 @@ export function folk(opts = {}) {
   // hats
   const hatM = toon(o.hatColor);
   if (o.hat === "bowler") {
-    const crown = outline(new THREE.Mesh(new THREE.SphereGeometry(0.22, 28, 16, 0, Math.PI * 2, 0, Math.PI / 2), hatM));
-    crown.scale.y = 0.8; crown.position.y = 0.2; head.add(crown);
-    const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.025, 32), hatM)); brim.position.y = 0.2; brim.scale.z = 0.92; head.add(brim);
+    const crown = outline(new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 0.84, 28, 16, 0, Math.PI * 2, 0, Math.PI / 2), hatM));
+    crown.scale.y = 0.95; crown.position.y = R_HEAD * 0.52; head.add(crown);
+    const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.22, R_HEAD * 1.22, 0.03, 32), hatM)); brim.position.y = R_HEAD * 0.52; brim.scale.z = 0.92; head.add(brim);
     head.rotation.z = 0;
   }
   if (o.hat === "hardhat") {
@@ -245,9 +253,9 @@ export function folk(opts = {}) {
     const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, R_HEAD * 1.9), hh); ridge.position.y = R_HEAD * 0.32 + R_HEAD * 0.74; head.add(ridge);
   }
   if (o.hat === "porkpie") {
-    const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.2, 0.15, 28), hatM)); crown.position.y = 0.3; head.add(crown);
-    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.205, 0.205, 0.04, 28), toon(0xf2e6c4)); band.position.y = 0.26; head.add(band);
-    const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.022, 32), hatM)); brim.position.y = 0.23; head.add(brim);
+    const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.78, R_HEAD * 0.82, R_HEAD * 0.75, 28), hatM)); crown.position.y = R_HEAD * 0.92; head.add(crown);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.84, R_HEAD * 0.84, R_HEAD * 0.16, 28), toon(0xf2e6c4)); band.position.y = R_HEAD * 0.68; head.add(band);
+    const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.18, R_HEAD * 1.18, 0.03, 32), hatM)); brim.position.y = R_HEAD * 0.56; head.add(brim);
   }
   // bow tie at the collar
   if (o.bowtie) {

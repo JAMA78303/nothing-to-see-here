@@ -12,13 +12,14 @@ const toonRamp = (() => {
 const toon = color => new THREE.MeshToonMaterial({ color, gradientMap: toonRamp });
 const INK = new THREE.MeshBasicMaterial({ color: 0x161313 });
 const headRamp = (() => {
-  const t = new THREE.DataTexture(new Uint8Array([200, 255]), 2, 1, THREE.RedFormat);
+  const t = new THREE.DataTexture(new Uint8Array([232, 255]), 2, 1, THREE.RedFormat);
   t.minFilter = t.magFilter = THREE.NearestFilter;
   t.needsUpdate = true;
   return t;
 })();
-export const HEAD = new THREE.MeshToonMaterial({ color: 0xffffff, gradientMap: headRamp, emissive: 0x606060 });   // scenes can raise emissive at night   // nearly flat white, like a drawing
+export const HEAD = new THREE.MeshToonMaterial({ color: 0xeef1ff, gradientMap: headRamp, emissive: 0x7a7a7a });   // scenes can raise emissive at night   // nearly flat white, like a drawing
 const R_HEAD = 0.36;
+const BODY = 1.22;   // body size relative to the original egg; the head keeps its size
 
 // ---------- 2D faces ----------
 const FACE_INK = "#1b1717";
@@ -62,7 +63,7 @@ function drawFace(g, name, extras = {}) {
 // cartoon outline: the back faces of the mesh pushed out along the normals, drawn in ink
 const OUTLINE = new THREE.ShaderMaterial({
   side: THREE.BackSide,
-  uniforms: { w: { value: 0.016 } },
+  uniforms: { w: { value: 0.026 } },
   vertexShader: "uniform float w; void main() { vec3 p = position + normal * w; gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }",
   fragmentShader: "void main() { gl_FragColor = vec4(0.086, 0.075, 0.075, 1.0); }",
 });
@@ -81,7 +82,7 @@ export function outline(mesh) {
 }
 
 // a thin limb from the group's origin along -y, of the given length
-function stick(len, r = 0.032) {
+function stick(len, r = 0.036) {
   const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 8), INK);
   m.position.y = -len / 2;
   return m;
@@ -97,7 +98,19 @@ export function folk(opts = {}) {
   const o = { body: 0x7b4ea3, hair: 0x1d1a1a, hairStyle: "slick", shoes: 0x2b3a67, buttons: false, face: "neutral", hat: null, hatColor: 0x1d1a1a, bowtie: null, vest: false, cane: false, prop: null, ...opts };
   const root = new THREE.Group();
   const bodyM = toon(o.body);
-  const hairM = toon(o.hair);
+  // hair: base colour with lighter highlight streaks running from the crown
+  const hairTex = (() => {
+    const c = document.createElement("canvas"); c.width = c.height = 256;
+    const g = c.getContext("2d");
+    const base = new THREE.Color(o.hair);
+    g.fillStyle = "#" + base.getHexString(); g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = "#" + base.clone().lerp(new THREE.Color(0xffffff), 0.35).getHexString(); g.lineWidth = 5; g.lineCap = "round";
+    g.lineWidth = 6;
+    for (let i = 0; i < 9; i++) { const y = 40 + i * 20, x0 = (i * 53) % 120; g.beginPath(); g.moveTo(x0, y); g.quadraticCurveTo(x0 + 70, y - 14, x0 + 150, y + 6); g.stroke(); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping;
+    return t;
+  })();
+  const hairM = new THREE.MeshToonMaterial({ color: 0xffffff, map: hairTex, gradientMap: toonRamp });
   const shoeM = toon(o.shoes);
 
   // hips sit at y = 0.62; the whole figure is ~1.75 tall
@@ -129,8 +142,10 @@ export function folk(opts = {}) {
   }
 
   // head: a big soft white ball, slightly squashed, with a blob of hair
+  torso.scale.setScalar(BODY);
   const neck = new THREE.Group();
   neck.position.y = 0.55;
+  neck.scale.setScalar(1 / BODY);
   torso.add(neck);
   const head = new THREE.Group();
   head.position.y = 0.3;
@@ -158,9 +173,9 @@ export function folk(opts = {}) {
   };
   setFace(o.face);
   if (o.hairStyle !== "none") {
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.05, 40, 24, 0, Math.PI * 2, 0, Math.PI * (o.hairStyle === "bowl" || o.hairStyle === "tuft" ? 0.5 : 0.42)), hairM);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.05, 40, 24, 0, Math.PI * 2, 0, Math.PI * (o.hairStyle === "bowl" ? 0.5 : o.hairStyle === "swoop" || o.hairStyle === "tuft" ? 0.36 : 0.42)), hairM);
     cap.scale.set(1.0, 0.95, 0.98);
-    cap.rotation.x = o.hairStyle === "slick" ? -0.55 : -0.2;
+    cap.rotation.x = o.hairStyle === "slick" ? -0.55 : o.hairStyle === "swoop" || o.hairStyle === "tuft" ? -0.12 : -0.2;
     cap.position.y = 0.01;
     head.add(outline(cap));
     if (o.hairStyle === "slick") {           // swept-back hair with a curl at the front
@@ -169,10 +184,35 @@ export function folk(opts = {}) {
       head.add(curl);
     }
     if (o.hairStyle === "bowl") {            // a fringe that hangs over the forehead
-      const fringe = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.06, 40, 16, -Math.PI * 0.45, Math.PI * 0.9, Math.PI * 0.32, Math.PI * 0.16), hairM);
+      const fringe = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.06, 40, 16, Math.PI * 0.05, Math.PI * 0.9, Math.PI * 0.32, Math.PI * 0.16), hairM);
       head.add(fringe);
     }
-    if (o.hairStyle === "tuft") {            // bowl cut plus a curly tuft sticking up on top
+    if (o.hairStyle === "swoop" || o.hairStyle === "tuft") {   // side-swept fringe with a parting
+      const fringeGeo = new THREE.SphereGeometry(R_HEAD * 1.07, 48, 20, Math.PI * 0.5 - Math.PI * 0.6, Math.PI * 1.2, Math.PI * 0.12, Math.PI * 0.2);
+      const fp = fringeGeo.attributes.position;
+      for (let i = 0; i < fp.count; i++) {        // curve the bottom edge: longer on one side, swept up on the other
+        const x = fp.getX(i), y = fp.getY(i);
+        if (y < R_HEAD * 0.75) fp.setY(i, y - 0.06 * Math.max(0, x / R_HEAD + 0.3) + 0.05 * Math.max(0, -x / R_HEAD - 0.2));
+      }
+      fringeGeo.computeVertexNormals();
+      const fringe = outline(new THREE.Mesh(fringeGeo, hairM));
+      fringe.rotation.set(0.12, 0, 0.32);
+      head.add(fringe);
+      const part = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.075, 20, 8, Math.PI * 0.5 - Math.PI * 0.12, Math.PI * 0.025, Math.PI * 0.08, Math.PI * 0.24), INK);
+      part.rotation.set(0.05, 0.35, 0.3);
+      void part;
+    }
+    if (o.hairStyle === "tuft" || o.tuft) {   // a curved horn-like tuft on top
+      const pts = [V(-0.05, 0.9, -0.15), V(0.0, 1.25, -0.12), V(0.12, 1.52, -0.06), V(0.3, 1.66, -0.02), V(0.46, 1.62, 0.0)].map(p => p.multiplyScalar(R_HEAD));
+      const curve = new THREE.CatmullRomCurve3(pts);
+      for (let i = 0; i <= 16; i++) {
+        const k = i / 16;
+        const ball = outline(new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * (0.16 - 0.135 * k), 14, 10), hairM));
+        ball.position.copy(curve.getPoint(k)).multiplyScalar(0.82).add(V(0, R_HEAD * 0.16, 0));
+        head.add(ball);
+      }
+    }
+    if (o.hairStyle === "tuft_old") {
       const fringe = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.06, 40, 16, -Math.PI * 0.45, Math.PI * 0.9, Math.PI * 0.3, Math.PI * 0.14), hairM);
       head.add(fringe);
       const tuft = outline(new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.035, 10, 20, Math.PI * 0.9), hairM));
@@ -222,10 +262,10 @@ export function folk(opts = {}) {
     const placket = onBody(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.1, 0.01), toon(new THREE.Color(o.body).multiplyScalar(0.85))), 0, 0.44, 0.165);
     onBody(new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), toon(0xffffff)), 0, 0.46, 0.172);
     void placket;
-    const badge = canvasPlane(0.17, 0.06, (g, w, h) => {
+    const badge = canvasPlane(0.21, 0.08, (g, w, h) => {
       g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.strokeStyle = "#111"; g.lineWidth = 10; g.strokeRect(5, 5, w - 10, h - 10);
       g.fillStyle = "#d62f2f"; g.fillRect(10, 10, w - 20, 16);
-      g.fillStyle = "#111"; g.font = "bold 62px Arial"; g.textAlign = "center"; g.fillText((o.name || "KYLE").toUpperCase(), w / 2, h - 18);
+      g.fillStyle = "#111"; g.font = "900 120px Arial Black, Arial"; g.textAlign = "center"; g.fillText((o.name || "MAX").toUpperCase(), w / 2, h - 22);
     });
     onBody(badge, 0.08, 0.34, 0.172).rotation.y = 0.35;
     const logo = canvasPlane(0.07, 0.07, (g, w, h) => {
@@ -245,12 +285,12 @@ export function folk(opts = {}) {
     const shoulder = new THREE.Group();
     shoulder.position.set(0.15 * side, 0.43, 0);
     torso.add(shoulder);
-    shoulder.add(stick(0.26));
+    shoulder.add(stick(0.26, 0.029));
     const elbow = new THREE.Group();
     elbow.position.y = -0.26;
     shoulder.add(elbow);
-    elbow.add(stick(0.24));
-    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.046, 12, 10), INK);
+    elbow.add(stick(0.24, 0.029));
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 10), INK);
     hand.position.y = -0.25;
     elbow.add(hand);
     return { shoulder, elbow };
@@ -260,11 +300,11 @@ export function folk(opts = {}) {
     const hip = new THREE.Group();
     hip.position.set(0.075 * side, 0.02, 0);
     hips.add(hip);
-    hip.add(stick(0.3, 0.034));
+    hip.add(stick(0.3, 0.04));
     const knee = new THREE.Group();
     knee.position.y = -0.3;
     hip.add(knee);
-    knee.add(stick(0.27, 0.034));
+    knee.add(stick(0.27, 0.04));
     const shoe = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 14), shoeM);
     shoe.scale.set(0.95, 0.55, 1.45);
     shoe.position.set(0, -0.3, 0.05);

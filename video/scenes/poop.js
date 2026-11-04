@@ -172,8 +172,28 @@ const bugs = [], bubbles = [];
   cloud(X - 6, 12, -30, 2.4); cloud(X + 7, 14, -36, 2.6); tree(X + 9, -12, 1.4); tree(X - 10, -14, 1.2);
 }
 const farmMax = max({ face: "surprised" });
-const corn = ink(new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.24, 6, 10), new THREE.MeshToonMaterial({ color: 0xffd02a, emissive: 0x5a4400 })));
-corn.position.y = -0.28; corn.rotation.x = 0.3;
+// an unmistakable ear of corn: rows of bright kernels and green husk leaves peeling back
+const kernels = canvasTex(128, 256, (g, w, h) => {
+  g.fillStyle = "#c98f00"; g.fillRect(0, 0, w, h);
+  for (let r = 0; r < 16; r++) for (let c = 0; c < 8; c++) {
+    g.fillStyle = (r + c) % 5 === 0 ? "#ffe066" : "#ffd21f";
+    g.beginPath(); g.ellipse(c * 16 + 8 + (r % 2) * 4, r * 16 + 8, 6.5, 7, 0, 0, 7); g.fill();
+    g.fillStyle = "rgba(255,255,255,0.55)"; g.beginPath(); g.arc(c * 16 + 6 + (r % 2) * 4, r * 16 + 5, 2, 0, 7); g.fill();
+  }
+});
+kernels.wrapS = kernels.wrapT = THREE.RepeatWrapping; kernels.repeat.set(2, 1);
+const corn = new THREE.Group();
+const cob = ink(new THREE.Mesh(new THREE.CapsuleGeometry(0.075, 0.3, 8, 16), new THREE.MeshToonMaterial({ map: kernels, emissive: 0x3a2a00 })));
+cob.position.y = 0.12;
+corn.add(cob);
+for (let i = 0; i < 3; i++) {
+  const husk = ink(new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.32, 4), new THREE.MeshToonMaterial({ color: 0x5fbf3a, emissive: 0x153a08 })));
+  const a = i * Math.PI * 2 / 3;
+  husk.position.set(Math.cos(a) * 0.06, -0.08, Math.sin(a) * 0.06);
+  husk.rotation.set(Math.sin(a) * 0.9 + Math.PI, 0, -Math.cos(a) * 0.9);
+  corn.add(husk);
+}
+corn.position.y = -0.3; corn.rotation.set(Math.PI, 0, 0.25);
 farmMax.userData.parts.armR.elbow.add(corn);
 farmMax.position.set(SET.farm + 0.6, 0.12, -0.4); farmMax.rotation.y = -0.25;
 scene.add(farmMax);
@@ -186,7 +206,7 @@ const cams = {
   eggs:   [V(300.6, 1.4, 6.5),   V(300.2, 3.6, -5)],
   bugs:   [V(400, 3.4, 9.8),     V(400, 3.6, -1)],
   farm:   [V(500.9, 1.45, 3.0),  V(500.2, 1.2, -1.5)],
-  outro:  [V(500.65, 1.55, 1.6), V(500.6, 1.45, -0.4)],
+  outro:  [V(500.4, 1.55, 1.9), V(500.35, 1.45, -0.4)],
   cta:    [V(500.4, 2.2, 6.0),   V(500.4, 1.4, -2)],
 };
 start((time, tl) => {

@@ -13,7 +13,7 @@ const ink = m => outline(m);
 const add = (m, x, y, z) => { m.position.set(x, y, z); scene.add(m); return m; };
 const SET = { bath: 0, screen: 100, settle: 200, eggs: 300, bugs: 400, farm: 500 };
 const SHOT_SET = { hook: "farm", flush: "bath", screen: "screen", settle: "settle", eggs: "eggs", bugs: "bugs", farm: "farm", outro: "farm", cta: "farm", start: "farm" };
-const max = extra => folk({ body: 0x2f8fd6, outfit: "polo", name: "Max", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0x2c2c2c, ...extra });
+const max = extra => folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0x2c2c2c, ...extra });
 
 // ---------- bathroom ----------
 {

@@ -272,12 +272,14 @@ export function folk(opts = {}) {
     const placket = onBody(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.1, 0.01), toon(new THREE.Color(o.body).multiplyScalar(0.85))), 0, 0.44, 0.165);
     onBody(new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), toon(0xffffff)), 0, 0.46, 0.172);
     void placket;
+    if (o.name) {                             // name badge only when a name is given
     const badge = canvasPlane(0.21, 0.08, (g, w, h) => {
       g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.strokeStyle = "#111"; g.lineWidth = 10; g.strokeRect(5, 5, w - 10, h - 10);
       g.fillStyle = "#d62f2f"; g.fillRect(10, 10, w - 20, 16);
-      g.fillStyle = "#111"; g.font = "900 120px Arial Black, Arial"; g.textAlign = "center"; g.fillText((o.name || "MAX").toUpperCase(), w / 2, h - 22);
+      g.fillStyle = "#111"; g.font = "900 120px Arial Black, Arial"; g.textAlign = "center"; g.fillText(o.name.toUpperCase(), w / 2, h - 22);
     });
     onBody(badge, 0.08, 0.34, 0.172).rotation.y = 0.35;
+    }
     const logo = canvasPlane(0.07, 0.07, (g, w, h) => {
       g.fillStyle = "#f2d48a"; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 4, 0, 7); g.fill(); g.strokeStyle = "#111"; g.lineWidth = 8; g.stroke();
       g.fillStyle = "#2a7fd4"; g.beginPath(); g.ellipse(w / 2, h / 2, w * 0.28, h * 0.14, 0, 0, 7); g.fill();

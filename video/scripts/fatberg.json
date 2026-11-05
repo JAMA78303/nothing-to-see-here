@@ -1,0 +1,58 @@
+{
+  "title": "The monster living in the sewer under your city",
+  "headline": "THE MONSTER UNDER YOUR CITY",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "tail": 0.12,
+  "ipa": {
+    "fatberg": "fˈætbɜːɡ"
+  },
+  "highlight": [
+    "monster",
+    "sewer",
+    "wipes",
+    "grease",
+    "fatberg",
+    "eleven",
+    "buses",
+    "nine",
+    "weeks",
+    "growing"
+  ],
+  "shots": [
+    { "shot": "hook", "text": "There's a monster growing in the sewer under your city." },
+    { "shot": "how", "text": "Wipes and cooking grease from every drain..." },
+    { "shot": "grow", "text": "glue together into a rock-hard blob called a fatberg." },
+    { "shot": "scale", "text": "London found one as heavy as eleven double-decker buses." },
+    { "shot": "blast", "text": "It took workers nine weeks to break it up." },
+    { "shot": "end", "text": "And right now, another one is growing..." }
+  ],
+  "sfx": [
+    { "sound": "rumble", "shot": "hook", "at": 0.0, "length": 2.5, "gain": 0.7 },
+    { "sound": "water", "shot": "how", "at": 0.0, "length": 2.6, "gain": 0.45 },
+    { "sound": "bubbles", "shot": "grow", "at": 0.0, "length": 2.8, "gain": 0.6 },
+    { "sound": "impact", "shot": "scale", "at": 0.4, "length": 1.0, "gain": 0.8 },
+    { "sound": "water", "shot": "blast", "at": 0.0, "length": 2.8, "gain": 0.8 },
+    { "sound": "rumble", "shot": "end", "at": 0.0, "length": 2.0, "gain": 0.6 }
+  ],
+  "youtube": {
+    "title": "The Monster Living in the Sewer Under Your City 🤢 #shorts",
+    "description": "There's a monster growing in the sewer under your city 😳\n\nIt's called a fatberg. Wet wipes don't break down like toilet paper, and cooking grease poured down the sink cools and hardens in the pipes. Together they glue into a rock-hard blob that can block a whole sewer.\n\nIn 2017, workers in London found one under Whitechapel that weighed about 130 tonnes (as heavy as eleven double-decker buses) and stretched around 250 meters. It took a team about nine weeks to blast it apart with high-pressure hoses.\n\nAnd right now, another one is growing... so only flush the 3 Ps: pee, poo and paper 🧻\n\n🤢 Did you know about fatbergs? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #fatberg #sewer #gross #didyouknow #london #howitworks #science",
+    "tags": [
+      "fatberg",
+      "fatberg london",
+      "whitechapel fatberg",
+      "monster in the sewer",
+      "what's in the sewer",
+      "sewer",
+      "wet wipes",
+      "don't flush wipes",
+      "grease down the drain",
+      "gross facts",
+      "how it works",
+      "did you know",
+      "animation",
+      "shorts"
+    ]
+  }
+}

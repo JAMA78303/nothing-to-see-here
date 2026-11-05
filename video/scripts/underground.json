@@ -1,0 +1,73 @@
+{
+  "title": "What if you built your house underground",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "highlight": [
+    "underground",
+    "55",
+    "degrees",
+    "heating",
+    "hundred",
+    "tons",
+    "groundwater",
+    "Coober",
+    "Pedy",
+    "half",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "What if you built your house underground?"
+    },
+    {
+      "shot": "temp",
+      "text": "A few feet down, it's about 55 degrees all year, so heating costs way less."
+    },
+    {
+      "shot": "roof",
+      "text": "But the roof has to hold up about a hundred tons of dirt."
+    },
+    {
+      "shot": "water",
+      "text": "And groundwater is always pushing to get in."
+    },
+    {
+      "shot": "coober",
+      "text": "In Coober Pedy, Australia, about half the town lives underground!"
+    },
+    {
+      "shot": "cta",
+      "text": "Would you live in one? Follow for more."
+    }
+  ],
+  "sfx": [
+    { "sound": "whoosh", "shot": "hook", "at": 0.0, "length": 1.2, "gain": 0.7 },
+    { "sound": "whoosh", "shot": "temp", "at": 0.1, "length": 0.8, "gain": 0.5 },
+    { "sound": "rumble", "shot": "roof", "at": 0.3, "length": 2.5, "gain": 0.8 },
+    { "sound": "impact", "shot": "roof", "at": 0.6, "length": 1.0, "gain": 0.7 },
+    { "sound": "water", "shot": "water", "at": 0.0, "length": 2.8, "gain": 0.45 },
+    { "sound": "whoosh", "shot": "coober", "at": 0.0, "length": 1.0, "gain": 0.6 },
+    { "sound": "whoosh", "shot": "cta", "at": 0.0, "length": 0.8, "gain": 0.4 }
+  ],
+  "youtube": {
+    "title": "What If You Built Your House Underground? 🏠 #shorts",
+    "description": "What if you built your whole house underground? 🤯\n\nA few feet down, the ground stays about the same temperature all year (around 50 to 60°F in much of the US), so an underground house needs a lot less heating and cooling. But there's a catch: the roof has to hold up the dirt on top of it. Just one meter of wet soil over a small house weighs around a hundred tons, far more than any snow load. And groundwater is always pushing in from every side, so the whole house needs a thick waterproof shell and drains.\n\nIt's not just an idea: in Coober Pedy, South Australia, about half the town lives in underground homes called 'dugouts' to escape summer heat that can top 113°F. Inside, they stay at a comfortable 75°F or so all year 🌵\n\n🏠 Would you live in one? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #underground #house #whatif #cooberpedy #architecture #didyouknow #howitworks",
+    "tags": [
+      "what if you built your house underground",
+      "underground house",
+      "underground home",
+      "earth sheltered home",
+      "coober pedy",
+      "dugout homes",
+      "living underground",
+      "what if",
+      "house",
+      "architecture",
+      "how it works",
+      "did you know",
+      "animation",
+      "shorts"
+    ]
+  }
+}

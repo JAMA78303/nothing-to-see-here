@@ -17,7 +17,10 @@
     "Pentagon",
     "real",
     "plan",
-    "follow"
+    "follow",
+    "best",
+    "bet",
+    "how"
   ],
   "shots": [
     {
@@ -34,30 +37,96 @@
     },
     {
       "shot": "store",
-      "text": "Need food? Grocery stores only keep about three days' worth."
+      "text": "Grocery stores only have about three days of food."
     },
     {
       "shot": "plan",
       "text": "The crazy part? The Pentagon actually wrote a real zombie war plan."
     },
     {
+      "shot": "escape",
+      "text": "So your best bet? Get to the Pentagon. The question is... how do you get there?"
+    },
+    {
       "shot": "cta",
-      "text": "Follow for more things you never knew."
+      "text": "Tell me your plan, and follow for more."
     }
   ],
   "sfx": [
-    { "sound": "whoosh", "shot": "hook", "at": 0.0, "length": 0.8, "gain": 0.8 },
-    { "sound": "impact", "shot": "hook", "at": 0.45, "length": 1.0, "gain": 0.9 },
-    { "sound": "impact", "shot": "power", "at": 1.2, "length": 0.6, "gain": 0.35 },
-    { "sound": "impact", "shot": "power", "at": 1.8, "length": 0.6, "gain": 0.35 },
-    { "sound": "whoosh", "shot": "phone", "at": 0.1, "length": 0.8, "gain": 0.5 },
-    { "sound": "whoosh", "shot": "store", "at": 0.1, "length": 0.8, "gain": 0.5 },
-    { "sound": "whoosh", "shot": "plan", "at": 0.0, "length": 1.0, "gain": 0.6 },
-    { "sound": "impact", "shot": "plan", "at": 1.6, "length": 1.0, "gain": 0.6 }
+    {
+      "sound": "whoosh",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 0.8,
+      "gain": 0.8
+    },
+    {
+      "sound": "impact",
+      "shot": "hook",
+      "at": 0.45,
+      "length": 1.0,
+      "gain": 0.9
+    },
+    {
+      "sound": "impact",
+      "shot": "power",
+      "at": 1.2,
+      "length": 0.6,
+      "gain": 0.35
+    },
+    {
+      "sound": "impact",
+      "shot": "power",
+      "at": 1.8,
+      "length": 0.6,
+      "gain": 0.35
+    },
+    {
+      "sound": "whoosh",
+      "shot": "phone",
+      "at": 0.1,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "store",
+      "at": 0.1,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "plan",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "impact",
+      "shot": "plan",
+      "at": 1.6,
+      "length": 1.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "escape",
+      "at": 0.0,
+      "length": 0.8,
+      "gain": 0.6
+    },
+    {
+      "sound": "impact",
+      "shot": "escape",
+      "at": 3.2,
+      "length": 1.0,
+      "gain": 0.7
+    }
   ],
   "youtube": {
     "title": "What If You Were Dropped Into a Zombie Invasion? 🧟 #shorts",
-    "description": "If you got dropped into a zombie invasion in the USA, this is what would happen 😳\n\nWithin about a day, the lights start going out, because nobody is left running the power plants and the grid needs people to keep it balanced. Then your phone dies: most cell towers only have a few hours of battery backup. Need food? Most grocery stores only keep about three days of stock on the shelves.\n\nAnd the crazy part: the Pentagon really did write a zombie war plan. It's called CONPLAN 8888, 'Counter-Zombie Dominance', and it was written in 2011 as a training exercise for military planners. The CDC even published a zombie preparedness guide the same year 🧟\n\n🧟 How long would you last? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #zombie #whatif #zombieapocalypse #survival #didyouknow #funny #animation",
+    "description": "If you got dropped into a zombie invasion in the USA, this is what would happen 😳\n\nWithin about a day, the lights start going out, because nobody is left running the power plants and the grid needs people to keep it balanced. Then your phone dies: most cell towers only have a few hours of battery backup. Need food? Most grocery stores only keep about three days of stock on the shelves.\n\nAnd the crazy part: the Pentagon really did write a zombie war plan. It's called CONPLAN 8888, 'Counter-Zombie Dominance', and it was written in 2011 as a training exercise for military planners. The CDC even published a zombie preparedness guide the same year 🧟\n\nSo your best bet might be getting to the Pentagon. The question is: how do you get there?\n\n🧟 What's your plan? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #zombie #whatif #zombieapocalypse #survival #didyouknow #funny #animation",
     "tags": [
       "what if you were dropped into a zombie invasion",
       "zombie apocalypse",

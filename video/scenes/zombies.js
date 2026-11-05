@@ -10,8 +10,8 @@ const toon = (c, e = 0) => new THREE.MeshToonMaterial({ color: c, emissive: e })
 const flat = c => new THREE.MeshBasicMaterial({ color: c });
 const add = (m, x, y, z) => { m.position.set(x, y, z); scene.add(m); return m; };
 const inked = []; const ink = m => { inked.push(m); return m; };
-const SET = { street: 0, store: 100, plan: 200 };
-const SHOT_SET = { start: "street", hook: "street", power: "street", phone: "street", store: "store", plan: "plan", cta: "street" };
+const SET = { street: 0, store: 100, plan: 200, map: 300 };
+const SHOT_SET = { start: "street", hook: "street", power: "street", phone: "street", store: "store", plan: "plan", escape: "map", cta: "street" };
 const skyTex = stops => canvasTex(16, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); stops.forEach(([p, c]) => gr.addColorStop(p, c)); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
 const DUSK = skyTex([[0, "#2b2350"], [0.45, "#7a3f6e"], [0.75, "#e0794a"], [1, "#f6b25a"]]);
 const NIGHT = skyTex([[0, "#070a1c"], [0.6, "#141c3e"], [1, "#2a2f55"]]);
@@ -177,6 +177,72 @@ let general, plan;
 }
 const maxPlan = folk({ ...MAX, face: "surprised" }); maxPlan.position.set(SET.plan - 0.65, 0, -0.3); maxPlan.rotation.y = 0.45; scene.add(maxPlan);
 
+// ---------- the escape map: a war-room wall map, route from Max to the Pentagon ----------
+const US = [[-124.7,48.4],[-124,46.3],[-124.1,42],[-124.2,40.3],[-122.4,37.8],[-120.6,34.6],[-117.1,32.5],[-114.7,32.7],[-111,31.3],[-108.2,31.3],[-106.5,31.8],[-104.5,29.6],[-103,29],[-101.4,29.8],[-99.5,27.5],[-97.4,25.9],[-97.4,27.8],[-94.7,29.4],[-91,29.2],[-89.4,29.1],[-89.6,30.2],[-86.5,30.4],[-85,29.6],[-83.6,29.9],[-82.7,28],[-81.8,26.1],[-80.4,25.2],[-80.1,26.8],[-81,29.5],[-81.4,30.7],[-80.9,32.1],[-79.2,33.2],[-77.9,33.9],[-75.5,35.2],[-76.3,37],[-75.1,38.8],[-74,40.6],[-71.9,41.3],[-70,41.7],[-70.6,42.6],[-70.2,43.7],[-67,44.8],[-67.8,47.1],[-69.2,47.4],[-71.5,45],[-74.9,45],[-76.8,43.6],[-79,43.2],[-79.1,42.7],[-82.7,41.7],[-83.4,42.3],[-82.4,43],[-83.5,46.1],[-84.8,46.5],[-89.6,48],[-95.2,49],[-123.3,49]];
+const MW = 1024, MH = 720;
+const proj = ([lon, lat]) => [60 + (lon + 125) / 59 * (MW - 120), 70 + (49.5 - lat) / 25 * (MH - 150)];
+const ROUTE = [[-108.5, 39.0], [-104.9, 39.7], [-101.5, 39.0], [-98.5, 38.6], [-95.5, 39.4], [-92.3, 38.4], [-90.2, 38.7], [-87.8, 39.5], [-84.5, 39.3], [-81.5, 39.8], [-79.8, 39.2], [-77.06, 38.87]].map(proj);
+const ZPTS = [[-103.4, 40.6], [-100.0, 37.9], [-96.5, 40.5], [-93.0, 37.4], [-89.0, 40.4], [-85.6, 38.2], [-82.6, 40.7], [-79.0, 37.9]].map(proj);
+let mapMesh, mapCtx;
+{
+  const X = SET.map;
+  add(new THREE.Mesh(new THREE.PlaneGeometry(14, 8), toon(0x5d6b58)), X, 3, -1.2);
+  const fl = add(new THREE.Mesh(new THREE.PlaneGeometry(14, 10), toon(0x6b6458)), X, 0, 3); fl.rotation.x = -Math.PI / 2;
+  mapMesh = canvasPlane(3.7, 3.7 * MH / MW, () => {});
+  mapCtx = mapMesh.material.map.image.getContext("2d");
+  mapMesh.material.transparent = false;
+  add(mapMesh, X, 2.35, -1.1);
+  ink(box(X - 1.95, X + 1.95, 2.35 - 1.42, 2.35 + 1.42, -1.2, -1.14, solid(0x5b3a22)));
+}
+const mapCanvas = mapMesh.material.map.image;
+function drawMap(k, time) {
+  const g = mapCtx, sx = mapCanvas.width / MW, sy = mapCanvas.height / MH;
+  g.setTransform(sx, 0, 0, sy, 0, 0);
+  g.fillStyle = "#cfe3ef"; g.fillRect(0, 0, MW, MH);                              // sea
+  g.strokeStyle = "rgba(60,90,120,0.15)"; g.lineWidth = 2; for (let x = 0; x < MW; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, MH); g.stroke(); } for (let y = 0; y < MH; y += 64) { g.beginPath(); g.moveTo(0, y); g.lineTo(MW, y); g.stroke(); }
+  g.beginPath(); US.map(proj).forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath();
+  g.fillStyle = "#f1e3b8"; g.fill(); g.strokeStyle = "#5a4a2a"; g.lineWidth = 7; g.stroke();
+  g.fillStyle = "#3a2e1a"; g.font = "bold 46px Arial"; g.textAlign = "left"; g.fillText("ZOMBIE ESCAPE ROUTE", 40, 52);
+  // route drawn progressively
+  const prog = Math.min(1, Math.max(0, (k - 0.08) / 0.62));
+  const seg = []; let total = 0; for (let i = 1; i < ROUTE.length; i++) { const d = Math.hypot(ROUTE[i][0] - ROUTE[i - 1][0], ROUTE[i][1] - ROUTE[i - 1][1]); seg.push(d); total += d; }
+  let left = total * prog, head = ROUTE[0];
+  g.strokeStyle = "#d62f2f"; g.lineWidth = 9; g.setLineDash([22, 14]); g.beginPath(); g.moveTo(...ROUTE[0]);
+  for (let i = 1; i < ROUTE.length && left > 0; i++) { const f = Math.min(1, left / seg[i - 1]); head = [ROUTE[i - 1][0] + (ROUTE[i][0] - ROUTE[i - 1][0]) * f, ROUTE[i - 1][1] + (ROUTE[i][1] - ROUTE[i - 1][1]) * f]; g.lineTo(...head); left -= seg[i - 1]; }
+  g.stroke(); g.setLineDash([]);
+  // the Pentagon: a little gold pentagon and star at Washington, DC
+  const [px, py] = ROUTE[ROUTE.length - 1];
+  g.fillStyle = "#e0b84a"; g.strokeStyle = "#3a2e1a"; g.lineWidth = 6; g.beginPath(); for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / 5; g.lineTo(px + 26 * Math.cos(a), py + 26 * Math.sin(a)); } g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = "#1f3a7a"; g.font = "bold 34px Arial"; g.textAlign = "center"; g.fillText("PENTAGON", px - 10, py - 40);
+  // YOU pin
+  const [ux, uy] = ROUTE[0];
+  g.fillStyle = "#2f8fd6"; g.beginPath(); g.arc(ux, uy, 16, 0, 7); g.fill(); g.strokeStyle = "#111"; g.lineWidth = 5; g.stroke();
+  g.fillStyle = "#1b1b1b"; g.font = "bold 34px Arial"; g.fillText("YOU", ux, uy + 52);
+  // zombies popping up along the way as the route reaches them
+  ZPTS.forEach(([zx, zy], i) => {
+    const near = Math.min(...ROUTE.map(([rx, ry]) => Math.hypot(rx - zx, ry - zy)));
+    const passed = Math.hypot(head[0] - ROUTE[0][0], head[1] - ROUTE[0][1]) + 30 > Math.hypot(zx - ROUTE[0][0], zy - ROUTE[0][1]);
+    void near;
+    if (!passed) return;
+    const r = 20 * (1 + 0.1 * Math.sin(time * 6 + i));
+    g.fillStyle = "#a9c98f"; g.strokeStyle = "#1b1b1b"; g.lineWidth = 5; g.beginPath(); g.arc(zx, zy, r, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#1b1b1b"; g.beginPath(); g.arc(zx - 8, zy - 5, 5, 0, 7); g.fill(); g.beginPath(); g.arc(zx + 9, zy - 3, 3, 0, 7); g.fill(); g.fillRect(zx - 9, zy + 9, 18, 4);
+  });
+  // Max's head travelling along the route
+  g.fillStyle = "#fff"; g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(head[0], head[1], 20, 0, 7); g.fill(); g.stroke();
+  g.fillStyle = "#9a5a22"; g.beginPath(); g.arc(head[0], head[1] - 8, 20, Math.PI * 1.05, Math.PI * 1.95); g.fill();
+  // the big question
+  if (k > 0.72) {
+    const q = Math.min(1, (k - 0.72) / 0.08), wob = 0.08 * Math.sin(time * 5);
+    g.save(); g.translate(MW / 2 + 120, MH / 2 + 10); g.rotate(wob); g.scale(q, q);
+    g.font = "900 360px Arial Black, Arial"; g.textAlign = "center"; g.lineWidth = 22; g.strokeStyle = "#1b1b1b"; g.strokeText("?", 0, 120); g.fillStyle = "#d62f2f"; g.fillText("?", 0, 120);
+    g.restore();
+  }
+  mapMesh.material.map.needsUpdate = true;
+}
+const maxMap = folk({ ...MAX, face: "talk" }); maxMap.position.set(SET.map - 0.75, 0, 1.2); maxMap.rotation.y = 0.35; scene.add(maxMap);
+const pointer = ink(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.018, 0.9, 6), toon(0x8a5a2b))); scene.add(pointer);
+
 inked.forEach(outline);
 // [prop, holder, offset from the left hand to the prop's centre]
 const held = [[phone, maxSt, V(0, 0.2, -0.03)], [plan, general, V(0, 0.3, -0.02)]];
@@ -189,6 +255,7 @@ const cams = {
   store: [V(99.75, 1.8, 5.6), V(99.85, 1.35, -4)],
   plan:  [V(200.05, 1.8, 5.2), V(200.05, 1.6, -1)],
   cta:   [V(3.3, 3.1, 10.5), V(3.4, 1.45, 1.4)],
+  escape: [V(300.1, 2.0, 7.4), V(300.05, 1.75, -1)],
 };
 function shamble(z, time, x, zz, faceTo) {
   const ph = z.userData.ph;
@@ -317,6 +384,24 @@ start((time, tl) => {
     maxPlan.pose({ armL: [0.8 + 0.15 * Math.sin(time * 7), 0.5, 1.5], armR: [0.8 + 0.15 * Math.sin(time * 7 + 1), 0.5, 1.5], headTurn: 0.3 * Math.sin(time * 6) * (k > 0.4 ? 1 : 0), lean: -0.1 });
     maxPlan.position.y = 0.04 * Math.abs(Math.sin(time * 7));
     plan.rotation.set(0, -0.15 + 0.4 * (1 - show), 0.05);
+  }
+
+  // the escape map: Max points along the route, then turns to us: how do you get there?
+  maxMap.visible = pointer.visible = set === "map";
+  if (set === "map") {
+    drawMap(k, time);
+    const turn = k > 0.72;
+    maxMap.setFace(turn ? "scared" : "talk", turn ? { sweat: true } : {});
+    maxMap.rotation.y = turn ? 0.1 : 0.55;
+    maxMap.position.y = 0.02 * Math.abs(Math.sin(time * 5));
+    const reach = turn ? 0 : 0.25 * Math.sin(k * 9);
+    maxMap.pose(turn ? { armL: [1.1, 0.4, 1.2], armR: [1.1, 0.4, 1.2], headTilt: 0.05, headRoll: 0.12 * Math.sin(time * 3) }
+      : { armR: [0.25, 0.2, 0.3], armL: [0.9 + reach, 1.2, 0.2], headTurn: 0.6, headTilt: -0.15 });
+    maxMap.updateMatrixWorld(true);
+    const hand = maxMap.userData.parts.armL.elbow.localToWorld(V(0, -0.25, 0));
+    const tip = maxMap.userData.parts.armL.elbow.localToWorld(V(0, -1.0, 0));
+    pointer.position.copy(hand).lerp(tip, 0.5); pointer.lookAt(tip); pointer.rotateX(Math.PI / 2);
+    pointer.visible = !turn;
   }
 
   // props live in world space (so they always face the camera) but follow the hand

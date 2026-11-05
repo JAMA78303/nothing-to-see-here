@@ -69,14 +69,52 @@ let car, hazards = [], flag, tower;
   void stop;
   // abandoned car, door open, hazards blinking
   car = new THREE.Group();
-  const paint = toon(0xe04a36, 0x3a0e08), glass = toon(0x9fc3e0, 0x2a3a4a), dark = toon(0x2e2e2e);
-  car.add(ink(new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.62, 1.8), paint))).position.y = 0.6;
-  const cab = ink(new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.55, 1.6), glass)); cab.position.set(-0.2, 1.18, 0); car.add(cab);
-  const roof = ink(new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.08, 1.62), paint)); roof.position.set(-0.2, 1.48, 0); car.add(roof);
-  for (const [px, pz] of [[1.25, 0.9], [1.25, -0.9], [-1.25, 0.9], [-1.25, -0.9]]) { const wh = ink(new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.25, 18), dark)); wh.rotation.x = Math.PI / 2; wh.position.set(px, 0.34, pz); car.add(wh); const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.27, 14), toon(0xbfc4cc)); hub.rotation.x = Math.PI / 2; hub.position.set(px, 0.34, pz); car.add(hub); }
-  const door = ink(new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.6, 0.06), paint)); door.position.set(0.55, 0.65, 1.25); door.rotation.y = -0.9; void door;
-  for (const [px, pz] of [[2.0, 0.6], [2.0, -0.6], [-2.0, 0.6], [-2.0, -0.6]]) { const h = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.14, 0.3), flat(0xff9a1a)); h.position.set(px, 0.72, pz); car.add(h); hazards.push(h); }
-  car.position.set(3.4, 0, 1.6); car.rotation.y = -1.25; scene.add(car);
+  const paint = toon(0xe04a36, 0x3a0e08), glass = toon(0x9fc3e0, 0x2a3a4a), dark = toon(0x2a2a2a), chrome = toon(0xc9ced6, 0x22252a);
+  // body: a sedan side profile (bonnet, windscreen, roof, rear window, boot), extruded across and rounded off
+  const W = 1.7, b = 0.1;
+  const prof = [[-2.0, 0.3], [2.0, 0.3], [2.1, 0.55], [2.0, 0.82], [0.95, 0.95], [0.35, 1.42], [-0.85, 1.45], [-1.5, 1.0], [-2.0, 0.92], [-2.1, 0.55]];
+  const shape = new THREE.Shape(); prof.forEach(([x, y], i) => i ? shape.lineTo(x, y) : shape.moveTo(x, y)); shape.closePath();
+  const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: W - 2 * b, bevelEnabled: true, bevelSize: b, bevelThickness: b, bevelSegments: 4, curveSegments: 4 });
+  bodyGeo.translate(0, 0, -(W - 2 * b) / 2);
+  car.add(ink(new THREE.Mesh(bodyGeo, paint)));
+  // glass: side windows (with a door pillar) and the front and rear screens, sitting just proud of the body
+  const sideWin = [[0.86, 1.0], [0.36, 1.37], [-0.8, 1.4], [-1.38, 1.02]];
+  for (const sz of [-1, 1]) {
+    const ws = new THREE.Shape(); sideWin.forEach(([x, y], i) => i ? ws.lineTo(x, y) : ws.moveTo(x, y)); ws.closePath();
+    const wm = new THREE.Mesh(new THREE.ShapeGeometry(ws), glass); wm.position.z = sz * (W / 2 + 0.005); if (sz < 0) wm.rotation.y = Math.PI, wm.scale.x = -1; car.add(wm);
+    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.02), paint); pillar.position.set(-0.22, 1.2, sz * (W / 2 + 0.01)); car.add(pillar);
+    const line = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.5, 0.02), dark); line.position.set(-0.2, 0.62, sz * (W / 2 + 0.01)); car.add(line);           // door seam
+    for (const hx of [0.4, -0.75]) { const h = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.04, 0.03), chrome); h.position.set(hx, 0.8, sz * (W / 2 + 0.015)); car.add(h); }
+    const mirror = ink(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.16), paint)); mirror.position.set(0.82, 1.02, sz * (W / 2 + 0.08)); car.add(mirror);
+  }
+  const screen = (x0, y0, x1, y1, w) => {
+    // a quad on the sloped face between (x0,y0) and (x1,y1), pushed out along the face normal
+    let nx = -(y1 - y0), ny = x1 - x0; if (ny < 0) { nx = -nx; ny = -ny; } const nl = Math.hypot(nx, ny); nx = nx / nl * (b + 0.015); ny = ny / nl * (b + 0.015);
+    const ix = (x1 - x0) * 0.06, iy = (y1 - y0) * 0.06, hw = w / 2;
+    const P = [[x0 + ix, y0 + iy], [x1 - ix, y1 - iy]];
+    const v = new Float32Array([P[0][0] + nx, P[0][1] + ny, -hw, P[0][0] + nx, P[0][1] + ny, hw, P[1][0] + nx, P[1][1] + ny, hw, P[1][0] + nx, P[1][1] + ny, -hw]);
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(v, 3)); g.setIndex([0, 1, 2, 0, 2, 3]); g.computeVertexNormals();
+    const m = new THREE.Mesh(g, glass.clone()); m.material.side = THREE.DoubleSide; return car.add(m);
+  };
+  screen(0.95, 0.95, 0.35, 1.42, W - 0.25); screen(-1.5, 1.0, -0.85, 1.45, W - 0.25);
+  // front: headlights, grille, bumper; back: tail lights and bumper
+  for (const sz of [-1, 1]) {
+    const hl = ink(new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), flat(0xfff6d0))); hl.scale.set(0.35, 0.8, 1.2); hl.position.set(2.1, 0.7, sz * 0.55); car.add(hl);
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.16, 0.34), flat(0xd61f1f)); tl.position.set(-2.16, 0.74, sz * 0.58); car.add(tl);
+  }
+  const grille = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.16, 0.7), dark); grille.position.set(2.17, 0.6, 0); car.add(grille);
+  for (const bx of [2.2, -2.2]) { const bp = ink(new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, W + 0.06), chrome)); bp.position.set(bx, 0.38, 0); car.add(bp); }
+  const plate = canvasPlane(0.42, 0.14, (g, w, h) => { g.fillStyle = "#f4f4f4"; g.fillRect(0, 0, w, h); g.strokeStyle = "#1f3a7a"; g.lineWidth = 8; g.strokeRect(4, 4, w - 8, h - 8); g.fillStyle = "#1f3a7a"; g.font = "bold 110px Arial"; g.textAlign = "center"; g.fillText("ZMB 88", w / 2, h * 0.82); });
+  plate.position.set(2.29, 0.38, 0); plate.rotation.y = Math.PI / 2; car.add(plate);
+  // wheels with tyres, hubcaps and dark arches behind them
+  for (const [px, pz] of [[1.3, 1], [1.3, -1], [-1.3, 1], [-1.3, -1]]) {
+    const z = pz * (W / 2 - 0.08);
+    const arch = new THREE.Mesh(new THREE.CircleGeometry(0.44, 24, 0, Math.PI), dark); arch.position.set(px, 0.32, pz * (W / 2 + 0.006)); if (pz < 0) arch.rotation.y = Math.PI; car.add(arch);
+    const wh = ink(new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.26, 22), dark)); wh.rotation.x = Math.PI / 2; wh.position.set(px, 0.36, z); car.add(wh);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.28, 16), chrome); hub.rotation.x = Math.PI / 2; hub.position.set(px, 0.36, z); car.add(hub);
+  }
+  for (const [px, pz] of [[2.12, 0.78], [2.12, -0.78], [-2.12, 0.78], [-2.12, -0.78]]) { const h = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.12), flat(0xff9a1a)); h.position.set(px, 0.62, pz); car.add(h); hazards.push(h); }
+  car.position.set(3.4, 0, 1.6); car.rotation.y = -0.85; scene.add(car);
   // cell tower poking up behind the houses
   tower = new THREE.Group();
   const steel = toon(0x8a8f99);
@@ -331,7 +369,8 @@ start((time, tl) => {
   }
   if (shot === "cta") {
     // safe (for now) on the car roof, waving, zombies reaching up
-    maxSt.position.set(car.position.x - 0.1, 1.52 + 0.03 * Math.abs(Math.sin(time * 6)), car.position.z);
+    const roofC = car.localToWorld(V(-0.25, 1.55, 0));
+    maxSt.position.set(roofC.x, roofC.y + 0.03 * Math.abs(Math.sin(time * 6)), roofC.z);
     maxSt.setFace("grin");
     maxSt.pose({ armL: [2.6, 0, 0.5 + 0.45 * Math.sin(time * 9)], armR: [0.4, 0.2, 0.3], headRoll: 0.08 * Math.sin(time * 4.5) });
   }

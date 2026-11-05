@@ -1,0 +1,39 @@
+{
+  "name": "house_long",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "title_card": "What's really going on under your house",
+  "intro": "Here's what's really going on under your house, and in your back yard. Number one will make you think twice before you flush.",
+  "outro_card": "Which one surprised you most?",
+  "outro": "Which one surprised you the most? Tell me in the comments, and subscribe for more.",
+  "segments": [
+    { "name": "toilet", "label": "Where your toilet water actually goes" },
+    { "name": "basement", "label": "Why basements flood on sunny days" },
+    { "name": "pool", "label": "Why you should never drain your pool" },
+    { "name": "foundation", "label": "What if your house had no foundation?" },
+    { "name": "stormdrain", "label": "Where rain goes after the storm drain" },
+    { "name": "anthill", "label": "Concrete poured into an ant hill" },
+    { "name": "underground", "label": "What if you built your house underground?", "until": 18.797 }
+  ],
+  "youtube": {
+    "title": "What's Really Going On Under Your House (7 Things You Never Knew)",
+    "description": "Everything that's secretly happening under your house and in your back yard, in one video 🏠\n\nWhere your toilet water actually goes, why basements flood on perfectly sunny days, why you should never drain your pool, what happens if a house has no foundation, where rain goes after the storm drain, what's inside an ant hill, and what it would be like to live underground.\n\n⏱️ Chapters\n{chapters}\n\n🏠 Which one surprised you most? Tell me in the comments.\n🔔 Subscribe for more things you never knew.\n\n#house #howitworks #didyouknow #home #science #animation",
+    "tags": [
+      "what's under your house",
+      "how your house works",
+      "where does toilet water go",
+      "why basements flood",
+      "never drain your pool",
+      "house foundation",
+      "storm drain",
+      "ant hill concrete",
+      "underground house",
+      "how it works",
+      "home facts",
+      "did you know",
+      "science explained",
+      "animation",
+      "compilation"
+    ]
+  }
+}

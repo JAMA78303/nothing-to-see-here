@@ -12,11 +12,18 @@
     text-shadow: 0 8px 0 rgba(0,0,0,.35);
     transform-origin: 50% 50%;
   }
+  #headline {
+    position: absolute; left: 70px; right: 70px; top: 230px; text-align: center; display: none;
+    font: 900 92px/1.08 "Arial Black", Arial, sans-serif; color: #111; background: #ffd400;
+    padding: 26px 28px 30px; border: 10px solid #111; border-radius: 34px;
+    box-shadow: 0 14px 0 rgba(0,0,0,.35); transform-origin: 50% 50%;
+  }
   #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
 </style>
 <script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }</script>
 </head>
 <body>
+<div id="headline"></div>
 <div id="caption"></div>
 <div id="flash"></div>
 <script type="module">

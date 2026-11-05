@@ -199,7 +199,13 @@ const winterSky = new THREE.Color(0xb9c6d6), outbackSky = new THREE.Color(0x8fc6
 start((time, tl) => {
   const shot = tl.shot, k = tl.k;
   // the Coober Pedy set is a hard cut, so don't glide the camera from (or to) it
-  const look = shot === "coober" || tl.prev === "coober" ? (camera.position.copy(cams[shot].pos), cams[shot].look.clone()) : moveCamera(cams, tl);
+  let look;
+  if (shot === "end") {
+    // loop: glide back into the exact opening framing, so the cut to frame 1 is seamless
+    const e = ease(Math.min(1, k / 0.85));
+    camera.position.lerpVectors(V(0.4, 2.4, 13), cams.start.pos, e);
+    look = V(0.4, -1.2, -4).lerp(cams.start.look, e);
+  } else look = shot === "coober" || tl.prev === "coober" ? (camera.position.copy(cams[shot].pos), cams[shot].look.clone()) : moveCamera(cams, tl);
   if (shot === "coober") { camera.position.x += 0.6 * k; }
   camera.lookAt(look);
 
@@ -242,14 +248,14 @@ start((time, tl) => {
 
   // the mole: pops out of its mound and sniffs about in the hook; knocks on the hatch door at the end
   const street = shot !== "coober";
-  mole.visible = mound.visible = street && (shot === "hook" || shot === "cta" || shot === "temp");
+  mole.visible = mound.visible = street && (shot === "hook" || shot === "cta" || shot === "temp" || shot === "end");
   if (shot === "cta") {
     mole.position.set(SH.x0 + 0.6, 0, -1.9); mole.rotation.y = Math.PI;
     moleHead.rotation.set(0.25 * Math.max(0, Math.sin(time * 14)), 0, 0);
     mole.position.z += 0.05 * Math.max(0, Math.sin(time * 14));
   } else {
-    const pop = shot === "hook" ? ease(Math.min(1, tl.since("hook") / 0.5)) : 1;
-    const wander = shot === "hook" ? 0 : Math.min(1, k * 1.5);
+    const pop = shot === "hook" ? ease(Math.min(1, tl.since("hook") / 0.5)) : shot === "end" ? 1 - ease(Math.max(0, (k - 0.55) / 0.4)) : 1;
+    const wander = shot === "hook" || shot === "end" ? 0 : Math.min(1, k * 1.5);
     mole.position.set(2.9 + 0.8 * wander, -0.75 + 0.75 * pop + 0.03 * Math.abs(Math.sin(time * 9)), -1.6 - 0.3 * wander);
     mole.rotation.y = -0.4 + 0.7 * Math.sin(time * 1.6);
     moleHead.rotation.set(0.15 * Math.sin(time * 11), 0.3 * Math.sin(time * 2.3), 0);

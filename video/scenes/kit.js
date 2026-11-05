@@ -363,6 +363,22 @@ function setCaption(TIMING, t) {
   captionEl.style.transform = `scale(${sc})`;
 }
 
+// a bold hook headline across the top for the first shot, so a scroller knows the premise from frame 1
+// (script "headline": "text" or { "text", "until": seconds })
+const headlineEl = document.getElementById("headline");
+function setHeadline(TIMING, t) {
+  const h = TIMING.headline;
+  if (!headlineEl || !h) return;
+  const text = typeof h === "string" ? h : h.text;
+  const until = typeof h === "string" ? TIMING.shots[0].end : h.until ?? TIMING.shots[0].end;
+  const out = Math.min(1, Math.max(0, (t - until + 0.25) / 0.25));
+  headlineEl.style.display = t < until ? "block" : "none";
+  headlineEl.textContent = text;
+  const sc = (1 + 0.03 * Math.sin(t * 7)) * (1 - 0.3 * out);   // full size on frame 1 (that's the feed preview), with a gentle pulse
+  headlineEl.style.transform = `scale(${sc}) rotate(-2deg)`;
+  headlineEl.style.opacity = 1 - out;
+}
+
 // Loads timing, exposes window.renderAt for the renderer, and draws the first frame.
 // colour grade, vignette and a touch of film grain, applied after tone mapping
 const GradeShader = {
@@ -420,6 +436,7 @@ export async function start(draw) {
     }
     draw(st, timeline(TIMING, st));
     setCaption(TIMING, t);
+    setHeadline(TIMING, t);
     // white flash as the cold open cuts back to the start of the story
     const hook = TIMING.shots.find(s => s.replay);
     const dt = hook ? t - hook.end : 99;

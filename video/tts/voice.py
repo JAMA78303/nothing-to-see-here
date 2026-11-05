@@ -61,7 +61,7 @@ for i, shot in enumerate(script["shots"]):
         })
         acc += wt
 
-    end = t + dur + (TAIL if i == len(script["shots"]) - 1 else GAP)
+    end = t + dur + (script.get("tail", TAIL) if i == len(script["shots"]) - 1 else GAP)
     shots.append({**shot, "start": round(t, 3),
                   "speechEnd": round(t + dur, 3), "end": round(end, 3), "words": timed})
     audio.append(samples)
@@ -71,5 +71,6 @@ for i, shot in enumerate(script["shots"]):
 # the first shot starts at 0 so the intro covers the lead-in
 shots[0]["start"] = 0
 sf.write(out_dir / "voice.wav", np.concatenate(audio), sr)
-(out_dir / "timing.json").write_text(json.dumps({"duration": round(t, 3), "shots": shots}, indent=1))
+extra = {"headline": script["headline"]} if "headline" in script else {}
+(out_dir / "timing.json").write_text(json.dumps({"duration": round(t, 3), "shots": shots, **extra}, indent=1, ensure_ascii=False))
 print(f"voice.wav {t:.2f}s, {len(shots)} shots")

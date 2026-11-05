@@ -1,7 +1,9 @@
 {
   "title": "What if you built your house underground",
+  "headline": "WHAT IF YOUR HOUSE WAS UNDERGROUND?",
   "voice": "am_michael",
   "speed": 1.1,
+  "tail": 0.12,
   "ipa": {
     "Pedy": "pˈiːdi"
   },
@@ -40,8 +42,8 @@
       "text": "In Coober Pedy, Australia, about half the town lives underground!"
     },
     {
-      "shot": "cta",
-      "text": "Would you live in one? Follow for more."
+      "shot": "end",
+      "text": "It really makes you wonder..."
     }
   ],
   "sfx": [
@@ -86,13 +88,6 @@
       "at": 0.0,
       "length": 1.0,
       "gain": 0.6
-    },
-    {
-      "sound": "whoosh",
-      "shot": "cta",
-      "at": 0.0,
-      "length": 0.8,
-      "gain": 0.4
     }
   ],
   "youtube": {

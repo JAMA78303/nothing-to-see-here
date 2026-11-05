@@ -15,6 +15,10 @@ const ROOT = path.resolve(__dirname, "..");
 const FPS = 30;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json" };
 const outDir = name => path.join(ROOT, "out", name);
+// WIDE=1 renders a 1920x1080 landscape version (for long videos) into frames_wide/ and <name>_wide.mp4
+const WIDE = process.env.WIDE === "1";
+const VIEW = WIDE ? { width: 1920, height: 1080 } : { width: 1080, height: 1920 };
+const SUFFIX = WIDE ? "_wide" : "";
 
 function serve() {
   const server = http.createServer((req, res) => {
@@ -29,10 +33,10 @@ function serve() {
 async function openScene(name, t = 0) {
   const server = await serve();
   const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+  const page = await browser.newPage({ viewport: VIEW });
   page.on("pageerror", e => console.error("page error:", e.message));
   const timing = `/out/${name}/timing.json`;
-  await page.goto(`http://localhost:${server.address().port}/scenes/index.html?scene=${name}&timing=${timing}&t=${t}&fx=${process.env.FX ?? 1}`);
+  await page.goto(`http://localhost:${server.address().port}/scenes/index.html?scene=${name}&timing=${timing}&t=${t}&fx=${process.env.FX ?? 1}${WIDE ? "&wide=1" : ""}`);
   await page.waitForFunction(() => window.ready, null, { timeout: 180000 });
   const close = async () => { await browser.close(); server.close(); };
   return { page, close };
@@ -47,7 +51,7 @@ async function still(name, t, out = path.join(outDir(name), `t${t}.png`)) {
 }
 
 async function video(name) {
-  const out = path.join(outDir(name), `${name}.mp4`);
+  const out = path.join(outDir(name), `${name}${SUFFIX}.mp4`);
   const mix = path.join(outDir(name), "mix.wav");
   const audio = fs.existsSync(mix) ? mix : path.join(outDir(name), "voice.wav");
   const { page, close } = await openScene(name, 0);
@@ -77,7 +81,7 @@ async function video(name) {
 // Resumable rendering for heavy scenes: frames are saved as JPEGs and existing ones are skipped,
 // so a long render can be split across several runs. Then `assemble` muxes them with the audio.
 async function frames(name, from = 0, to = Infinity) {
-  const dir = path.join(outDir(name), "frames");
+  const dir = path.join(outDir(name), "frames" + SUFFIX);
   fs.mkdirSync(dir, { recursive: true });
   const { page, close } = await openScene(name, 0);
   const total = Math.ceil((await page.evaluate(() => window.duration)) * FPS);
@@ -98,10 +102,10 @@ async function frames(name, from = 0, to = Infinity) {
 }
 
 async function assemble(name) {
-  const dir = path.join(outDir(name), "frames");
+  const dir = path.join(outDir(name), "frames" + SUFFIX);
   const mix = path.join(outDir(name), "mix.wav");
   const audio = fs.existsSync(mix) ? mix : path.join(outDir(name), "voice.wav");
-  const out = path.join(outDir(name), `${name}.mp4`);
+  const out = path.join(outDir(name), `${name}${SUFFIX}.mp4`);
   await new Promise((res, rej) => spawn("ffmpeg", [
     "-y", "-loglevel", "error", "-framerate", String(FPS), "-i", path.join(dir, "%05d.jpg"), "-i", audio,
     "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",

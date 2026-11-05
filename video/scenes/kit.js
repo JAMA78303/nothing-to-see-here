@@ -13,7 +13,8 @@ export { THREE };
 // cinematic look (soft contact shadows, glow, grading); ?fx=0 renders the plain version
 const FX = new URLSearchParams(location.search).get("fx") !== "0";
 
-const W = 1080, H = 1920;
+export const WIDE = new URLSearchParams(location.search).get("wide") === "1";   // landscape render for long videos
+const W = WIDE ? 1920 : 1080, H = WIDE ? 1080 : 1920;
 export const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(W, H);
 renderer.shadowMap.enabled = true;
@@ -368,7 +369,7 @@ function setCaption(TIMING, t) {
 const headlineEl = document.getElementById("headline");
 function setHeadline(TIMING, t) {
   const h = TIMING.headline;
-  if (!headlineEl || !h) return;
+  if (!headlineEl || !h || WIDE) return;
   const text = typeof h === "string" ? h : h.text;
   const until = typeof h === "string" ? TIMING.shots[0].end : h.until ?? TIMING.shots[0].end;
   const out = Math.min(1, Math.max(0, (t - until + 0.25) / 0.25));
@@ -406,7 +407,7 @@ function makeComposer() {
   const composer = new EffectComposer(renderer, target);
   composer.setPixelRatio(1);
   composer.addPass(new RenderPass(scene, camera));
-  if (fxOptions.ao) {
+  if (fxOptions.ao && !WIDE) {   // GTAO leaves black slabs at landscape size
     const ao = new GTAOPass(scene, camera, W, H);
     ao.updateGtaoMaterial({ radius: 2.4, distanceExponent: 1.2, thickness: 2.5, scale: 1.6, samples: 12 });
     ao.blendIntensity = 1.0;

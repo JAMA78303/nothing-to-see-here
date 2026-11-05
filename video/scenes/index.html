@@ -18,6 +18,8 @@
     padding: 26px 28px 30px; border: 10px solid #111; border-radius: 34px;
     box-shadow: 0 14px 0 rgba(0,0,0,.35); transform-origin: 50% 50%;
   }
+  body.wide { width: 1920px; height: 1080px; }
+  body.wide #caption { top: 790px; font-size: 96px; -webkit-text-stroke: 12px #000; }
   #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
 </style>
 <script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }</script>
@@ -27,7 +29,9 @@
 <div id="caption"></div>
 <div id="flash"></div>
 <script type="module">
-  const scene = new URLSearchParams(location.search).get("scene");
+  const params = new URLSearchParams(location.search);
+  if (params.get("wide") === "1") document.body.classList.add("wide");
+  const scene = params.get("scene");
   import(`./${scene}.js`);
 </script>
 </body>

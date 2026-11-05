@@ -76,7 +76,7 @@ let car, hazards = [], flag, tower;
   for (const [px, pz] of [[1.25, 0.9], [1.25, -0.9], [-1.25, 0.9], [-1.25, -0.9]]) { const wh = ink(new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.25, 18), dark)); wh.rotation.x = Math.PI / 2; wh.position.set(px, 0.34, pz); car.add(wh); const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.27, 14), toon(0xbfc4cc)); hub.rotation.x = Math.PI / 2; hub.position.set(px, 0.34, pz); car.add(hub); }
   const door = ink(new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.6, 0.06), paint)); door.position.set(0.55, 0.65, 1.25); door.rotation.y = -0.9; void door;
   for (const [px, pz] of [[2.0, 0.6], [2.0, -0.6], [-2.0, 0.6], [-2.0, -0.6]]) { const h = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.14, 0.3), flat(0xff9a1a)); h.position.set(px, 0.72, pz); car.add(h); hazards.push(h); }
-  car.position.set(3.4, 0, 2.2); car.rotation.y = 0.12; scene.add(car);
+  car.position.set(3.4, 0, 1.6); car.rotation.y = -1.25; scene.add(car);
   // cell tower poking up behind the houses
   tower = new THREE.Group();
   const steel = toon(0x8a8f99);
@@ -188,7 +188,7 @@ const cams = {
   phone: [V(-0.2, 1.55, 5.6), V(0.35, 1.8, -2)],
   store: [V(99.75, 1.8, 5.6), V(99.85, 1.35, -4)],
   plan:  [V(200.05, 1.8, 5.2), V(200.05, 1.6, -1)],
-  cta:   [V(2.0, 2.7, 10.2), V(2.9, 1.5, 1.2)],
+  cta:   [V(3.3, 3.1, 10.5), V(3.4, 1.45, 1.4)],
 };
 function shamble(z, time, x, zz, faceTo) {
   const ph = z.userData.ph;
@@ -273,6 +273,17 @@ start((time, tl) => {
   streetZ.forEach((z, i) => {
     z.visible = set === "street";
     if (!z.visible) return;
+    if (shot === "cta") {
+      // crowded round the outside of the car (ends and the near side), reaching up at Max on the roof
+      const [ox, oz] = [[-1.1, 1.5], [0.5, -1.5], [1.4, 1.55], [-1.6, -1.55], [0.2, 1.6], [-0.5, -1.6]][i];
+      const c = Math.cos(car.rotation.y), sn = Math.sin(car.rotation.y);
+      const x = car.position.x + ox * c + oz * sn, zz = car.position.z - ox * sn + oz * c;
+      z.position.set(x + 0.05 * Math.sin(time * 1.7 + i), 0.03 * Math.abs(Math.sin(time * 2.6 + i)), zz);
+      const toMax = Math.atan2(maxSt.position.x - x, maxSt.position.z - zz), toCam = Math.atan2(camera.position.x - x, camera.position.z - zz);
+      z.rotation.y = toMax + 0.45 * Math.atan2(Math.sin(toCam - toMax), Math.cos(toCam - toMax));
+      z.pose({ ...walkPose(time * 0.4 + i, 1), armL: [2.4, 0.4, 0.3 + 0.3 * Math.sin(time * 5 + i)], armR: [2.3, 0.4, 0.3 + 0.3 * Math.sin(time * 5.5 + i)], headTilt: -0.35, headRoll: 0.2 * Math.sin(time * 1.3 + i), lean: -0.05 });
+      return;
+    }
     const [sx, sz] = z.userData.p;
     const goal = shot === "cta" ? V(car.position.x, 0, car.position.z) : V(target.x, 0, target.z);
     const d = V(goal.x - sx, 0, goal.z - sz); const len = d.length();
@@ -281,7 +292,6 @@ start((time, tl) => {
     const x = sx + d.x / len * walked, zz = sz + d.z / len * walked;
     if (shot === "hook" && st0 < 0.9) { z.position.set(sx, 0, sz); z.rotation.y = 0.5 * Math.sin(i); z.pose({ headRoll: 0.2 * Math.sin(time + i), lean: 0.1 }); return; }
     shamble(z, time, x, zz, goal);
-    if (shot === "cta") { z.pose({ armL: [2.4, 0.4, 0.3 + 0.3 * Math.sin(time * 5 + i)], armR: [2.3, 0.4, 0.3 + 0.3 * Math.sin(time * 5.5 + i)], headTilt: -0.4, headRoll: 0.2 * Math.sin(time * 1.3 + i) }); }
   });
 
   // the store: Max grabs the last can as zombies shuffle down the aisle

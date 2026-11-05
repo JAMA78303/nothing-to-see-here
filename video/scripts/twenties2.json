@@ -1,0 +1,122 @@
+{
+  "title": "What if you traveled back to the 1920s",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "say": {
+    "1928": "nineteen twenty-eight",
+    "1920s": "nineteen twenties"
+  },
+  "highlight": [
+    "1920s",
+    "useless",
+    "fake",
+    "electricity",
+    "sick",
+    "antibiotics",
+    "1928",
+    "hats",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "Travel back to the 1920s, and this is what happens."
+    },
+    {
+      "shot": "phone",
+      "text": "Your phone? Useless. No signal, no internet, nothing."
+    },
+    {
+      "shot": "money",
+      "text": "Your money looks fake. The bills look totally different."
+    },
+    {
+      "shot": "power",
+      "text": "Need to charge it? Lots of homes don't even have electricity yet."
+    },
+    {
+      "shot": "sick",
+      "text": "Get sick? No antibiotics. Penicillin isn't discovered until 1928."
+    },
+    {
+      "shot": "fit",
+      "text": "But at least the hats are cool."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "whoosh",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 1.4,
+      "gain": 1.0
+    },
+    {
+      "sound": "impact",
+      "shot": "hook",
+      "at": 0.5,
+      "length": 1.0,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "phone",
+      "at": 0.1,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "money",
+      "at": 0.1,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "power",
+      "at": 0.1,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "impact",
+      "shot": "sick",
+      "at": 0.5,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "fit",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.6
+    }
+  ],
+  "youtube": {
+    "title": "What If You Traveled Back to the 1920s? 🎩 #shorts",
+    "description": "If you traveled back to the 1920s, this is what would happen 😳\n\nYour phone would be useless: no signal, no internet, nothing. Your money would look fake, because the bills looked completely different back then. Need to charge your phone? In 1920, about two out of three American homes didn't even have electricity yet. And if you got sick, there were no antibiotics: penicillin wasn't discovered until 1928, and it wasn't widely used until the 1940s.\n\nBut at least the hats were cool 🎩\n\n⏳ What would you miss most? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #whatif #timetravel #1920s #history #didyouknow #funny #animation",
+    "tags": [
+      "what if you traveled back to the 1920s",
+      "time travel",
+      "1920s",
+      "roaring twenties",
+      "what if",
+      "history",
+      "life in the 1920s",
+      "penicillin",
+      "no electricity",
+      "history facts",
+      "funny history",
+      "did you know",
+      "animation",
+      "cartoon",
+      "shorts"
+    ]
+  }
+}

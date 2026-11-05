@@ -17,6 +17,13 @@ const headRamp = (() => {
   t.needsUpdate = true;
   return t;
 })();
+// soft "vinyl toy" shading instead of hard cel bands (call before building characters)
+export function softShading() {
+  for (const [t, data] of [[toonRamp, [70, 120, 165, 205, 235, 255]], [headRamp, [196, 216, 234, 248, 255]]]) {
+    t.image.data = new Uint8Array(data); t.image.width = data.length;
+    t.minFilter = t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
+  }
+}
 export const HEAD = new THREE.MeshToonMaterial({ color: 0xeef1ff, gradientMap: headRamp, emissive: 0x7a7a7a });   // scenes can raise emissive at night   // nearly flat white, like a drawing
 export const SKINS = [];   // tinted head materials (zombies): scenes update their emissive alongside HEAD
 const R_HEAD = 0.36;
@@ -334,7 +341,7 @@ export function folk(opts = {}) {
       g.fillStyle = "#f2d48a"; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 4, 0, 7); g.fill(); g.strokeStyle = "#111"; g.lineWidth = 8; g.stroke();
       g.fillStyle = "#2a7fd4"; g.beginPath(); g.ellipse(w / 2, h / 2, w * 0.28, h * 0.14, 0, 0, 7); g.fill();
     });
-    onBody(logo, -0.09, 0.35, 0.168).rotation.y = -0.4;
+    if (o.logo !== false) onBody(logo, -0.09, 0.35, 0.168).rotation.y = -0.4;
   }
   if (o.belt) {                               // wide leather belt with a gold buckle, low on the belly
     const band = new THREE.Mesh(new THREE.CylinderGeometry(0.218, 0.226, 0.06, 32), toon(0x3a2416)); band.position.y = 0.17; band.scale.z = 0.88; torso.add(band);
@@ -370,8 +377,9 @@ export function folk(opts = {}) {
     elbow.position.y = -0.26;
     shoulder.add(elbow);
     elbow.add(stick(0.24, 0.029));
-    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 10), INK);
-    hand.position.y = -0.25;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(o.gloves ? 0.064 : 0.05, 14, 12), o.gloves ? toon(0x2a2422) : INK);
+    hand.position.y = o.gloves ? -0.27 : -0.25;
+    if (o.gloves) { hand.scale.set(1, 1.1, 0.9); outline(hand); const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.047, 0.05, 14), toon(0x2a2422)); cuff.position.y = -0.21; elbow.add(cuff); }
     elbow.add(hand);
     return { shoulder, elbow };
   };

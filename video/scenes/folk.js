@@ -70,6 +70,20 @@ function drawFace(g, name, extras = {}) {
     g.bezierCurveTo(282, my - 18, 312, my - 22, 344, my - 14); g.bezierCurveTo(336, my - 40, 286, my - 50, 256, my - 34);
     g.fill(); g.stroke();
   }
+  if (extras.toothGap) {                  // a knocked-out tooth in the grin
+    g.fillStyle = "#120808"; g.fillRect(256, my - 22, 24, 50); g.strokeStyle = FACE_INK; g.lineWidth = 5; g.strokeRect(256, my - 22, 24, 50);
+  }
+  if (extras.beard) {                     // a scruffy beard round the jaw
+    g.fillStyle = extras.beard; g.strokeStyle = FACE_INK; g.lineWidth = 7;
+    g.beginPath(); g.moveTo(150, 300);
+    g.bezierCurveTo(150, 420, 210, 470, 256, 470); g.bezierCurveTo(302, 470, 362, 420, 362, 300);
+    g.bezierCurveTo(340, 360, 300, 372, 256, 372); g.bezierCurveTo(212, 372, 172, 360, 150, 300);
+    g.fill(); g.stroke();
+  }
+  if (extras.eyePatch) {                  // black patch over the right eye (viewer's left) with a strap
+    line([[110, 140], [402, 290]], 12);
+    g.fillStyle = FACE_INK; g.beginPath(); g.ellipse(256 - ex, ey + 2, 50, 44, 0.2, 0, 7); g.fill();
+  }
   if (extras.sweat) {                     // a cartoon sweat drop at the top of the head
     g.fillStyle = "#6fc3ff"; g.strokeStyle = "#2a6fb0"; g.lineWidth = 6;
     g.beginPath(); g.moveTo(430, 60); g.quadraticCurveTo(470, 130, 430, 150); g.quadraticCurveTo(390, 130, 430, 60); g.fill(); g.stroke();
@@ -259,6 +273,21 @@ export function folk(opts = {}) {
     brim.position.set(0, R_HEAD * 0.32, 0.05); brim.scale.z = 1.12; head.add(brim);
     const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, R_HEAD * 1.9), hh); ridge.position.y = R_HEAD * 0.32 + R_HEAD * 0.74; head.add(ridge);
   }
+  if (o.hat === "tricorn") {                // three-cornered pirate hat with gold trim and a skull
+    const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.72, R_HEAD * 0.86, R_HEAD * 0.5, 24), hatM)); crown.position.y = R_HEAD * 0.86; head.add(crown);
+    const brim = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.45, R_HEAD * 1.45, R_HEAD * 0.32, 3), hatM));
+    brim.position.y = R_HEAD * 0.72; brim.rotation.y = Math.PI / 2; brim.scale.set(1, 1, 0.9); head.add(brim);
+    const trim = new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.47, R_HEAD * 1.47, R_HEAD * 0.05, 3), toon(0xe0b84a)); trim.position.y = R_HEAD * 0.89; trim.rotation.y = Math.PI / 2; trim.scale.set(1, 1, 0.9); head.add(trim);
+    const skull = canvasPlane(0.16, 0.16, (g, w, h) => { g.fillStyle = "#fff"; g.beginPath(); g.arc(w / 2, h * 0.42, w * 0.3, 0, 7); g.fill(); g.fillRect(w * 0.36, h * 0.6, w * 0.28, h * 0.14);
+      g.fillStyle = "#111"; g.beginPath(); g.arc(w * 0.4, h * 0.42, w * 0.08, 0, 7); g.fill(); g.beginPath(); g.arc(w * 0.6, h * 0.42, w * 0.08, 0, 7); g.fill();
+      g.strokeStyle = "#fff"; g.lineWidth = w * 0.08; g.beginPath(); g.moveTo(w * 0.15, h * 0.75); g.lineTo(w * 0.85, h * 0.95); g.moveTo(w * 0.85, h * 0.75); g.lineTo(w * 0.15, h * 0.95); g.stroke(); });
+    skull.position.set(0, R_HEAD * 0.95, R_HEAD * 0.83); head.add(skull);
+  }
+  if (o.hat === "bandana") {                // knotted head scarf
+    const scarf = outline(new THREE.Mesh(new THREE.SphereGeometry(R_HEAD * 1.04, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.4), hatM)); scarf.position.y = R_HEAD * 0.05; head.add(scarf);
+    for (const sx of [-1, 1]) { const tail = outline(new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 8), hatM)); tail.position.set(0.06 * sx, R_HEAD * 0.4, -R_HEAD * 0.98); tail.rotation.set(-0.6, 0, sx * 0.5); head.add(tail); }
+    const knot = outline(new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), hatM)); knot.position.set(0, R_HEAD * 0.55, -R_HEAD * 0.9); head.add(knot);
+  }
   if (o.hat === "officer") {                // peaked military cap
     const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.05, R_HEAD * 0.86, R_HEAD * 0.42, 28), hatM)); crown.position.y = R_HEAD * 0.82; head.add(crown);
     const band = new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.88, R_HEAD * 0.88, R_HEAD * 0.12, 28), toon(0x1a1a1a)); band.position.y = R_HEAD * 0.64; head.add(band);
@@ -306,6 +335,10 @@ export function folk(opts = {}) {
       g.fillStyle = "#2a7fd4"; g.beginPath(); g.ellipse(w / 2, h / 2, w * 0.28, h * 0.14, 0, 0, 7); g.fill();
     });
     onBody(logo, -0.09, 0.35, 0.168).rotation.y = -0.4;
+  }
+  if (o.belt) {                               // wide leather belt with a gold buckle, low on the belly
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.218, 0.226, 0.06, 32), toon(0x3a2416)); band.position.y = 0.17; band.scale.z = 0.88; torso.add(band);
+    onBody(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.07, 0.02), toon(0xe0b84a)), 0, 0.17, 0.198);
   }
   if (o.torn) {                               // ripped shirt: jagged holes and a ragged hem
     const rip = (w, h) => canvasPlane(w, h, (g, W, H) => {

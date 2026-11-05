@@ -1,0 +1,58 @@
+{
+  "title": "What if you woke up as a pirate",
+  "headline": "WHAT IF YOU WOKE UP AS A PIRATE?",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "tail": 0.12,
+  "highlight": [
+    "pirate",
+    "bugs",
+    "teeth",
+    "falling",
+    "toilet",
+    "hole",
+    "plank",
+    "never",
+    "fun"
+  ],
+  "shots": [
+    { "shot": "hook", "text": "What if you woke up as a pirate?" },
+    { "shot": "food", "text": "Breakfast? A rock-hard biscuit crawling with bugs." },
+    { "shot": "teeth", "text": "No fruit for months, so your teeth start falling out." },
+    { "shot": "toilet", "text": "And the toilet? A hole at the front of the ship." },
+    { "shot": "plank", "text": "But walking the plank? Pirates almost never did it." },
+    { "shot": "end", "text": "Still think it sounds fun?" }
+  ],
+  "sfx": [
+    { "sound": "water", "shot": "hook", "at": 0.0, "length": 2.4, "gain": 0.35 },
+    { "sound": "creak", "shot": "hook", "at": 0.4, "length": 1.4, "gain": 0.6 },
+    { "sound": "whoosh", "shot": "food", "at": 0.0, "length": 0.8, "gain": 0.5 },
+    { "sound": "impact", "shot": "teeth", "at": 1.4, "length": 0.6, "gain": 0.5 },
+    { "sound": "water", "shot": "toilet", "at": 1.0, "length": 2.0, "gain": 0.7 },
+    { "sound": "creak", "shot": "plank", "at": 0.2, "length": 1.4, "gain": 0.6 },
+    { "sound": "impact", "shot": "plank", "at": 1.9, "length": 1.0, "gain": 0.8 },
+    { "sound": "water", "shot": "end", "at": 0.0, "length": 1.6, "gain": 0.35 }
+  ],
+  "youtube": {
+    "title": "What If You Woke Up as a Pirate? 🏴‍☠️ #shorts",
+    "description": "What if you woke up as a pirate? 🏴‍☠️\n\nBreakfast would be ship's biscuit (hardtack): a rock-hard cracker that was often crawling with weevils, so sailors tapped it on the table to knock the bugs out. With no fresh fruit for months, you'd get scurvy from a lack of vitamin C: your gums would bleed and your teeth could fall out. And the toilet? It was called 'the head': a seat with a hole at the front of the ship, right over the waves.\n\nBut walking the plank? There are only a handful of reports of it ever happening. Most of that comes from books and movies.\n\n🏴‍☠️ Still think it sounds fun? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #pirate #whatif #history #pirates #didyouknow #funny #animation",
+    "tags": [
+      "what if you woke up as a pirate",
+      "what if you were a pirate",
+      "pirate life",
+      "pirates",
+      "real pirate life",
+      "hardtack",
+      "scurvy",
+      "walking the plank",
+      "pirate facts",
+      "history facts",
+      "funny history",
+      "what if",
+      "did you know",
+      "animation",
+      "cartoon",
+      "shorts"
+    ]
+  }
+}

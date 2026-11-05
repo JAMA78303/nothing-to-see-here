@@ -1,0 +1,80 @@
+{
+  "title": "What if you were dropped into a zombie invasion in the USA",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "say": {
+    "USA": "U.S.A."
+  },
+  "highlight": [
+    "zombie",
+    "USA",
+    "lights",
+    "power",
+    "phone",
+    "hours",
+    "three",
+    "days",
+    "Pentagon",
+    "real",
+    "plan",
+    "follow"
+  ],
+  "shots": [
+    {
+      "shot": "hook",
+      "text": "Dropped into a zombie invasion in the USA? Here's what happens."
+    },
+    {
+      "shot": "power",
+      "text": "Within a day, the lights go out. Nobody's running the power plants."
+    },
+    {
+      "shot": "phone",
+      "text": "Then your phone dies. Cell towers only have a few hours of backup power."
+    },
+    {
+      "shot": "store",
+      "text": "Need food? Grocery stores only keep about three days' worth."
+    },
+    {
+      "shot": "plan",
+      "text": "The crazy part? The Pentagon actually wrote a real zombie war plan."
+    },
+    {
+      "shot": "cta",
+      "text": "Follow for more things you never knew."
+    }
+  ],
+  "sfx": [
+    { "sound": "whoosh", "shot": "hook", "at": 0.0, "length": 0.8, "gain": 0.8 },
+    { "sound": "impact", "shot": "hook", "at": 0.45, "length": 1.0, "gain": 0.9 },
+    { "sound": "impact", "shot": "power", "at": 1.2, "length": 0.6, "gain": 0.35 },
+    { "sound": "impact", "shot": "power", "at": 1.8, "length": 0.6, "gain": 0.35 },
+    { "sound": "whoosh", "shot": "phone", "at": 0.1, "length": 0.8, "gain": 0.5 },
+    { "sound": "whoosh", "shot": "store", "at": 0.1, "length": 0.8, "gain": 0.5 },
+    { "sound": "whoosh", "shot": "plan", "at": 0.0, "length": 1.0, "gain": 0.6 },
+    { "sound": "impact", "shot": "plan", "at": 1.6, "length": 1.0, "gain": 0.6 }
+  ],
+  "youtube": {
+    "title": "What If You Were Dropped Into a Zombie Invasion? 🧟 #shorts",
+    "description": "If you got dropped into a zombie invasion in the USA, this is what would happen 😳\n\nWithin about a day, the lights start going out, because nobody is left running the power plants and the grid needs people to keep it balanced. Then your phone dies: most cell towers only have a few hours of battery backup. Need food? Most grocery stores only keep about three days of stock on the shelves.\n\nAnd the crazy part: the Pentagon really did write a zombie war plan. It's called CONPLAN 8888, 'Counter-Zombie Dominance', and it was written in 2011 as a training exercise for military planners. The CDC even published a zombie preparedness guide the same year 🧟\n\n🧟 How long would you last? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #zombie #whatif #zombieapocalypse #survival #didyouknow #funny #animation",
+    "tags": [
+      "what if you were dropped into a zombie invasion",
+      "zombie apocalypse",
+      "zombie invasion",
+      "zombies",
+      "what if",
+      "survival",
+      "pentagon zombie plan",
+      "conplan 8888",
+      "counter zombie dominance",
+      "cdc zombie",
+      "power grid",
+      "did you know",
+      "funny",
+      "animation",
+      "cartoon",
+      "shorts"
+    ]
+  }
+}

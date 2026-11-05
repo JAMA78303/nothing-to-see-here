@@ -18,6 +18,7 @@ const headRamp = (() => {
   return t;
 })();
 export const HEAD = new THREE.MeshToonMaterial({ color: 0xeef1ff, gradientMap: headRamp, emissive: 0x7a7a7a });   // scenes can raise emissive at night   // nearly flat white, like a drawing
+export const SKINS = [];   // tinted head materials (zombies): scenes update their emissive alongside HEAD
 const R_HEAD = 0.36;
 const BODY = 1.22;   // body size relative to the original egg; the head keeps its size
 
@@ -55,6 +56,10 @@ function drawFace(g, name, extras = {}) {
     gross:     () => { brow(-1, -10, 26); brow(1, -10, 26); line([[ex * -1 + 256 - 26, ey - 14], [256 - ex + 22, ey], [256 - ex - 26, ey + 14]], 12); line([[256 + ex + 26, ey - 14], [256 + ex - 22, ey], [256 + ex + 26, ey + 14]], 12);
                      line([[204, my], [222, my - 10], [242, my + 4], [262, my - 10], [282, my + 4], [304, my - 8]], 10); oval(268, my + 22, 20, 16, "#e8708a"); },
     sneeze:    () => { brow(-1, 12, 30); brow(1, 12, 30); line([[256 - ex - 28, ey], [256 - ex + 28, ey + 4]], 12); line([[256 + ex - 28, ey + 4], [256 + ex + 28, ey]], 12); oval(256, my + 6, 46, 38, "#3a1414"); },
+    zombie:    () => { ringEye(-1, 44, 9); oval(256 + ex, ey + 6, 30, 18, "#fff"); line([[256 + ex - 34, ey - 6], [256 + ex + 34, ey - 2]], 11); oval(256 + ex + 4, ey + 10, 7, 7, "#3a3a3a");
+                     g.fillStyle = "#3a1414"; g.beginPath(); g.ellipse(266, my + 4, 48, 30, 0.15, 0, 7); g.fill(); g.strokeStyle = FACE_INK; g.lineWidth = 9; g.stroke();
+                     g.fillStyle = "#fff"; g.fillRect(236, my - 22, 16, 18); g.fillRect(272, my - 24, 16, 16); g.fillRect(258, my + 18, 14, 14);
+                     line([[150, 150], [190, 196]], 7, "#5a3a3a"); for (const k of [0.25, 0.5, 0.75]) { const x = 150 + 40 * k, y = 150 + 46 * k; line([[x - 10, y + 8], [x + 10, y - 8]], 5, "#5a3a3a"); } },
     scared:    () => { brow(-1, -12, 34); brow(1, -12, 34); ringEye(-1, 38, 8); ringEye(1, 38, 8); line([[200, my + 6], [218, my - 8], [238, my + 8], [256, my - 8], [274, my + 8], [294, my - 8], [312, my + 6]], 9); },
   };
   (faces[name] || faces.neutral)();
@@ -160,7 +165,9 @@ export function folk(opts = {}) {
   const head = new THREE.Group();
   head.position.y = 0.3;
   neck.add(head);
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD, 40, 30), HEAD);
+  const skinM = o.skin ? Object.assign(HEAD.clone(), { color: new THREE.Color(o.skin) }) : HEAD;
+  if (o.skin) SKINS.push(skinM);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(R_HEAD, 40, 30), skinM);
   skull.scale.set(1.0, 0.92, 0.95);
   head.add(outline(skull));
   // drawn-on 2D face: a canvas painted onto a patch over the front of the head
@@ -252,6 +259,12 @@ export function folk(opts = {}) {
     brim.position.set(0, R_HEAD * 0.32, 0.05); brim.scale.z = 1.12; head.add(brim);
     const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, R_HEAD * 1.9), hh); ridge.position.y = R_HEAD * 0.32 + R_HEAD * 0.74; head.add(ridge);
   }
+  if (o.hat === "officer") {                // peaked military cap
+    const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 1.05, R_HEAD * 0.86, R_HEAD * 0.42, 28), hatM)); crown.position.y = R_HEAD * 0.82; head.add(crown);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.88, R_HEAD * 0.88, R_HEAD * 0.12, 28), toon(0x1a1a1a)); band.position.y = R_HEAD * 0.64; head.add(band);
+    const visor = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.7, R_HEAD * 0.7, 0.025, 24, 1, false, -Math.PI / 2, Math.PI), toon(0x1a1a1a))); visor.position.set(0, R_HEAD * 0.58, R_HEAD * 0.45); visor.rotation.x = 0.25; head.add(visor);
+    const badge = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8), toon(0xe0b84a)); badge.position.set(0, R_HEAD * 0.86, R_HEAD * 0.98); badge.scale.z = 0.4; head.add(badge);
+  }
   if (o.hat === "porkpie") {
     const crown = outline(new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.78, R_HEAD * 0.82, R_HEAD * 0.75, 28), hatM)); crown.position.y = R_HEAD * 0.92; head.add(crown);
     const band = new THREE.Mesh(new THREE.CylinderGeometry(R_HEAD * 0.84, R_HEAD * 0.84, R_HEAD * 0.16, 28), toon(0xf2e6c4)); band.position.y = R_HEAD * 0.68; head.add(band);
@@ -293,6 +306,20 @@ export function folk(opts = {}) {
       g.fillStyle = "#2a7fd4"; g.beginPath(); g.ellipse(w / 2, h / 2, w * 0.28, h * 0.14, 0, 0, 7); g.fill();
     });
     onBody(logo, -0.09, 0.35, 0.168).rotation.y = -0.4;
+  }
+  if (o.torn) {                               // ripped shirt: jagged holes and a ragged hem
+    const rip = (w, h) => canvasPlane(w, h, (g, W, H) => {
+      g.fillStyle = "#" + new THREE.Color(o.body).multiplyScalar(0.45).getHexString(); g.strokeStyle = "#161313"; g.lineWidth = 10;
+      g.beginPath(); const n = 9; for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, r = (i % 2 ? 0.28 : 0.46) * W; g.lineTo(W / 2 + r * Math.cos(a), H / 2 + (i % 2 ? 0.28 : 0.46) * H * Math.sin(a)); } g.closePath(); g.fill(); g.stroke();
+    });
+    onBody(rip(0.09, 0.09), 0.06, 0.3, 0.172).rotation.y = 0.3;
+    onBody(rip(0.07, 0.06), -0.1, 0.16, 0.185).rotation.y = -0.45;
+  }
+  if (o.outfit === "general") {               // army general: medal ribbons, gold buttons
+    const ribbons = canvasPlane(0.12, 0.07, (g, W, H) => { const cs = ["#c0392b", "#f1c40f", "#2e86c1", "#27ae60", "#8e44ad", "#e67e22"]; for (let i = 0; i < 6; i++) { g.fillStyle = cs[i]; g.fillRect((i % 3) * W / 3 + 2, Math.floor(i / 3) * H / 2 + 2, W / 3 - 4, H / 2 - 4); } });
+    onBody(ribbons, -0.08, 0.4, 0.16).rotation.y = -0.35;
+    const gold = toon(0xe0b84a);
+    for (let i = 0; i < 4; i++) onBody(new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 6), gold), 0.03, 0.42 - i * 0.08, 0.18 - i * 0.003);
   }
   if (o.outfit === "suit") {
     const shirt = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 3), toon(0xffffff)); shirt.rotation.set(Math.PI, 0, 0); shirt.scale.z = 0.25; onBody(shirt, 0, 0.44, 0.16);

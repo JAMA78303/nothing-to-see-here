@@ -2,8 +2,8 @@
   "title": "What if you were dropped into a zombie invasion in the USA",
   "voice": "am_michael",
   "speed": 1.1,
-  "say": {
-    "USA": "U.S.A."
+  "ipa": {
+    "Pentagon": "pˈɛntəɡˌɑːn"
   },
   "highlight": [
     "zombie",

@@ -2,6 +2,9 @@
   "title": "What if you built your house underground",
   "voice": "am_michael",
   "speed": 1.1,
+  "ipa": {
+    "Pedy": "pˈiːdi"
+  },
   "highlight": [
     "underground",
     "55",
@@ -42,13 +45,55 @@
     }
   ],
   "sfx": [
-    { "sound": "whoosh", "shot": "hook", "at": 0.0, "length": 1.2, "gain": 0.7 },
-    { "sound": "whoosh", "shot": "temp", "at": 0.1, "length": 0.8, "gain": 0.5 },
-    { "sound": "rumble", "shot": "roof", "at": 0.3, "length": 2.5, "gain": 0.8 },
-    { "sound": "impact", "shot": "roof", "at": 0.6, "length": 1.0, "gain": 0.7 },
-    { "sound": "water", "shot": "water", "at": 0.0, "length": 2.8, "gain": 0.45 },
-    { "sound": "whoosh", "shot": "coober", "at": 0.0, "length": 1.0, "gain": 0.6 },
-    { "sound": "whoosh", "shot": "cta", "at": 0.0, "length": 0.8, "gain": 0.4 }
+    {
+      "sound": "whoosh",
+      "shot": "hook",
+      "at": 0.0,
+      "length": 1.2,
+      "gain": 0.7
+    },
+    {
+      "sound": "whoosh",
+      "shot": "temp",
+      "at": 0.1,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "rumble",
+      "shot": "roof",
+      "at": 0.3,
+      "length": 2.5,
+      "gain": 0.8
+    },
+    {
+      "sound": "impact",
+      "shot": "roof",
+      "at": 0.6,
+      "length": 1.0,
+      "gain": 0.7
+    },
+    {
+      "sound": "water",
+      "shot": "water",
+      "at": 0.0,
+      "length": 2.8,
+      "gain": 0.45
+    },
+    {
+      "sound": "whoosh",
+      "shot": "coober",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "cta",
+      "at": 0.0,
+      "length": 0.8,
+      "gain": 0.4
+    }
   ],
   "youtube": {
     "title": "What If You Built Your House Underground? 🏠 #shorts",

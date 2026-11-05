@@ -24,6 +24,7 @@ out_dir.mkdir(parents=True, exist_ok=True)
 
 kokoro = Kokoro(str(ROOT / "voices/kokoro-v1.0.onnx"), str(ROOT / "voices/voices-v1.0.bin"))
 say = script.get("say", {})
+ipa = script.get("ipa", {})
 highlight = {w.lower() for w in script.get("highlight", [])}
 
 audio, shots, t = [], [], LEAD
@@ -32,7 +33,17 @@ audio.append(np.zeros(int(LEAD * sr), dtype=np.float32))
 for i, shot in enumerate(script["shots"]):
     # "say" swaps how a word is spoken without changing the caption, e.g. {"1928": "nineteen twenty-eight"}
     spoken = re.sub(r"[\w']+", lambda m: say.get(m.group(0), m.group(0)), shot["text"])
-    samples, sr = kokoro.create(spoken, voice=script["voice"], speed=script["speed"], lang="en-us")
+    # "ipa" fixes a word's pronunciation outright, e.g. {"Pentagon": "pˈɛntəɡˌɑːn"}: swap its phonemes in the sentence
+    if ipa:
+        ph = kokoro.tokenizer.phonemize(spoken, "en-us")
+        for word, fix in ipa.items():
+            if re.search(rf"\b{re.escape(word)}\b", spoken):
+                default = kokoro.tokenizer.phonemize(word, "en-us").strip()
+                if default not in ph: print(f"warning: couldn't find {word!r} ({default}) in {ph!r}")
+                ph = ph.replace(default, fix)
+        samples, sr = kokoro.create(ph, voice=script["voice"], speed=script["speed"], lang="en-us", is_phonemes=True)
+    else:
+        samples, sr = kokoro.create(spoken, voice=script["voice"], speed=script["speed"], lang="en-us")
     # trim the model's own leading/trailing silence so timings line up
     loud = np.where(np.abs(samples) > 0.01)[0]
     samples = samples[max(0, loud[0] - 600): loud[-1] + 1200]

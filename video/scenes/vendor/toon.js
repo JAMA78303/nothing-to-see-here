@@ -282,6 +282,13 @@ const headBlob = (seed, a = 118, facing = 0) => ({
 const thickAngle = (light) => Math.atan2(-Math.sin(light) + 0.8, -Math.cos(light));
 const DEF_LIGHT = rad(-120);
 const FACE = {
+  // local additions: one consistent face for a recurring character (same eyes; lids, brows and mouth do the acting)
+  m_neutral: { eye: ["lid", "lid"], brow: [0, -1], mouth: "dash" },
+  m_stern: { eye: ["lid", "lid"], brow: [4, -2], mouth: "frown" },
+  m_shock: { eye: ["open", "open"], brow: [-8, -7], mouth: "o" },
+  m_worried: { eye: ["lid", "lid"], brow: [-4, 3], mouth: "wave" },
+  m_smile: { eye: ["lid", "lid"], brow: [-1, -2], mouth: "smirk" },
+  m_happy: { eye: ["happy", "happy"], brow: [-2, -2], mouth: "smile" },
   neutral: { eye: ["lid", "lid"], brow: [0, -1], mouth: "dash" },
   stern: { eye: ["lid", "lid"], brow: [3, -2], mouth: "frown" },
   grin: { eye: ["happy", "happy"], brow: [-3, -3], mouth: "grin" },
@@ -297,12 +304,15 @@ const FACE = {
   smile_closed: { eye: ["happy", "happy"], brow: [0, -1], mouth: "smile" },
   lick: { eye: ["dot", "dot"], brow: [0, -1], mouth: "lick" }
 };
-const halfLid = (k) => k === "dot" || k === "small" ? "lid" : k === "lid" ? "slit" : k === "shock" ? "shockHalf" : k;
+const halfLid = (k) => k === "dot" || k === "small" || k === "open" ? "lid" : k === "lid" ? "slit" : k === "shock" ? "shockHalf" : k;
 const eyeKind = (k, lid) => lid >= 1 && k !== "happy" && k !== "squeeze" && k !== "spiral" ? "dash" : lid > 0 ? halfLid(k) : k;
 const lidOf = (b) => b === true ? 1 : Number(b) || 0;
 const eye = (p, kind, x, ey, u, side, look, skin) => {
   const lx = x + look * 3 * u, lw = 3.8 * u;
   switch (kind) {
+    case "open":   // same size as the lidded eye, fully open
+      p.ell(lx, ey - u, 7 * u, 8 * u, INK, 0);
+      break;
     case "dot":
       p.ell(lx, ey, 3.8 * u, 5.5 * u, INK, 0);
       break;
@@ -720,7 +730,7 @@ const SWING_HIP = 733;
 const bodySide = (p, o, opts) => {
   const { phase = 0, expr = "neutral", mode = "march", blink = false, stomp = 1, pose = 0, stride = 1, light = DEF_LIGHT, seed = 1 } = opts;
   const Bd = BUILD[o.build ?? "adult"], skin = o.skin ?? SKIN, two = Math.PI * 2, lid = lidOf(blink);
-  const H = { ...headBlob(seed, Bd.a, 1), asym: 0.12, rot: rad(3 + 3 * (rnd(seed, 7) - 0.5)) };
+  const H = opts.faceFront ? headBlob(seed, Bd.a, 0) : { ...headBlob(seed, Bd.a, 1), asym: 0.12, rot: rad(3 + 3 * (rnd(seed, 7) - 0.5)) };
   const W = 2 * H.a, HH = 2 * H.b, u = W / 100, sole = 975, ankY = sole - 4 * u;
   const thick = thickAngle(light), ow = 5 * u;
   const legLen = (Bd.legs + 0.12) * HH - 4 * u, l1 = legLen / 2, l2 = legLen / 2;
@@ -861,7 +871,8 @@ const bodySide = (p, o, opts) => {
   p.inkRing(hp, ow, thick);
   hatOn(p, o, hp, H, hx, hc, light, seed, 1, true);
   const brim = !!o.hat && o.hat !== "hair" && o.hat !== "bonnet" && o.hat !== "cap";
-  faceSide(p, hx, hc, W, expr, lid, brim, skin, o.moustache, o.build === "stout");
+  if (opts.faceFront) faceFront(p, hx, hc, W, expr, 1, 0.4, lid, brim, skin, o.moustache, o.build === "stout");
+  else faceSide(p, hx, hc, W, expr, lid, brim, skin, o.moustache, o.build === "stout");
   p.head = { x: hx, y: hc, blob: H, rot: p.rot ? [...p.rot] : null };
   p.rot = null;
 };

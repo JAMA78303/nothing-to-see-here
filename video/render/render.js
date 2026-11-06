@@ -36,7 +36,7 @@ async function openScene(name, t = 0) {
   const page = await browser.newPage({ viewport: VIEW });
   page.on("pageerror", e => console.error("page error:", e.message));
   const timing = `/out/${name}/timing.json`;
-  await page.goto(`http://localhost:${server.address().port}/scenes/index.html?scene=${name}&timing=${timing}&t=${t}&fx=${process.env.FX ?? 1}${WIDE ? "&wide=1" : ""}`);
+  await page.goto(`http://localhost:${server.address().port}/scenes/index.html?scene=${name}&timing=${timing}&t=${t}&fx=${process.env.FX ?? 1}${WIDE ? "&wide=1" : ""}${process.env.SCENE_ARGS ? "&" + process.env.SCENE_ARGS : ""}`);
   await page.waitForFunction(() => window.ready, null, { timeout: 180000 });
   const close = async () => { await browser.close(); server.close(); };
   return { page, close };

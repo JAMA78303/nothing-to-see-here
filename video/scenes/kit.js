@@ -401,12 +401,13 @@ const GradeShader = {
     }`,
 };
 // scenes can switch off the heavier effects (e.g. ambient occlusion in empty space)
-export const fxOptions = { ao: true, dof: null };   // dof: { focus, aperture, maxblur }
+export const fxOptions = { ao: true, dof: null, passes: [] };   // dof: { focus, aperture, maxblur }
 function makeComposer() {
   const target = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
   const composer = new EffectComposer(renderer, target);
   composer.setPixelRatio(1);
   composer.addPass(new RenderPass(scene, camera));
+  for (const make of fxOptions.passes || []) composer.addPass(make(scene, camera, W, H));   // e.g. the ink outline pass
   if (fxOptions.ao && !WIDE) {   // GTAO leaves black slabs at landscape size
     const ao = new GTAOPass(scene, camera, W, H);
     ao.updateGtaoMaterial({ radius: 2.4, distanceExponent: 1.2, thickness: 2.5, scale: 1.6, samples: 12 });

@@ -708,6 +708,7 @@ const bodyFront = (p, o, opts) => {
   hatOn(p, o, hp, H, 300, hc, light, seed, facing, false);
   const brim = !!o.hat && o.hat !== "hair" && o.hat !== "bonnet" && o.hat !== "cap";
   faceFront(p, 300, hc, W, expr, facing, look, lid, brim, skin, o.moustache, o.build === "stout");
+  p.head = { x: 300, y: hc, blob: H, rot: p.rot ? [...p.rot] : null };
   p.rot = null;
 };
 const ik = (hip, ank, l1, l2) => {
@@ -748,6 +749,10 @@ const bodySide = (p, o, opts) => {
     hipY = ankY - 0.87 * legLen;
     legs.push({ ank: [300 - 0.5 * legLen, ankY], pitch: rad(-8), near: false }, { ank: [300 + 0.32 * legLen, ankY], pitch: 0, near: true });
     lean = 14 * pose;
+  } else if (mode === "hammer") {   // local addition: braced stance for a two-handed swing (pose 0 raised .. 1 struck)
+    hipY = ankY - 0.9 * legLen;
+    legs.push({ ank: [300 - 0.42 * legLen, ankY], pitch: rad(-6), near: false }, { ank: [300 + 0.3 * legLen, ankY], pitch: 0, near: true });
+    lean = -8 + 22 * pose;
   } else if (mode === "swing") {
     hipY = SWING_HIP;
     const a = rad(60 * pose);
@@ -794,8 +799,15 @@ const bodySide = (p, o, opts) => {
   };
   const rifle = !!o.rifle && (mode === "march" || mode === "stand");
   const B0 = [tcx + 0.72 * T.a, chin + 0.58 * HH], B1 = [tcx - 0.95 * T.a - 22 * u, crown - 0.4 * HH];
-  let near, far;
-  if (mode === "swing") {
+  let near, far, sledge = null;
+  if (mode === "hammer") {
+    const th = rad(-30 + 132 * pose), d = [Math.sin(th), -Math.cos(th)];
+    const gN = [S[0] + d[0] * aLen * 0.82, S[1] + d[1] * aLen * 0.82], gF = [S[0] + d[0] * aLen * 0.6, S[1] + d[1] * aLen * 0.6];
+    const bend = (g, k) => [(S[0] + g[0]) / 2 - d[1] * k * u, (S[1] + g[1]) / 2 + d[0] * k * u];
+    near = [S, bend(gN, 10), gN]; far = [S, bend(gF, 12), gF];
+    const end = [S[0] + d[0] * (aLen * 0.82 + 0.62 * HH), S[1] + d[1] * (aLen * 0.82 + 0.62 * HH)];
+    sledge = { a: [gF[0] - d[0] * 8 * u, gF[1] - d[1] * 8 * u], b: end, d };
+  } else if (mode === "swing") {
     near = [S, [S[0] + 12 * u, S[1] - 0.16 * HH], [300 + 6 * u, chin - 0.3 * HH]];
     far = [S, [S[0] + 8 * u, S[1] - 0.18 * HH], [300 + 2 * u, chin - 0.36 * HH]];
   } else if (mode === "push") {
@@ -834,6 +846,12 @@ const bodySide = (p, o, opts) => {
     p.band([B0, B1], "#7a4b2a", 5 * u, 1.5 * u, "round");
     p.band([lerp2(B0, B1, 0.6), B1], "#8d949c", 2.4 * u, 1.2 * u, "round");
   }
+  if (sledge) {   // wooden handle, iron head across the end
+    const { a, b, d } = sledge, n = [-d[1], d[0]], hw = 0.17 * HH, hh = 0.075 * HH;
+    p.band([a, b], "#8a5a34", 5.5 * u, 1.6 * u, "round");
+    p.poly([[b[0] + n[0] * hw - d[0] * hh, b[1] + n[1] * hw - d[1] * hh], [b[0] + n[0] * hw + d[0] * hh, b[1] + n[1] * hw + d[1] * hh],
+      [b[0] - n[0] * hw + d[0] * hh, b[1] - n[1] * hw + d[1] * hh], [b[0] - n[0] * hw - d[0] * hh, b[1] - n[1] * hw - d[1] * hh]], "#6f767e", 2.4 * u);
+  }
   p.stroke(curve(near[0], near[1], near[2]), 5.2 * u, armCol);
   p.dot(near[2][0], near[2][1], 5.5 * u);
   const hx = 300 + 4 * u;
@@ -844,6 +862,7 @@ const bodySide = (p, o, opts) => {
   hatOn(p, o, hp, H, hx, hc, light, seed, 1, true);
   const brim = !!o.hat && o.hat !== "hair" && o.hat !== "bonnet" && o.hat !== "cap";
   faceSide(p, hx, hc, W, expr, lid, brim, skin, o.moustache, o.build === "stout");
+  p.head = { x: hx, y: hc, blob: H, rot: p.rot ? [...p.rot] : null };
   p.rot = null;
 };
 const swingKid = (p, o, kick, expr, light = DEF_LIGHT, blink = 0) => {
@@ -1023,6 +1042,7 @@ const fxBlob = (p, col) => {
   g.fillRect(0, 0, 128, 128);
 };
 export {
+  bodySide as _bodySide,
   INK,
   KID,
   OFFICER,

@@ -196,7 +196,7 @@ const max = makeMax({ facing: 1 });
 
 // ======================= timeline =======================
 const CAMS = {
-  hook:    [V(1.7, 1.55, 2.4),   V(-0.2, 1.15, -2.2)],
+  hook:    [V(-2.25, 1.5, 1.1),  V(-0.3, 1.15, -2.3)],
   setting: [V(100.2, 1.6, 5.2),  V(100.2, 2.6, -30)],
   tunnel:  [V(200.1, 1.45, 3.2), V(200, 1.25, -3)],
   rooms:   [V(394.8, 1.9, 9.0),  V(394.8, 1.25, -2.4)],
@@ -221,7 +221,7 @@ start((time, tl) => {
   if (shot === "stairs") { const d = ease(k) * (STAIR.levels - 1) * STAIR.h; p = V(SET.stairs + 1.0, 1.4 - d, 9.5); l = V(SET.stairs, 0.4 - d, -2); }
   else if (shot === "snap") { const e = ease(Math.min(1, k / 0.8)); p = V(SET.city, lerp(-6, -8, e), lerp(5, 30, e)); l = V(SET.city, lerp(-6.5, -8.5, e), -2); }
   else if (shot === "rooms") { p.x += 11 * ease(k); l.x += 11 * ease(k); }
-  else if (shot === "hook" && st > 1.6) p.lerp(V(-0.1, 1.2, -1.2), 0.5 * ease((st - 1.6) / 4));
+  else if (shot === "hook" && st > 1.6) p.lerp(V(-1.4, 1.45, -0.2), 0.6 * ease((st - 1.6) / 4));
   else p.lerp(l, 0.06 * ease(k));
   camera.position.copy(p); camera.lookAt(l);
 
@@ -231,7 +231,12 @@ start((time, tl) => {
   if (set === "house") {
     if (shot === "loop") { max.position.set(SET.house + 1.9, 0, -0.4); max.userData.draw({ expr: "neutral", prop: null, wave: Math.abs(Math.sin(st * 9)) * 0.6, facing: 1, blink: false }); }
     else if (shot === "deadpan") { max.position.set(SET.house - 0.05, 0, -1.0); max.userData.draw({ expr: k < 0.55 ? "neutral" : "nervous", prop: ["hammer", 1], facing: 0, blink: Math.sin(st * 3) > 0.96 }); }
-    else { max.position.set(SET.house + 0.75, 0, -1.4); max.userData.draw({ expr: hit < 1 ? "stern" : st < 2.2 ? "shock" : "neutral", prop: ["hammer", st < 0.45 ? 0.15 * Math.sin(st * 6) : hit], facing: -1 }); }
+    else {
+      // side-on to the wall: wind up, swing, strike at ~0.55 s, then the hammer sags as he stares into the hole
+      const pose = st < 0.3 ? 0.25 - 0.25 * (st / 0.3) : st < 0.55 ? ease((st - 0.3) / 0.25) : st < 1.4 ? 1 : 1 - 0.25 * ease(Math.min(1, (st - 1.4) / 0.6));
+      max.position.set(SET.house - 0.95, 0, BACK + 0.8);
+      max.userData.draw({ side: true, mode: "hammer", pose, expr: st < 0.55 ? "stern" : st < 2.4 ? "shock" : "neutral" });
+    }
   }
   if (set === "village") { max.position.set(SET.village + 0.2, 0, 0.2); max.userData.draw({ expr: "neutral", prop: ["hammer", 1], facing: 0, blink: Math.sin(st * 2.5) > 0.97 }); }
   if (set === "tunnel") { max.position.set(SET.tunnel, 0, -0.6 + 0.5 * k); max.userData.draw({ expr: "nervous", prop: "lantern", mode: "stroll", phase: (st * 0.9) % 1, facing: 0 }); lanternLight.position.set(SET.tunnel + 0.45, 1.3, max.position.z + 0.3); lanternLight.intensity = 7 * (1 + 0.06 * Math.sin(time * 19)); }

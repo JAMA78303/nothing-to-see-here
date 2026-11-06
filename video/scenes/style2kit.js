@@ -6,7 +6,7 @@ import { InkPass, NOINK } from "./vendor/ink.js";
 import { twoTone, TONE, CHAR, untone } from "./vendor/shade.js";
 import { cardShade } from "./vendor/cardshade.js";
 import { LIGHTS, LOOK } from "./vendor/lights.js";
-import { Pen, bodyFront, blobPts, headBlob, townsfolk } from "./vendor/toon.js";
+import { Pen, bodyFront, bodySide, blobPts, headBlob, townsfolk } from "./vendor/toon.js";
 export { NOINK, untone, LIGHTS, LOOK, townsfolk };
 
 const v3 = a => new THREE.Vector3(...a);
@@ -67,10 +67,15 @@ export const CREAM = "#f6f1e6";
 export const MAX = { jacket: "#1f8a9a", pants: "#2b2b38", boots: "#2a2422", hat: null, hair: "#8a5a2b", buttons: "#e8c45a", skin: CREAM };
 /** Max's hair: a small side-swept cap with a flick, clipped to the head */
 export function maxHair(p, col = MAX.hair, seed = 4, facing = 0) {
-  const head = blobPts(300, 309, headBlob(seed, 118, facing));
-  const hair = [[150, 300], [150, 120], [450, 120], [450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282]];
+  // follows the head the body drawer just drew (position, shape and lean), else the default front head
+  const h = p.head ?? { x: 300, y: 309, blob: headBlob(seed, 118, facing), rot: null };
+  const dx = h.x - 300, dy = h.y - 309, rot = p.rot;
+  p.rot = h.rot;
+  const head = blobPts(h.x, h.y, h.blob);
+  const hair = [[150, 300], [150, 120], [450, 120], [450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282]].map(([x, y]) => [x + dx, y + dy]);
   p.clip(head, () => p.poly(hair, col, 0));
-  p.clip(head, () => p.stroke([[450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282], [150, 300]], 9));
+  p.clip(head, () => p.stroke(hair.slice(3).concat([hair[0]]), 9));
+  p.rot = rot;
 }
 export const CARD_W = 1.35, CARD_H = 2.25;   // 600 x 1000 design units -> metres (an adult ~1.75 m tall)
 /** a character card: group at the feet. draw(opts) redraws the drawing (expression, pose, prop, blink...) */
@@ -89,7 +94,7 @@ export function makeCard(outfit, base = {}, extra = null, scale = 1) {
     if (key === lastKey) return;
     lastKey = key;
     const c = cv.getContext("2d"); c.clearRect(0, 0, 600, 1000);
-    const p = new Pen(c); bodyFront(p, outfit, opts); if (extra) extra(p, opts);
+    const p = new Pen(c); (opts.side ? bodySide : bodyFront)(p, outfit, opts); if (extra) extra(p, opts);
     tex.needsUpdate = true;
   };
   g.userData.draw({});

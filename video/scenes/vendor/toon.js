@@ -608,6 +608,9 @@ const bodyFront = (p, o, opts) => {
     } else if (prop === "icecream") {
       const S = sh(1);
       arms.push({ pts: [S, [tcx + 1.05 * T.a + 4 * u, S[1] + 0.45 * HH], [tcx + 0.5 * T.a, S[1] + 0.4 * HH]], front: true });
+    } else if (prop === "mug" || prop === "sip") {   // local addition: a mug held in front of the chest, or raised to sip
+      const S = sh(1), up = prop === "sip";
+      arms.push({ pts: [S, [tcx + 1.1 * T.a + 6 * u, S[1] + (up ? 0.3 : 0.48) * HH], [tcx + (up ? 0.35 : 0.55) * T.a, S[1] + (up ? -0.12 : 0.36) * HH]], front: true });
     } else if (Array.isArray(prop)) {
       const S = sh(1), k = clamp(prop[1], 0, 1);
       const E = lerp2([tcx + 1.1 * T.a + 10 * u, S[1] - 0.15 * HH], [tcx + 1.2 * T.a + 10 * u, S[1] + 0.3 * HH], k);
@@ -662,7 +665,13 @@ const bodyFront = (p, o, opts) => {
   for (const a of arms) if (a.front) {
     drawArm(a);
     const [hx, hy] = a.pts[2];
-    if (prop === "icecream") {
+    if (prop === "mug" || prop === "sip") {
+      // mug body behind the hand, handle on the far side, the ink-dot hand wrapped over the front
+      p.poly([[hx - 15 * u, hy - 20 * u], [hx + 15 * u, hy - 20 * u], [hx + 13 * u, hy + 16 * u], [hx - 13 * u, hy + 16 * u]], "#f4f4f2", 2.4 * u);
+      p.arc(hx - 17 * u, hy - 2 * u, 7 * u, 8 * u, 90, 270, 2.6 * u);
+      p.ell(hx, hy - 20 * u, 15 * u, 3.5 * u, "#7a4a2a", 1.6 * u);
+      p.dot(hx + 2 * u, hy, 6 * u);
+    } else if (prop === "icecream") {
       p.poly([[hx - 8 * u, hy - 12 * u], [hx + 8 * u, hy - 12 * u], [hx, hy + 7 * u]], "#e0a35a", 1.8 * u);
       p.ell(hx, hy - 19 * u, 11 * u, 10 * u, "#f7c6d9", 2.2 * u);
       p.dot(hx, hy, 5.5 * u);

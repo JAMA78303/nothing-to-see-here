@@ -135,10 +135,8 @@ const max = new THREE.Group(); max.add(maxCard); maxCard.position.y = CARD_H / 2
 max.position.set(0.35, 0, -1.75);
 function drawMax(blink) {
   const g = cv.getContext("2d"); g.clearRect(0, 0, 600, 1000); const p = new Pen(g);
-  bodyFront(p, MAX, { mode: "stand", expr: "neutral", seed: 4, facing: 1, blink, light: -2.1 });
+  bodyFront(p, MAX, { mode: "stand", expr: "neutral", seed: 4, facing: 1, blink, light: -2.1, prop: "mug" });
   maxHair(p, MAX.hair, 4, 1);
-  // a mug held in front of the coat
-  p.poly([[262, 540], [300, 540], [298, 588], [264, 588]], "#f4f4f4", 7); p.arc(304, 562, 12, 14, -80, 80, 6);
   tex.needsUpdate = true;
 }
 drawMax(false);

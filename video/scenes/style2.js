@@ -2,18 +2,35 @@
 // textures, two-tone lighting and the ink pass come from mromidev/claude-animated-shorts (MIT, scenes/vendor/).
 // Max is our own character: a flat card with a bean head, brown hair with his curl, teal coat with gold buttons.
 import { THREE, scene, camera, sun, hemi, setWaterTable, GROUND_BOTTOM, V, start, fxOptions } from "./kit.js";
+import { BokehPass } from "three/addons/postprocessing/BokehPass.js";
 import { InkPass, NOINK } from "./vendor/ink.js";
 import { twoTone, TONE, CHAR, untone } from "./vendor/shade.js";
 import { cardShade } from "./vendor/cardshade.js";
 import { LIGHTS, LOOK } from "./vendor/lights.js";
 import { facadeHD, roofHD, cobbleHD, stoneHD, rep } from "./vendor/paint.js";
-import { Pen, bodyFront, townsfolk, INK } from "./vendor/toon.js";
+import { Pen, bodyFront, townsfolk, INK, blobPts, headBlob } from "./vendor/toon.js";
 
 const PRESET = new URLSearchParams(location.search).get("light") === "golden" ? "golden" : "day";
 const L = LIGHTS[PRESET], LK = LOOK[PRESET];
 fxOptions.ao = false;
-fxOptions.passes = [(s, c, W, H) => { const p = new InkPass(s, c); p.setSize(W, H); return p; }];
+fxOptions.captionStyle = "story";
+const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); white.needsUpdate = true;
+let bokeh;
+const QS = new URLSearchParams(location.search);
+fxOptions.passes = [
+  (s, c, W, H) => { const p = new InkPass(s, c); p.setSize(W, H); if (QS.get("noink")) p.enabled = false; return p; },
+  (s, c) => {
+    // background blur focused on the character; its depth pass respects the cards' cut-out so no rectangle halo
+    bokeh = new BokehPass(s, c, { focus: 4.0, aperture: 0.0035, maxblur: 0.009 });
+    const md = bokeh.materialDepth; md.map = white; md.alphaTest = 0.5;
+    md.onBeforeRender = (r, sc, cam, geo, obj) => { const m = obj.material; md.map = m && m.alphaTest > 0 && m.map ? m.map : white; md.uniformsNeedUpdate = true; };
+    if (QS.get("noblur")) bokeh.enabled = false;
+    return bokeh;
+  },
+];
 setWaterTable(GROUND_BOTTOM - 1, 0);
+// the kit's groundwater overlay (for cutaway scenes) is hidden by a clip plane, which the ink pass can't see: remove it
+scene.traverse(o => { if (o.isMesh && o.material?.clippingPlanes?.length) o.visible = false; });
 
 // ---------- light, sky, fog from the preset ----------
 const v3 = a => new THREE.Vector3(...a);
@@ -24,7 +41,7 @@ sun.color.set(L.sunCol); sun.intensity = L.sunI; sun.shadow.bias = L.bias; sun.s
 hemi.color.set(L.sky); hemi.groundColor.set(L.ground); hemi.intensity = L.hemiI;
 const sky = document.createElement("canvas"); sky.width = 8; sky.height = 512;
 { const g = sky.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 512); const c = LK.sky.c;
-  gr.addColorStop(0, c[4]); gr.addColorStop(0.35, c[3]); gr.addColorStop(0.62, c[2]); gr.addColorStop(0.82, c[1]); gr.addColorStop(1, c[0]); g.fillStyle = gr; g.fillRect(0, 0, 8, 512); }
+  gr.addColorStop(0, PRESET === "day" ? "#6ea6e6" : c[4]); gr.addColorStop(0.35, PRESET === "day" ? "#8fbbec" : c[3]); gr.addColorStop(0.62, c[2]); gr.addColorStop(0.82, c[1]); gr.addColorStop(1, c[0]); g.fillStyle = gr; g.fillRect(0, 0, 8, 512); }
 const skyTex = new THREE.CanvasTexture(sky); skyTex.colorSpace = THREE.SRGBColorSpace;
 scene.background = skyTex;
 scene.fog = new THREE.Fog(untone(L.fog), L.fogNear, L.fogFar);
@@ -33,7 +50,7 @@ scene.fog = new THREE.Fog(untone(L.fog), L.fogNear, L.fogFar);
 const lam = o => twoTone(new THREE.MeshLambertMaterial(o));
 const add = (m, x, y, z) => { m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; scene.add(m); return m; };
 const ROAD = 3.2, WALK = 5.4;
-const road = add(new THREE.Mesh(new THREE.PlaneGeometry(2 * ROAD, 140), lam({ map: rep(cobbleHD(), 3, 60) })), 0, 0, -60); road.rotation.x = -Math.PI / 2;
+const road = add(new THREE.Mesh(new THREE.PlaneGeometry(2 * ROAD, 140), lam({ map: rep(cobbleHD(), 3, 47) })), 0, 0, -60); road.rotation.x = -Math.PI / 2;
 for (const s of [-1, 1]) {
   const walk = add(new THREE.Mesh(new THREE.BoxGeometry(WALK - ROAD, 0.16, 140), lam({ map: rep(stoneHD(), 1, 60) })), s * (ROAD + WALK) / 2, 0.08, -60);
   void walk;
@@ -73,12 +90,17 @@ for (const s of [-1, 1]) {
 }
 
 // ---------- characters as lit flat cards ----------
-const MAX = { jacket: "#1f8a9a", pants: "#2b2b38", boots: "#2a2422", hat: "hair", hairCut: 0.3, hair: "#8a5a2b", buttons: "#e8c45a", skin: "#ffe2c2" };
+const CREAM = "#f6f1e6";
+const MAX = { jacket: "#1f8a9a", pants: "#2b2b38", boots: "#2a2422", hat: null, hair: "#8a5a2b", buttons: "#e8c45a", skin: CREAM };
 // Max's curl of hair on top of his head, in the 600 x 1000 design space (head centre ~ (300, 309), crown ~ y 198)
-function maxTuft(p, col) {
-  const pts = [];
-  for (let i = 0; i <= 16; i++) { const t = i / 16, a = Math.PI * (1.0 - 1.6 * t), r = 26 * (1 - 0.5 * t); pts.push([306 + 30 * t + r * Math.cos(a), 150 - 30 * t + r * Math.sin(a) + 40 * (1 - t) * (1 - t)]); }
-  p.line([[300, 214], [298, 190], ...pts], col, 22);
+// Max's hair: a small brown patch on the crown, swept to one side, clipped to the head (head centre ~ (300, 309))
+function maxHair(p, col, seed) {
+  // a side-swept cap of hair over the top of the head with a little flick, clipped to the head outline
+  const head = blobPts(300, 309, headBlob(seed, 118, 0));
+  const hair = [[150, 300], [150, 120], [450, 120], [450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282]];
+  p.clip(head, () => p.poly(hair, col, 0));
+  p.clip(head, () => p.stroke([[450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282], [150, 300]], 9));
+  p.line([[332, 202], [348, 180], [372, 176]], col, 14);
 }
 const CARD_W = 1.35, CARD_H = 2.25;   // 600 x 1000 design units -> metres (an adult is ~1.75 m tall)
 function card(outfit, opts, extra) {
@@ -98,18 +120,19 @@ function card(outfit, opts, extra) {
   scene.add(g);
   return g;
 }
-const max = card(MAX, { mode: "stand", expr: "shock", seed: 4 }, p => maxTuft(p, MAX.hair));
+const max = card(MAX, { mode: "stand", expr: "neutral", seed: 4 }, p => maxHair(p, MAX.hair, 4));
 max.position.set(0, 0.0, 2.2);
 const folk = [
-  card(townsfolk(0), { mode: "stand", expr: "stern", seed: 11, facing: 1 }), card(townsfolk(1), { mode: "stand", expr: "nervous", seed: 12, facing: -1 }),
-  card(townsfolk(2), { mode: "stroll", expr: "neutral", seed: 13, facing: 1 }), card(townsfolk(3), { mode: "stroll", expr: "smile", seed: 14, facing: -1 }),
+  card({ ...townsfolk(0), skin: CREAM }, { mode: "stand", expr: "stern", seed: 11, facing: 1 }), card({ ...townsfolk(1), skin: "#f1ebdf" }, { mode: "stand", expr: "smile", seed: 12, facing: -1 }),
+  card({ ...townsfolk(2), skin: CREAM }, { mode: "stroll", expr: "neutral", seed: 13, facing: 1 }), card({ ...townsfolk(3), skin: "#f1ebdf" }, { mode: "stroll", expr: "smile", seed: 14, facing: -1 }),
 ];
-folk[0].position.set(-2.3, 0.16, -1.5); folk[1].position.set(2.4, 0.16, -2.6); folk[2].position.set(-4.2, 0.16, -9); folk[3].position.set(3.8, 0.16, -14);
+folk[0].position.set(-1.7, 0.0, -0.6); folk[1].position.set(1.9, 0.0, -2.2); folk[2].position.set(-4.2, 0.16, -9); folk[3].position.set(3.8, 0.16, -14);
 
 // ---------- camera and the camera-relative sun ----------
 start((time) => {
-  camera.position.set(0.15, 1.5, 6.4);
-  camera.lookAt(0, 1.75, -12);
+  camera.position.set(0.35, 1.55, 5.0);
+  camera.lookAt(0.05, 1.45, 0.0);
+  if (bokeh) bokeh.uniforms.focus.value = camera.position.distanceTo(max.position.clone().setY(1.4));
   const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
   const az = THREE.MathUtils.degToRad(L.az), el = THREE.MathUtils.degToRad(L.el);
   const right = new THREE.Vector3(-fwd.z, 0, fwd.x);

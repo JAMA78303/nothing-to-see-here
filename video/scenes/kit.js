@@ -352,15 +352,27 @@ function chunks(words) {
   }
   return out;
 }
+// "story" captions: small white phrases of up to 3 words, no keyword colour (the 2D-in-3D story style)
+function phrases(words) {
+  const out = [];
+  for (let i = 0; i < words.length;) {
+    const grp = [words[i++]];
+    while (i < words.length && grp.length < 3 && !/[.,?!]$/.test(grp.at(-1).word) && (grp.map(w => w.word).join(" ") + words[i].word).length <= 16) grp.push(words[i++]);
+    out.push({ text: grp.map(w => w.word.replace(/\.\.\.$/, "")).join(" "), start: grp[0].start, hl: false });
+  }
+  return out;
+}
 function setCaption(TIMING, t) {
   const shot = TIMING.shots.find(s => t >= s.start && t < s.end) || TIMING.shots.at(-1);
   let cur = null;
-  for (const c of chunks(shot.words)) if (t >= c.start) cur = c;
+  const story = fxOptions.captionStyle === "story";
+  captionEl.classList.toggle("story", story);
+  for (const c of (story ? phrases : chunks)(shot.words)) if (t >= c.start) cur = c;
   if (!cur || t > shot.speechEnd + 0.25) { captionEl.textContent = ""; return; }
   captionEl.textContent = cur.text.replace(/[.,!?]$/, "");
   captionEl.style.color = cur.hl ? "#ffd400" : "#fff";
   const dt = t - cur.start;
-  const sc = dt < 0.08 ? 0.7 + (dt / 0.08) * 0.42 : Math.max(1, 1.12 - (dt - 0.08) * 1.2);
+  const sc = story ? 1 : dt < 0.08 ? 0.7 + (dt / 0.08) * 0.42 : Math.max(1, 1.12 - (dt - 0.08) * 1.2);
   captionEl.style.transform = `scale(${sc})`;
 }
 
@@ -401,7 +413,7 @@ const GradeShader = {
     }`,
 };
 // scenes can switch off the heavier effects (e.g. ambient occlusion in empty space)
-export const fxOptions = { ao: true, dof: null, passes: [] };   // dof: { focus, aperture, maxblur }
+export const fxOptions = { ao: true, dof: null, passes: [], captionStyle: "pop" };   // dof: { focus, aperture, maxblur }
 function makeComposer() {
   const target = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
   const composer = new EffectComposer(renderer, target);

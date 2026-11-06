@@ -1,0 +1,51 @@
+{
+  "title": "He knocked down a wall and found a city",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "gap": 0.06,
+  "tail": 0.15,
+  "ipa": {
+    "Derinkuyu": "dˌɛɹɪŋkˈuːjuː"
+  },
+  "highlight": [],
+  "shots": [
+    { "shot": "hook", "text": "In 1963, a man knocked down one wall in his house... and found an entire city." },
+    { "shot": "setting", "text": "He lived in Derinkuyu, a quiet town in Turkey. He was just doing some renovating." },
+    { "shot": "tunnel", "text": "Behind the wall was a tunnel." },
+    { "shot": "stairs", "text": "The tunnel led to a room. The room led to stairs. And the stairs kept going..." },
+    { "shot": "rooms", "text": "Down there were stables, kitchens, wells, wine presses... even a church." },
+    { "shot": "snap", "text": "It was big enough to hide twenty thousand people. And their animals." },
+    { "shot": "deadpan", "text": "Luckily, nobody had lived there for decades. Unluckily, he'd just knocked a hole in his house." },
+    { "shot": "doors", "text": "People carved it out of soft volcanic rock, and when raiders came, they rolled giant stone doors across the tunnels, like locking a bathroom door from the inside." },
+    { "shot": "map", "text": "Today, more than two hundred underground towns have been found in that region." },
+    { "shot": "loop", "text": "So... maybe check behind your walls." }
+  ],
+  "sfx": [
+    { "sound": "impact", "shot": "hook", "at": 0.6, "length": 1.0, "gain": 0.9 },
+    { "sound": "shatter", "shot": "hook", "at": 0.65, "length": 1.0, "gain": 0.5 },
+    { "sound": "whoosh", "shot": "tunnel", "at": 0.0, "length": 0.8, "gain": 0.4 },
+    { "sound": "whoosh", "shot": "snap", "at": 0.0, "length": 1.4, "gain": 0.6 },
+    { "sound": "rumble", "shot": "doors", "at": 2.4, "length": 2.5, "gain": 0.8 },
+    { "sound": "impact", "shot": "doors", "at": 4.6, "length": 1.0, "gain": 0.7 }
+  ],
+  "youtube": {
+    "title": "He Knocked Down a Wall… and Found a City 😳 #shorts",
+    "description": "In 1963, a man renovating his house in Derinkuyu, Turkey, knocked through a wall and found a tunnel. It led to one of the biggest underground cities ever discovered 🤯\n\nDerinkuyu goes down roughly 85 meters, with stables, kitchens, wells, wine presses and even a chapel carved out of soft volcanic rock. It's thought to have sheltered up to 20,000 people and their livestock. When raiders came, people rolled huge round stone doors across the tunnels, and they could only be opened from the inside.\n\nIt was last used about a hundred years ago, in the 1920s. Today more than 200 underground settlements are known in the Cappadocia region.\n\n🏚️ Would you check behind your walls now? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #derinkuyu #underground #history #didyouknow #cappadocia #turkey #animation",
+    "tags": [
+      "derinkuyu",
+      "derinkuyu underground city",
+      "underground city",
+      "man knocked down wall found city",
+      "cappadocia",
+      "cappadocia underground city",
+      "hidden city",
+      "history facts",
+      "strange history",
+      "true story",
+      "did you know",
+      "animation",
+      "cartoon",
+      "shorts"
+    ]
+  }
+}

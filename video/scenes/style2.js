@@ -100,7 +100,6 @@ function maxHair(p, col, seed) {
   const hair = [[150, 300], [150, 120], [450, 120], [450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282]];
   p.clip(head, () => p.poly(hair, col, 0));
   p.clip(head, () => p.stroke([[450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282], [150, 300]], 9));
-  p.line([[332, 202], [348, 180], [372, 176]], col, 14);
 }
 const CARD_W = 1.35, CARD_H = 2.25;   // 600 x 1000 design units -> metres (an adult is ~1.75 m tall)
 function card(outfit, opts, extra) {

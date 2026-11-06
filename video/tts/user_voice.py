@@ -81,7 +81,7 @@ for i, (shot, samples) in enumerate(zip(shots_in, lines)):
         timed.append({"word": w, "start": round(t + dur * acc / total, 3), "end": round(t + dur * (acc + wt) / total, 3),
                       "hl": re.sub(r"\W", "", w).lower() in highlight})
         acc += wt
-    end = t + dur + (script.get("tail", TAIL) if i == len(shots_in) - 1 else GAP)
+    end = t + dur + (script.get("tail", TAIL) if i == len(shots_in) - 1 else script.get("gap", GAP))
     shots.append({**shot, "start": round(t, 3), "speechEnd": round(t + dur, 3), "end": round(end, 3), "words": timed})
     audio += [samples.astype(np.float32), np.zeros(int((end - t - dur) * SR), dtype=np.float32)]
     t = end

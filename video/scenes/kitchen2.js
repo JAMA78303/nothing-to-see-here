@@ -123,7 +123,6 @@ function maxHair(p, col, seed, facing) {
   const hair = [[150, 300], [150, 120], [450, 120], [450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282]];
   p.clip(head, () => p.poly(hair, col, 0));
   p.clip(head, () => p.stroke([[450, 262], [418, 246], [372, 236], [326, 246], [282, 258], [236, 268], [190, 282], [150, 300]], 9));
-  p.line([[300, 202], [316, 178], [340, 172]], col, 14);
 }
 const CARD_W = 1.35, CARD_H = 2.25;
 const cv = document.createElement("canvas"); cv.width = 600; cv.height = 1000;

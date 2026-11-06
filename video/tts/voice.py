@@ -61,7 +61,7 @@ for i, shot in enumerate(script["shots"]):
         })
         acc += wt
 
-    end = t + dur + (script.get("tail", TAIL) if i == len(script["shots"]) - 1 else GAP)
+    end = t + dur + (script.get("tail", TAIL) if i == len(script["shots"]) - 1 else script.get("gap", GAP))   # "gap": pause between lines
     shots.append({**shot, "start": round(t, 3),
                   "speechEnd": round(t + dur, 3), "end": round(end, 3), "words": timed})
     audio.append(samples)

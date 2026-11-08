@@ -105,8 +105,8 @@ export function makeCard(outfit, base = {}, extra = null, scale = 1) {
 export function faceCamera(card) { card.rotation.y = Math.atan2(camera.position.x - card.position.x, camera.position.z - card.position.z); }
 // Max always uses his own expression set (m_*) and the same head (facing 0, seed 4), so he stays recognisably one character
 const MAX_EXPR = e => e && !e.startsWith("m_") ? ({ neutral: "m_neutral", stern: "m_stern", shock: "m_shock", nervous: "m_worried", smile: "m_smile", grin: "m_happy", relief: "m_happy" }[e] ?? "m_neutral") : e;
-export const makeMax = (base = {}) => {
-  const c = makeCard(MAX, { mode: "stand", expr: "m_neutral", seed: 4, ...base, facing: 0, faceFront: true }, (p, o) => maxHair(p, MAX.hair, 4, 0));
+export const makeMax = (base = {}, outfit = {}) => {
+  const c = makeCard({ ...MAX, ...outfit }, { mode: "stand", expr: "m_neutral", seed: 4, ...base, facing: 0, faceFront: true }, (p, o) => maxHair(p, MAX.hair, 4, 0));
   const draw = c.userData.draw;
   c.userData.draw = (o = {}) => draw({ ...o, expr: MAX_EXPR(o.expr ?? "m_neutral"), facing: 0, faceFront: true });
   c.userData.draw({});

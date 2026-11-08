@@ -454,7 +454,10 @@ export async function start(draw) {
     // white flash as the cold open cuts back to the start of the story
     const hook = TIMING.shots.find(s => s.replay);
     const dt = hook ? t - hook.end : 99;
-    flashEl.style.opacity = dt > -0.08 && dt < 0.3 ? 0.9 * (1 - (dt < 0 ? -dt / 0.08 : dt / 0.3)) : 0;
+    let fl = dt > -0.08 && dt < 0.3 ? 0.9 * (1 - (dt < 0 ? -dt / 0.08 : dt / 0.3)) : 0;
+    // shots marked "flash": a quick white flash on the cut into them
+    for (const sh of TIMING.shots) if (sh.flash) { const d2 = t - sh.start; if (d2 > -0.05 && d2 < 0.22) fl = Math.max(fl, 0.85 * (1 - (d2 < 0 ? -d2 / 0.05 : d2 / 0.22))); }
+    flashEl.style.opacity = fl;
     if (composer) composer.render(t); else renderer.render(scene, camera);
   };
   window.renderAt(Number(params.get("t") || 0));

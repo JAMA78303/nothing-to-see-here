@@ -4,6 +4,7 @@
 import { THREE, scene, camera, sun, hemi, V, ease, lerp, start } from "./kit.js";
 import { setupStyle, setLight, aimSun, ctex, lam, lit, add, box, makeMax, makeCard, faceCamera, look, untone, townsfolk, CREAM, NOINK } from "./style2kit.js";
 import { facadeHD } from "./vendor/paint.js";
+import { cardShade } from "./vendor/cardshade.js";
 
 setupStyle({ ink: { widthNear: 4.2, widthFar: 2.8 }, blur: { aperture: 0.0024, maxblur: 0.006 } });
 const SET = { street: 0, room: 100, hall: 200, under: 300, jack: 400, train: 500 };
@@ -75,10 +76,29 @@ const streetFolk = {
 const maxStreet = makeMax({ expr: "neutral" });
 
 // ======================= ROOM: the hotel room (tea, then bed) =======================
-let roomSky, bedBlanket;
+let roomSky, bedBlanket, bedSheet, bedPillow;
 const maxTea = makeMax({ expr: "neutral", prop: "sip" }, { jacket: "#8a2b3a", buttons: "#e8c45a" });
 const waiter = T({ jacket: "#f2efe6", pants: "#2b2b38", boots: "#1e1e1e", hat: "hair", hair: "#3a2a1a", moustache: "#3a2a1a", buttons: "#2b2b38" }, { expr: "smile", seed: 41, facing: -1 });
-const maxBed = makeMax({ expr: "m_neutral", blink: 1 }, { jacket: "#8a2b3a" });
+const maxBedSrc = makeMax({ expr: "m_neutral", blink: 1 }, { jacket: "#8a2b3a" }); maxBedSrc.visible = false;
+// Max asleep, seen from the side of the bed: his usual drawing laid on its side, head on a pillow, a blanket up to his chin
+const maxBed = (() => {
+  const W2 = 1000, H2 = 600, cv = document.createElement("canvas"); cv.width = W2; cv.height = H2;
+  const c = cv.getContext("2d"), INK = "#241726", src = maxBedSrc.children[0].material.map.image;
+  c.lineJoin = c.lineCap = "round"; c.lineWidth = 9; c.strokeStyle = INK;
+  // pillow
+  c.fillStyle = "#f4f2ea"; c.beginPath(); c.ellipse(230, 405, 175, 62, -0.04, 0, Math.PI * 2); c.fill(); c.stroke();
+  // Max, head to the left (his drawing rotated a quarter turn)
+  c.save(); c.translate(-30, 600); c.rotate(-Math.PI / 2); c.drawImage(src, 0, 0); c.restore();
+  c.clearRect(430, 0, W2 - 430, H2);   // his body is under the blanket: nothing pokes out above it
+  // blanket from his neck to past his feet, with a fold at the top
+  c.fillStyle = "#3f6a8a"; c.beginPath(); c.moveTo(370, 470); c.bezierCurveTo(372, 230, 440, 175, 580, 180); c.bezierCurveTo(760, 188, 900, 230, 995, 270); c.lineTo(995, 470); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = "#e9e4d6"; c.beginPath(); c.moveTo(370, 470); c.bezierCurveTo(372, 260, 400, 205, 450, 186); c.bezierCurveTo(440, 260, 445, 380, 455, 470); c.closePath(); c.fill(); c.stroke();
+  c.lineWidth = 6; c.beginPath(); c.moveTo(600, 250); c.quadraticCurveTo(650, 340, 630, 440); c.moveTo(800, 270); c.quadraticCurveTo(840, 360, 820, 450); c.stroke();
+  c.clearRect(0, 468, W2, H2 - 468);   // the 3D mattress carries on below
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2.25, 1.35), cardShade(new THREE.MeshLambertMaterial({ map: tex, alphaTest: 0.5, side: THREE.DoubleSide })));
+  m.layers.set(NOINK); const g = new THREE.Group(); g.add(m); scene.add(g); g.userData.draw = () => {}; return g;
+})();
 {
   const X = SET.room;
   const paper = ctex(256, 256, (g, w, h) => { g.fillStyle = "#e9d7a8"; g.fillRect(0, 0, w, h); g.fillStyle = "#c9a86a"; for (let y = 0; y < h; y += 32) for (let x = (y / 32) % 2 * 16; x < w; x += 32) { g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); } g.fillStyle = "rgba(120,60,40,0.25)"; for (let x = 0; x < w; x += 64) g.fillRect(x, 0, 6, h); }, 4, 2);
@@ -95,9 +115,9 @@ const maxBed = makeMax({ expr: "m_neutral", blink: 1 }, { jacket: "#8a2b3a" });
   box(1.2, 0.08, 0.8, lit({ map: wood("#6b4128") }), X - 0.4, 0.78, -1.2); box(0.08, 0.76, 0.08, lit({ color: "#4a2e1a" }), X - 0.4, 0.38, -1.2);
   add(new THREE.SphereGeometry(0.16, 16, 12), lit({ color: "#f4f4f2" }), X - 0.6, 0.98, -1.2);
   bedBlanket = box(2.4, 0.5, 2.0, lit({ color: "#3f6a8a" }), X - 2.6, 0.65, -1.6);
-  box(1.2, 0.06, 1.7, lit({ color: "#4f7a9a" }), X - 1.95, 1.1, -1.75);   // the sheet over his legs
+  bedSheet = box(1.2, 0.06, 1.7, lit({ color: "#4f7a9a" }), X - 1.95, 1.1, -1.75);   // the sheet over his legs
   box(2.6, 0.3, 2.2, lit({ map: wood("#6b4128") }), X - 2.6, 0.3, -1.8); box(0.12, 1.4, 2.2, lit({ map: wood("#6b4128") }), X - 3.85, 0.9, -1.8);
-  box(0.7, 0.18, 1.2, lit({ color: "#f4f4f0" }), X - 3.3, 0.95, -1.8);
+  bedPillow = box(0.7, 0.18, 1.2, lit({ color: "#f4f4f0" }), X - 3.3, 0.95, -1.8);
   lamp("room", X, 3.4, 1.5, 8, 12, 0xffe0b0); lamp("room", X + 1.6, 2.2, -1.8, 3, 6, 0xdfeaff);
 }
 
@@ -176,7 +196,7 @@ const CAMS = {
   raise: [W(2.5, 2.5, 6), W(-0.5, 0.5, -8)], stuck: [W(2.6, 3.6, -14.5), W(0.2, 1.0, -21.4)], lift: [W(300.6, 1.3, 3.6), W(300, 1.1, -1.5)],
   under: [W(296.4, 1.6, 2.4), W(300.6, 0.9, -1.8)], signal: [W(300.4, 1.3, 2.4), W(300, 1.2, -1)], rises: [W(-1.5, 4, 14), W(0, 7, -26)],
   tea: [W(100.6, 1.65, 2.6), W(100.2, 1.35, -1.6)], jack: [W(400.9, 1.7, 6.2), W(400.4, 1.2, -1)], roll: [W(0.5, 3.6, 9), W(-1, 3.0, -6)],
-  wave: [W(1.2, 4.0, 4.0), W(2.6, 3.8, -4.2)], pullman: [W(500, 1.6, 3.0), W(500, 1.2, -6)], sleep: [W(99.4, 3.6, 1.0), W(97.4, 0.95, -1.75)],
+  wave: [W(1.2, 4.0, 4.0), W(2.6, 3.8, -4.2)], pullman: [W(500, 1.6, 3.0), W(500, 1.2, -6)], sleep: [W(97.2, 1.75, 3.9), W(97.35, 1.05, -1.75)],
 };
 const cardsBySet = { street: [maxStreet, ...Object.values(streetFolk)], room: [maxTea, waiter, maxBed], hall: [council, ...councillors], under: [foreman, ...crew], train: [pullman, ...sleepers], jack: [] };
 start((time, tl) => {
@@ -226,9 +246,10 @@ start((time, tl) => {
   maxTea.visible = shot === "tea" || shot === "guest"; maxTea.position.set(SET.room + 0.35, 0, -1.6);
   maxTea.userData.draw({ prop: shot === "guest" ? "mug" : st % 2 < 1.1 ? "sip" : "mug", expr: "m_neutral", blink: Math.sin(st * 3) > 0.97 });
   waiter.visible = shot === "tea"; waiter.position.set(SET.room - 0.9, 0, -1.2);
-  maxBed.visible = shot === "sleep"; maxBed.position.set(SET.room - 1.3, 1.06, -1.75); maxBed.rotation.set(-Math.PI / 2, Math.PI / 2, 0, "YXZ");
+  maxBed.visible = shot === "sleep"; maxBed.position.set(SET.room - 2.55, 0.9 + 1.35 * (468 - 300) / 600, -1.2); maxBed.rotation.set(0, 0, 0);
+  bedSheet.visible = bedPillow.visible = shot !== "sleep";
   zz.visible = shot === "sleep" || shot === "pullman";
-  if (shot === "sleep") zz.position.set(SET.room - 2.2, 2.0 + 0.1 * Math.sin(time * 2), -1.6);
+  if (shot === "sleep") zz.position.set(SET.room - 2.95, 1.95 + 0.1 * Math.sin(time * 2), -1.6);
   if (shot === "pullman") zz.position.set(SET.train - 0.7, 1.6 + 0.1 * Math.sin(time * 2), -1.4);
   zz.quaternion.copy(camera.quaternion);
 

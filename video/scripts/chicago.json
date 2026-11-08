@@ -1,0 +1,189 @@
+{
+  "title": "They lifted a hotel with the guests still inside",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "gap": 0.04,
+  "tail": 0.15,
+  "highlight": [],
+  "shots": [
+    {
+      "shot": "rise",
+      "text": "In 1861, Chicago lifted a hotel into the air..."
+    },
+    {
+      "shot": "guest",
+      "text": "with the guests still inside."
+    },
+    {
+      "shot": "problem",
+      "text": "Chicago had a problem.",
+      "flash": true
+    },
+    {
+      "shot": "swamp",
+      "text": "It was built on a swamp."
+    },
+    {
+      "shot": "mud",
+      "text": "The mud was so deep, people stuck joke signs in it..."
+    },
+    {
+      "shot": "sign",
+      "text": "No bottom here."
+    },
+    {
+      "shot": "sick",
+      "text": "And with nowhere for the sewage to go, people got sick."
+    },
+    {
+      "shot": "decision",
+      "text": "So the city made a crazy decision:"
+    },
+    {
+      "shot": "pipes",
+      "text": "build the sewers on the ground..."
+    },
+    {
+      "shot": "raise",
+      "text": "and raise the whole city on top of them."
+    },
+    {
+      "shot": "stuck",
+      "text": "But the buildings were stuck down below."
+    },
+    {
+      "shot": "lift",
+      "text": "So they lifted the buildings too.",
+      "flash": true
+    },
+    {
+      "shot": "under",
+      "text": "Hundreds of men crawled underneath with thousands of jackscrews."
+    },
+    {
+      "shot": "signal",
+      "text": "On a signal, every man turned his screw a little..."
+    },
+    {
+      "shot": "rises",
+      "text": "and the whole hotel slowly rose."
+    },
+    {
+      "shot": "tea",
+      "text": "Luckily, the guests barely noticed."
+    },
+    {
+      "shot": "jack",
+      "text": "Like a car jack... times a thousand."
+    },
+    {
+      "shot": "roll",
+      "text": "Soon they were rolling whole buildings down the street..."
+    },
+    {
+      "shot": "wave",
+      "text": "sometimes with people still inside."
+    },
+    {
+      "shot": "pullman",
+      "text": "The man in charge, George Pullman, went on to build train sleeping cars.",
+      "flash": true
+    },
+    {
+      "shot": "sleep",
+      "text": "He just really liked people sleeping through things."
+    }
+  ],
+  "sfx": [
+    {
+      "sound": "creak",
+      "shot": "rise",
+      "at": 0.0,
+      "length": 2.0,
+      "gain": 0.8
+    },
+    {
+      "sound": "whoosh",
+      "shot": "problem",
+      "at": 0.0,
+      "length": 0.6,
+      "gain": 0.6
+    },
+    {
+      "sound": "drain",
+      "shot": "swamp",
+      "at": 0.2,
+      "length": 1.4,
+      "gain": 0.6
+    },
+    {
+      "sound": "impact",
+      "shot": "decision",
+      "at": 1.0,
+      "length": 0.6,
+      "gain": 0.7
+    },
+    {
+      "sound": "rumble",
+      "shot": "raise",
+      "at": 0.0,
+      "length": 2.0,
+      "gain": 0.6
+    },
+    {
+      "sound": "whoosh",
+      "shot": "lift",
+      "at": 0.0,
+      "length": 0.6,
+      "gain": 0.6
+    },
+    {
+      "sound": "creak",
+      "shot": "signal",
+      "at": 1.0,
+      "length": 1.6,
+      "gain": 0.8
+    },
+    {
+      "sound": "creak",
+      "shot": "rises",
+      "at": 0.0,
+      "length": 2.0,
+      "gain": 0.8
+    },
+    {
+      "sound": "rumble",
+      "shot": "roll",
+      "at": 0.3,
+      "length": 2.5,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "pullman",
+      "at": 0.0,
+      "length": 0.6,
+      "gain": 0.6
+    }
+  ],
+  "youtube": {
+    "title": "They Lifted a Hotel… With the Guests Still Inside 😳 #shorts",
+    "description": "In the 1850s and 60s, Chicago had a problem: the city was built on swampy ground, the streets turned to deep mud, and sewage had nowhere to drain, so disease kept spreading 🤢\n\nSo the city did something wild: it built new sewers on the ground and raised the streets several feet on top of them. That left the buildings sunk below the new street level, so they were lifted too. Teams of hundreds of men worked under the buildings with thousands of jackscrews, turning them a little at a time on a signal, and big brick hotels went up while they stayed open for business. Some buildings were even rolled to new spots with people inside.\n\nOne of the men who made his name raising buildings, George Pullman, later became famous for his railway sleeping cars 🚂\n\n🏨 Would you have stayed in the hotel? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #chicago #history #didyouknow #strangehistory #engineering #truestory #animation",
+    "tags": [
+      "raising of chicago",
+      "chicago raised buildings",
+      "hotel lifted with guests inside",
+      "chicago history",
+      "jackscrews",
+      "george pullman",
+      "strange history",
+      "history facts",
+      "engineering history",
+      "true story",
+      "did you know",
+      "animation",
+      "cartoon",
+      "shorts"
+    ]
+  }
+}

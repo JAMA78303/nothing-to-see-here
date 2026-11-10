@@ -223,7 +223,7 @@ start((time, tl) => {
   const raised = ["stuck", "rises", "roll", "wave"].includes(shot) ? 1 : shot === "raise" ? ease(Math.min(1, k * 1.2)) : 0;
   ST.fill.position.y = -0.5 + 1.9 * raised;
   ST.pipes.forEach(pp => (pp.visible = shot === "pipes" || shot === "raise"));
-  const lift = shot === "rise" ? lerp(0.1, 3.0, ease(Math.min(1, k * 1.15))) : shot === "rises" ? lerp(0, 1.9, ease(k)) : ["roll", "wave"].includes(shot) ? 1.9 : 0;
+  const lift = shot === "rise" ? lerp(0.9, 3.2, ease(Math.min(1, k * 1.15))) : shot === "rises" ? lerp(0, 1.9, ease(k)) : ["roll", "wave"].includes(shot) ? 1.9 : 0;
   ST.hotel.position.y = lift;
   ST.screws.forEach(sc => { sc.visible = lift > 0.05; sc.scale.y = Math.max(0.05, lift); sc.position.y = lift / 2; sc.rotation.y = time * 3; });
   ST.wagon.visible = shot === "swamp" || shot === "problem";

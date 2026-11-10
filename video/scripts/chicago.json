@@ -11,7 +11,7 @@
   "shots": [
     {
       "shot": "rise",
-      "text": "In 1861, Chicago lifted a hotel into the air..."
+      "text": "This hotel is being lifted into the air..."
     },
     {
       "shot": "guest",
@@ -19,7 +19,7 @@
     },
     {
       "shot": "problem",
-      "text": "Chicago had a problem.",
+      "text": "Chicago, 1861. The city had a problem.",
       "flash": true
     },
     {

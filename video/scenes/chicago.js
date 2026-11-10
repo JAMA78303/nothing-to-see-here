@@ -63,6 +63,8 @@ const ST = { street: null, fill: null, hotel: null, screws: [], wagon: null, sig
   const hfront = lam({ map: facadeHD("chiRoll", 4, 4.2, { wall: "#e2d2a8", shutter: "#3a5a7a", door: true }) }), hpl = lam({ color: "#e2d2a8" });
   box(4, 4.2, 3.6, [hpl, hpl, hpl, hpl, hfront, hpl], 0, 2.7, 0, house);
   const roof = add(new THREE.ConeGeometry(3.2, 1.6, 4), lam({ color: "#7a3f30" }), 0, 5.6, 0, house); roof.rotation.y = Math.PI / 4; roof.scale.z = 0.8;
+  add(new THREE.PlaneGeometry(1.1, 1.5), lam({ color: "#3a2a22" }), 0.9, 3.55, 1.805, house);   // an open balcony door
+  box(1.5, 0.9, 0.5, lam({ color: "#8a6238" }), 0.9, 2.75, 2.05, house);   // the balcony she waves from
   for (let i = 0; i < 4; i++) { const lg = add(new THREE.CylinderGeometry(0.22, 0.22, 3.8, 12), lam({ color: "#8a6238" }), -1.6 + i * 1.07, 0.32, 0, house); lg.rotation.x = Math.PI / 2; }
 }
 const streetFolk = {
@@ -190,11 +192,11 @@ const zz = add(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({ 
 // ======================= timeline =======================
 const W = (x, y, z) => V(x, y, z);
 const CAMS = {
-  rise: [W(1.5, 2.2, 10), W(0, 5, -26)], guest: [W(101.1, 1.75, 0.9), W(100.35, 1.55, -1.6)], problem: [W(-2.5, 3.2, 6), W(0, 1, -12)],
+  rise: [W(6.5, 1.2, -9.5), W(-0.5, 4.2, -22)], guest: [W(101.1, 1.75, 0.9), W(100.35, 1.55, -1.6)], problem: [W(-2.5, 3.2, 6), W(0, 1, -12)],
   swamp: [W(-0.2, 1.6, 2.6), W(-1.6, 0.6, -3)], mud: [W(2.8, 1.5, 2.5), W(1.4, 1.0, -1.2)], sign: [W(1.6, 1.4, 1.5), W(1.4, 1.35, -1.2)],
   sick: [W(-0.8, 1.6, 4.5), W(-0.4, 1.2, -1)], decision: [W(200.2, 2.3, 6.2), W(200, 1.8, -1.5)], pipes: [W(-5, 3.0, 4), W(-1.6, 0.4, -8)],
   raise: [W(2.5, 2.5, 6), W(-0.5, 0.5, -8)], stuck: [W(2.6, 3.6, -14.5), W(0.2, 1.0, -21.4)], lift: [W(300.6, 1.3, 3.6), W(300, 1.1, -1.5)],
-  under: [W(296.4, 1.6, 2.4), W(300.6, 0.9, -1.8)], signal: [W(300.4, 1.3, 2.4), W(300, 1.2, -1)], rises: [W(-1.5, 4, 14), W(0, 7, -26)],
+  under: [W(296.4, 1.6, 2.4), W(300.6, 0.9, -1.8)], signal: [W(300.4, 1.3, 2.4), W(300, 1.2, -1)], rises: [W(3.2, 3.5, -12.5), W(0, 3.0, -21.5)],
   tea: [W(100.6, 1.65, 2.6), W(100.2, 1.35, -1.6)], jack: [W(400.9, 1.7, 6.2), W(400.4, 1.2, -1)], roll: [W(0.5, 3.6, 9), W(-1, 3.0, -6)],
   wave: [W(1.2, 4.0, 4.0), W(2.6, 3.8, -4.2)], pullman: [W(500, 1.6, 3.0), W(500, 1.2, -6)], sleep: [W(97.2, 1.75, 3.9), W(97.35, 1.05, -1.75)],
 };
@@ -218,10 +220,10 @@ start((time, tl) => {
   camera.rotateZ(shot === "signal" ? 0.04 * Math.sin(st * 30) * Math.max(0, 1 - st) : 0);
 
   // ---- street state ----
-  const raised = ["stuck", "rises", "roll", "wave", "rise"].includes(shot) ? 1 : shot === "raise" ? ease(Math.min(1, k * 1.2)) : 0;
+  const raised = ["stuck", "rises", "roll", "wave"].includes(shot) ? 1 : shot === "raise" ? ease(Math.min(1, k * 1.2)) : 0;
   ST.fill.position.y = -0.5 + 1.9 * raised;
   ST.pipes.forEach(pp => (pp.visible = shot === "pipes" || shot === "raise"));
-  const lift = shot === "rise" ? lerp(0.2, 1.9, ease(k)) : shot === "rises" ? lerp(0.6, 1.9, ease(k)) : ["roll", "wave"].includes(shot) ? 1.9 : 0;
+  const lift = shot === "rise" ? lerp(0.1, 3.0, ease(Math.min(1, k * 1.15))) : shot === "rises" ? lerp(0, 1.9, ease(k)) : ["roll", "wave"].includes(shot) ? 1.9 : 0;
   ST.hotel.position.y = lift;
   ST.screws.forEach(sc => { sc.visible = lift > 0.05; sc.scale.y = Math.max(0.05, lift); sc.position.y = lift / 2; sc.rotation.y = time * 3; });
   ST.wagon.visible = shot === "swamp" || shot === "problem";
@@ -238,7 +240,7 @@ start((time, tl) => {
   sf.sick.userData.draw({ expr: "pained", blink: Math.sin(st * 8) > 0.6 });
   sf.worker1.visible = sf.worker2.visible = shot === "pipes"; sf.worker1.position.set(-0.6, 0, -4); sf.worker2.position.set(-3.2, 0.3, -6);
   sf.worker1.userData.draw({ mode: "push", pose: 0.5 + 0.5 * Math.sin(st * 5), expr: "stern", side: true });
-  sf.waver.visible = shot === "wave"; sf.waver.position.set(ST.house.position.x + 0.9, ST.house.position.y + 2.15, -4.15); sf.waver.userData.draw({ expr: "smile", wave: Math.abs(Math.sin(st * 8)) });
+  sf.waver.visible = shot === "wave"; sf.waver.position.set(ST.house.position.x + 0.9, ST.house.position.y + 2.75, -4.0); sf.waver.userData.draw({ expr: "smile", wave: Math.abs(Math.sin(st * 8)) });
   maxStreet.visible = shot === "stuck"; maxStreet.position.set(0.6, 1.9, -19.4); maxStreet.userData.draw({ expr: st > 0.7 ? "m_worried" : "m_neutral" });
 
   // ---- room ----

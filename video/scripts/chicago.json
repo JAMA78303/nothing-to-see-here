@@ -4,6 +4,9 @@
   "speed": 1.15,
   "gap": 0.04,
   "tail": 0.15,
+  "say": {
+    "1861": "eighteen sixty-one"
+  },
   "highlight": [],
   "shots": [
     {
@@ -100,7 +103,7 @@
       "shot": "rise",
       "at": 0.0,
       "length": 2.0,
-      "gain": 0.8
+      "gain": 0.3
     },
     {
       "sound": "whoosh",

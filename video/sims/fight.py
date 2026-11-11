@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-FPS, FLOOR, HP, Z, GRAV, STAND = 60, 1430, 120, 1.45, 3400.0, 178   # Z: camera zoom on the fighters
+FPS, FLOOR, HP, Z, GRAV, STAND = 60, 1430, 120, 1.1, 3400.0, 178   # Z: camera zoom on the fighters
 L = dict(torso=135, head=40, ua=72, fa=72, th=92, sh=92)
 COL = [(255, 70, 60), (60, 150, 255)]; NAME = ["RED", "BLUE"]
 # angles in degrees: limbs from straight down, + = towards the opponent; torso from upright, + = leaning in

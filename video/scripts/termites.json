@@ -1,0 +1,29 @@
+{
+  "title": "This pile of dirt has air conditioning",
+  "headline": "THIS PILE OF DIRT HAS AIR CON",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "gap": 0.04,
+  "tail": 0.12,
+  "highlight": ["air", "conditioning", "Termites", "mud", "spit", "Hot", "cool", "fungus", "queen", "egg", "three", "seconds", "thirty", "thousand", "twenty", "years"],
+  "shots": [
+    { "shot": "hook", "text": "This pile of dirt has air conditioning." },
+    { "shot": "built", "text": "Termites built it, out of mud and spit." },
+    { "shot": "air", "text": "Hot air rises out through chimneys... and cool air gets pulled in below." },
+    { "shot": "fungus", "text": "Inside, they farm their own food: a fungus garden." },
+    { "shot": "queen", "text": "And deep in the middle, the queen lays an egg every three seconds." },
+    { "shot": "count", "text": "That's about thirty thousand a day." },
+    { "shot": "years", "text": "She can keep that up for twenty years... all inside this pile of dirt." }
+  ],
+  "sfx": [
+    { "sound": "whoosh", "shot": "air", "at": 0.0, "length": 1.6, "gain": 0.45 },
+    { "sound": "whoosh", "shot": "fungus", "at": 0.0, "length": 0.5, "gain": 0.4 },
+    { "sound": "bubbles", "shot": "queen", "at": 0.3, "length": 2.5, "gain": 0.5 },
+    { "sound": "whoosh", "shot": "years", "at": 0.0, "length": 0.8, "gain": 0.4 }
+  ],
+  "youtube": {
+    "title": "This Pile of Dirt Has Air Conditioning 😳 #shorts",
+    "description": "Termite mounds can stand taller than a person, and the insects that build them are smaller than a grain of rice 🐜\n\nThe mound is built from soil, saliva and droppings, and it works like a set of lungs: warm, stale air from the nest rises up through the chimneys, and fresh air is drawn in lower down. Deep inside, the termites grow a fungus on chewed-up plants and eat it. In the middle sits the queen, who can lay tens of thousands of eggs a day and live for around twenty years.\n\n🐜 Would you go near one? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #termites #nature #animals #didyouknow #science #insects #animation",
+    "tags": ["termite mound", "inside a termite mound", "termites", "termite queen", "fungus farming termites", "how termite mounds work", "nature facts", "animal facts", "insects", "science facts", "did you know", "cutaway", "animation", "shorts"]
+  }
+}

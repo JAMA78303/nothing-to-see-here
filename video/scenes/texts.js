@@ -149,7 +149,7 @@ function folkPerson(x, z, o, ph, face) {
   return f;
 }
 const alex = FOLK
-  ? folkPerson(2, -2.6, { body: 0x3fa9a0, outfit: "polo", name: "Sam", hairStyle: "tuft", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "smug" }, phone1, "smug")
+  ? folkPerson(2, -2.6, { body: 0x3fa9a0, outfit: "polo", name: "Sam", hairStyle: "swoop", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "smug" }, phone1, "smug")
   : person(2, -2.6, { phone: phone1, shirt: 0x3fa9a0, hair: 0x3b2a20, skin: 0xe8b98f, style: "short" });
 const sam = FOLK
   ? folkPerson(104, -2.6, { body: 0xe0604a, hairStyle: "bun", hair: 0x6b3e26, shoes: 0x283a6b, face: "bored" }, phone2, "bored")

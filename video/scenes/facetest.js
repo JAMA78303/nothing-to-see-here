@@ -14,8 +14,8 @@ const wall = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), new THREE.MeshBasicM
 wall.position.set(0, 3, -2.2); scene.add(wall);
 
 const cast = [
-  folk({ body: 0xe03a2e, outfit: "polo", name: "Kyle", hairStyle: "tuft", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "bored" }),
-  folk({ body: 0x8a5a2b, outfit: "suit", tie: 0xf2b632, hairStyle: "tuft", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "grin" }).pose({ armL: [2.5, 0, 0.3], armR: [2.5, 0, 0.3] }),
+  folk({ body: 0xe03a2e, outfit: "polo", name: "Kyle", hairStyle: "swoop", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "bored" }),
+  folk({ body: 0x8a5a2b, outfit: "suit", tie: 0xf2b632, hairStyle: "swoop", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "grin" }).pose({ armL: [2.5, 0, 0.3], armR: [2.5, 0, 0.3] }),
   folk({ body: 0x3a8fd6, outfit: "polo", name: "Ray", hairStyle: "slick", hair: 0x1d1a1a, shoes: 0x283a6b, face: "surprised" }),
   folk({ body: 0x6fd1a8, hat: "porkpie", hatColor: 0x6b4a2f, hairStyle: "none", bowtie: 0xd62f2f, shoes: 0x2c2c2c, face: "smug" }),
 ];

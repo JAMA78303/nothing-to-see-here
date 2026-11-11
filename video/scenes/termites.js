@@ -133,7 +133,7 @@ const label = (text, colour, x, y) => {
 const hotLabel = label("HOT", "#ff5a36", 1.45, 3.6), coolLabel = label("COOL", "#4ab4ff", -1.9, 2.0);
 
 // ---------- Max, for scale ----------
-const max = folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0xffffff, face: "surprised" });
+const max = folk({ body: 0x2f8fd6, outfit: "polo", hairStyle: "swoop", hair: 0x9a5a22, shoes: 0xffffff, face: "surprised" });
 max.position.set(3.0, 0, -0.9); max.rotation.y = -0.45; scene.add(max);
 
 // ---------- cameras: hard cuts with a small push in ----------

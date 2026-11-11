@@ -28,7 +28,7 @@ reader.position.set(-0.6, 1.35, 0.6); reader.rotation.set(-0.3, 0.5, 0); scene.a
 const ticket = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.4), new THREE.MeshBasicMaterial({ map: canvasTex(128, 180, (g, w, h) => { g.fillStyle = "#3b7fd4"; g.fillRect(0, 0, w, h); g.fillStyle = "#ffd23f"; g.font = "bold 30px Arial"; g.fillText("WIN!", 20, 50); g.fillStyle = "#fff"; for (let r = 0; r < 4; r++) g.fillRect(14, 80 + r * 22, w - 28, 10); }) }));
 ticket.rotation.set(-Math.PI / 2, 0, 0.4); ticket.position.set(0.35, 0.955, 0.75); scene.add(ticket);
 
-const max = folk({ body: 0x2f8fd6, outfit: "polo", name: "Max", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0x2c2c2c, face: "bored" }).pose({ armL: [0.35, 0.5, 0.6], armR: [0.35, 0.5, 0.6] });
+const max = folk({ body: 0x2f8fd6, outfit: "polo", name: "Max", hairStyle: "swoop", hair: 0x9a5a22, shoes: 0x2c2c2c, face: "bored" }).pose({ armL: [0.35, 0.5, 0.6], armR: [0.35, 0.5, 0.6] });
 max.position.set(0, -0.05, -0.55);
 scene.add(max);
 

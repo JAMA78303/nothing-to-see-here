@@ -29,7 +29,7 @@ sunFace.position.set(-3, 16, -25);
 sunFace.scale.setScalar(0.9);
 scene.add(sunFace);
 
-const kyle = folk({ body: 0xe03a2e, outfit: "polo", name: "Kyle", hairStyle: "tuft", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "grin" });
+const kyle = folk({ body: 0xe03a2e, outfit: "polo", name: "Kyle", hairStyle: "swoop", hair: 0x8a5a2b, shoes: 0x2c2c2c, face: "grin" });
 kyle.position.set(0.3, 0, 0.6);
 scene.add(kyle);
 const frost = new THREE.Mesh(new THREE.PlaneGeometry(80, 70), new THREE.MeshToonMaterial({ color: 0xeef6ff, transparent: true, opacity: 0 }));

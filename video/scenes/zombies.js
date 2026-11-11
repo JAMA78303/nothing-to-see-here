@@ -126,13 +126,13 @@ let car, hazards = [], flag, tower;
 }
 
 // ---------- characters ----------
-const MAX = { body: 0x2f8fd6, outfit: "polo", hairStyle: "tuft", hair: 0x9a5a22, shoes: 0xffffff };
+const MAX = { body: 0x2f8fd6, outfit: "polo", hairStyle: "swoop", hair: 0x9a5a22, shoes: 0xffffff };
 const maxSt = folk({ ...MAX, face: "surprised" }); scene.add(maxSt);
 const ZSKIN = 0xa9c98f;
 const zSpec = [
   { body: 0x7a8f5a, hair: 0x3a3226, hairStyle: "bowl" }, { body: 0x9a4a4a, hair: 0x1d1a1a, hairStyle: "slick" },
   { body: 0x5a6a9a, hair: 0x6a4a2a, hairStyle: "swoop" }, { body: 0xb8a070, hair: 0x2a2a2a, hairStyle: "bun" },
-  { body: 0x6a5a7a, hair: 0x4a3a2a, hairStyle: "tuft" }, { body: 0x8a7a5a, hairStyle: "none", hat: "hardhat" },
+  { body: 0x6a5a7a, hair: 0x4a3a2a, hairStyle: "swoop" }, { body: 0x8a7a5a, hairStyle: "none", hat: "hardhat" },
 ];
 const mkZombie = o => { const z = folk({ shoes: 0x3a3a3a, ...o, skin: ZSKIN, torn: true, face: "zombie" }); scene.add(z); return z; };
 // street zombies: [start x, start z, phase]

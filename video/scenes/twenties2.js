@@ -125,7 +125,7 @@ const walkers = [
 const setCrowd = (face, lean = 0) => crowd.forEach(f => { f.setFace(face, f.userData.mus ? { mustache: f.userData.mus } : {}); f.pose({ lean, headTilt: 0.05 }); });
 
 // Max (modern clothes) and Max fitting in (bowler, vest, cane)
-const maxNow = folk({ body: 0x1f8a9a, outfit: "polo", buttons: true, gloves: true, logo: false, hairStyle: "tuft", hair: 0x9a5a22, shoes: 0x2a2422, face: "surprised" });
+const maxNow = folk({ body: 0x1f8a9a, outfit: "polo", buttons: true, gloves: true, logo: false, hairStyle: "swoop", hair: 0x9a5a22, shoes: 0x2a2422, face: "surprised" });
 maxNow.position.set(0, 0.0, 0.4); scene.add(maxNow);
 const maxFit = folk({ body: 0xe0a92c, vest: true, gloves: true, hat: "bowler", hatColor: 0x222222, hairStyle: "none", shoes: 0x3a2a20, face: "crazy", cane: true });
 maxFit.position.set(0, 0.0, 0.4); scene.add(maxFit);
@@ -173,7 +173,7 @@ const note = canvasPlane(0.42, 0.2, (g, w, h) => {      // a made-up colourful m
   g.fillStyle = "#2f5a3a"; g.font = "bold 120px Arial"; g.fillText("20", 26, h * 0.72); g.textAlign = "right"; g.fillText("20", w - 26, h * 0.72);
   g.strokeStyle = "rgba(47,90,58,0.5)"; g.lineWidth = 6; for (let r = 30; r < 110; r += 18) { g.beginPath(); g.arc(w / 2, h / 2, r, 0, 7); g.stroke(); }
 });
-const maxShop = folk({ body: 0x1f8a9a, outfit: "polo", buttons: true, gloves: true, logo: false, hairStyle: "tuft", hair: 0x9a5a22, shoes: 0x2a2422, face: "scared" }).pose({ armL: [0.35, 1.15, 0.5], armR: [0.3, 0.2, 0.3] });
+const maxShop = folk({ body: 0x1f8a9a, outfit: "polo", buttons: true, gloves: true, logo: false, hairStyle: "swoop", hair: 0x9a5a22, shoes: 0x2a2422, face: "scared" }).pose({ armL: [0.35, 1.15, 0.5], armR: [0.3, 0.2, 0.3] });
 note.scale.setScalar(1.6); note.position.set(99.55, 1.45, 1.05); note.rotation.set(0, -0.2, 0.12); scene.add(note);
 maxShop.position.set(SET.shop - 0.9, 0.0, 1.0); maxShop.rotation.y = 0.5; scene.add(maxShop);
 maxShop.setFace("scared", { sweat: true });
@@ -195,7 +195,7 @@ let lampLight, flame;
   const noPlug = canvasPlane(0.5, 0.5, (g, w, h) => { g.strokeStyle = "#d62f2f"; g.lineWidth = 26; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 20, 0, 7); g.stroke(); g.beginPath(); g.moveTo(w * 0.2, h * 0.2); g.lineTo(w * 0.8, h * 0.8); g.stroke(); g.fillStyle = "#f2f2f2"; g.fillRect(w * 0.38, h * 0.36, w * 0.24, h * 0.28); });
   add(noPlug, X - 1.6, 0.7, -2.38);
 }
-const maxHome = folk({ body: 0x1f8a9a, outfit: "polo", buttons: true, gloves: true, logo: false, hairStyle: "tuft", hair: 0x9a5a22, shoes: 0x2a2422, face: "scared" }).pose({ armL: [0.3, 0.95, 1.4], armR: [0.3, 0.2, 0.3], headTurn: 0.3, headTilt: 0.1 });
+const maxHome = folk({ body: 0x1f8a9a, outfit: "polo", buttons: true, gloves: true, logo: false, hairStyle: "swoop", hair: 0x9a5a22, shoes: 0x2a2422, face: "scared" }).pose({ armL: [0.3, 0.95, 1.4], armR: [0.3, 0.2, 0.3], headTurn: 0.3, headTilt: 0.1 });
 const charger = new THREE.Group();
 charger.add(ink(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.08), toon(0xf2f2f2))));
 for (const dx of [-0.03, 0.03]) { const pin = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.06, 0.015), toon(0xc9c9c9)); pin.position.set(dx, 0.09, 0); charger.add(pin); }

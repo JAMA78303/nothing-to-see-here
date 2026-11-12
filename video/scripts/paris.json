@@ -1,0 +1,29 @@
+{
+  "title": "Police found a secret cinema under Paris",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "gap": 0.04,
+  "tail": 0.15,
+  "highlight": [],
+  "shots": [
+    { "shot": "hook", "text": "Police found a secret cinema... under Paris." },
+    { "shot": "seats", "text": "Deep in the old tunnels: a giant screen, seats carved from stone..." },
+    { "shot": "cafe", "text": "electricity, phone lines, even a little café." },
+    { "shot": "dogs", "text": "The entrance was guarded by a tape of barking dogs.", "flash": true },
+    { "shot": "back", "text": "Three days later, they came back with experts." },
+    { "shot": "gone", "text": "Everything was gone. Just a note: Don't try to find us.", "flash": true },
+    { "shot": "loop", "text": "A secret group later said it was theirs... and it wasn't the only one." }
+  ],
+  "sfx": [
+    { "sound": "whoosh", "shot": "seats", "at": 0.0, "length": 0.5, "gain": 0.4 },
+    { "sound": "impact", "shot": "dogs", "at": 0.0, "length": 1.0, "gain": 0.5 },
+    { "sound": "whoosh", "shot": "back", "at": 0.0, "length": 0.5, "gain": 0.4 },
+    { "sound": "impact", "shot": "gone", "at": 0.0, "length": 1.2, "gain": 0.5 },
+    { "sound": "drips", "shot": "loop", "at": 0.0, "length": 3.0, "gain": 0.5 }
+  ],
+  "youtube": {
+    "title": "Police Found a Secret Cinema Under Paris 😳 #shorts",
+    "description": "In 2004, Paris police on a training exercise in the tunnels under the city found a hidden underground cinema 🎬\n\nIt had a big screen, a projector, seats carved out of the rock, electricity, phone lines and even a small café. A recording of barking dogs played at the entrance to scare people off.\n\nWhen the police came back three days later with experts to work out where the power was coming from, the cables had been cut and the equipment was gone. All that was left was a note: \"Ne cherchez pas\" (don't look for us).\n\nAn underground art group called the UX later said they had built it, and that they had other secret spaces under Paris.\n\n🎬 Would you go down there? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #paris #history #mystery #catacombs #didyouknow #truestory #animation",
+    "tags": ["secret cinema paris", "underground cinema paris", "paris catacombs", "paris tunnels", "secret cinema under paris", "les ux", "mystery", "strange history", "true story", "did you know", "history facts", "animation", "cartoon", "shorts"]
+  }
+}

@@ -19,6 +19,7 @@
     box-shadow: 0 14px 0 rgba(0,0,0,.35); transform-origin: 50% 50%;
   }
   body.wide { width: 1920px; height: 1080px; }
+  body.nocap #caption, body.nocap #headline { display: none; }
   body.wide #caption { top: 790px; font-size: 96px; -webkit-text-stroke: 12px #000; }
   #caption.story { top: 1240px; font: 800 66px/1.1 "Arial Black", Arial, sans-serif; -webkit-text-stroke: 10px #000; text-shadow: 0 5px 0 rgba(0,0,0,.3); padding: 0 90px; }
   #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
@@ -32,6 +33,7 @@
 <script type="module">
   const params = new URLSearchParams(location.search);
   if (params.get("wide") === "1") document.body.classList.add("wide");
+  if (params.get("nocap") === "1") document.body.classList.add("nocap");   // stills with no captions or headline (banners, thumbnails)
   const scene = params.get("scene");
   import(`./${scene}.js`);
 </script>

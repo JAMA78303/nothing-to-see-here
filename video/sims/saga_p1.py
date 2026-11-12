@@ -45,7 +45,6 @@ def drop(f, t, x):
     f.pose(t, "tuck", 0.05); f.go(t, t + 0.32, h=0, e="in"); f.pose(t + 0.3, "crouch", 0.04); st.sfx(t + 0.32, "land", 0.8); f.pose(t + 0.45, "guard", 0.12)
 for i, (f, x) in enumerate(((R2, 800), (R3, 930), (R4, 1060), (R5, 1190))): drop(f, 1.4 + i * 0.07, x)
 R5.prop.set(0, "staff")
-st.freeze(2.55, 0.9, "1v6"); st.sfx(2.55, "title")
 
 # ---------------- 2.6  combo: spin kicks both ways, an uppercut into the ceiling ----------------
 B.pose(2.66, "kick", 0.08)

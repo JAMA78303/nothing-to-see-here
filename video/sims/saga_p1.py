@@ -178,9 +178,6 @@ def eyes(R_, d, s, real, X, Y, Z, layer):
 st.draw_hooks.append(eyes)
 
 def ui(d, s, real, label):
-    n = sum(1 for t in st.kos if t <= s); last = max([t for t in st.kos if t <= s] or [-9]); pop = 1 + 0.25 * max(0, 1 - (s - last) / 0.15)
-    w = 250 * pop; d.rounded_rectangle([540 - w, 130, 540 + w, 230], 24, fill=(160, 30, 30), outline=(0, 0, 0), width=6)
-    d.text((540, 180), f"REDS DOWN: {n}", font=__import__("saga").Fnt(54 * pop), fill=(255, 255, 255), anchor="mm")
     if label == "1v6":
         for part, xo, col in (("1", -270, BLUE), ("VS", 0, (255, 255, 255)), ("6", 270, RED)): outlined(d, (540 + xo, 960), part, 190, col, stroke=14)
 st.ui_hooks.append(ui)

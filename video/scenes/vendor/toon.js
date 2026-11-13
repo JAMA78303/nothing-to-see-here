@@ -755,6 +755,21 @@ const bodySide = (p, o, opts) => {
       legs.push({ ank: [300 + L.x, ankY - L.h], pitch: L.stance ? 0 : rad(35 * Math.sin(Math.PI * L.s) * (1 - 1.6 * L.s)), near: near2 });
     lean = 4 + 3 * Math.cos(2 * two * phase);
     nearFwd = nL.x / (S2 / 2);
+  } else if (mode === "run") {   // local addition: a real run: short stance, heels kicked up behind, knees driven forward, a flight phase, a strong lean
+    const S2 = 300 * stride;
+    const st = (ph) => {
+      const c = ((phase + ph) % 1 + 1) % 1;
+      if (c < 0.32) { const s2 = c / 0.32; return { x: S2 / 2 - S2 * s2, h: 0, stance: true, s: s2 }; }
+      const s = (c - 0.32) / 0.68;
+      return { x: -S2 / 2 + S2 * s - S2 * 0.55 * Math.sin(Math.PI * s), h: 0.62 * legLen * Math.pow(Math.sin(Math.PI * s), 0.7) * (1 - 0.25 * s), stance: false, s };
+    };
+    const nL = st(0), fL = st(0.5);
+    const air = !nL.stance && !fL.stance;
+    hipY = ankY - legLen * 0.9 - (air ? 26 * u : 8 * u * Math.sin(Math.PI * (nL.stance ? nL.s : fL.s)));
+    for (const [L, near2] of [[fL, false], [nL, true]])
+      legs.push({ ank: [300 + L.x, ankY - L.h], pitch: L.stance ? 0 : rad(-40 * Math.sin(Math.PI * L.s)), near: near2 });
+    lean = 16;
+    nearFwd = nL.x / (S2 / 2);
   } else if (mode === "push") {
     hipY = ankY - 0.87 * legLen;
     legs.push({ ank: [300 - 0.5 * legLen, ankY], pitch: rad(-8), near: false }, { ank: [300 + 0.32 * legLen, ankY], pitch: 0, near: true });
@@ -833,6 +848,9 @@ const bodySide = (p, o, opts) => {
   } else if (rifle) {
     near = [S, [S[0] - 4 * u, S[1] + 0.42 * HH], B0];
     far = mode === "march" ? swingArm(rad(30) * nearFwd) : swingArm(0);
+  } else if (mode === "run") {   // arms bent at the elbow, pumping against the legs
+    const pump = (ang) => { const e = [S[0] + Math.sin(ang) * aLen * 0.5, S[1] + Math.cos(ang) * aLen * 0.5], a2 = ang + rad(105); return [S, e, [e[0] + Math.sin(a2) * aLen * 0.45, e[1] + Math.cos(a2) * aLen * 0.45]]; };
+    near = pump(rad(-50) * nearFwd); far = pump(rad(50) * nearFwd);
   } else {
     near = swingArm(rad(-30) * nearFwd);
     far = mode === "march" ? swingArm(rad(30) * nearFwd) : null;

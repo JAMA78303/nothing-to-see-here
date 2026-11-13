@@ -36,6 +36,8 @@ POSES = dict(
     hurl=(32, (70, 60), (30, 40), (40, -5), (-44, -30)),       slamdn=(38, (58, 66), (48, 58), (52, -30), (30, -52)),
     crouch=(35, (60, 120), (40, 110), (70, -40), (-30, -80)),  win=(0, (150, 200), (-150, -200), (16, 4), (-16, -4)),
     cower=(40, (150, 210), (130, 200), (50, -40), (-20, -70)), point=(4, (92, 92), (30, 60), (24, -6), (-26, -14)),
+    kneel=(28, (70, 120), (55, 110), (92, 0), (-4, -92)),      roar=(-14, (125, 155), (-125, -155), (34, -4), (-34, -14)),
+    windup=(-26, (-70, -40), (40, 80), (30, -6), (-36, -20)),  slamup=(0, (172, 186), (164, 180), (62, -40), (40, -64)),  reach=(30, (110, 120), (60, 90), (60, -20), (-40, -60)),
 )
 P_ = {k: np.array([v[0], *v[1], *v[2], *v[3], *v[4]], float) for k, v in POSES.items()}
 EASE = {"lin": lambda k: k, "io": lambda k: k * k * (3 - 2 * k), "out": lambda k: 1 - (1 - k) ** 2, "in": lambda k: k * k}
@@ -62,6 +64,7 @@ class Fig:
         self.st, self.col, self.scale, self.band, self.kind, self.name = st, col, scale, band, kind, name
         self.P, self.X, self.Hh, self.R = Track(P_[pose]), Track(x), Track(h), Track(0.0)
         self.F, self.V, self.prop = Step(face), Step(vis), Step(None)
+        self.G, self.arm, self.bandS = Step(0.0), Step(None), Step(band)     # floor he stands on (h), armband colour, headband colour
         st.figs.append(self)
     def x(self, t): return float(self.X.at(t)[0])
     def h(self, t): return float(self.Hh.at(t)[0])
@@ -98,7 +101,7 @@ class Fig:
         if ko: self.st.ko(t)
         return self
     def state(self, t):
-        return dict(pose=self.P.at(t), x=self.x(t), h=self.h(t), r=float(self.R.at(t)[0]), face=self.F.at(t), vis=self.V.at(t), prop=self.prop.at(t))
+        return dict(pose=self.P.at(t), x=self.x(t), h=self.h(t), r=float(self.R.at(t)[0]), face=self.F.at(t), vis=self.V.at(t), prop=self.prop.at(t), ground=self.G.at(t), arm=self.arm.at(t), band=self.bandS.at(t))
 
 class Obj:
     """props and set pieces with their own track: kind in door, staff, hand"""
@@ -129,7 +132,7 @@ class Stage:
         self.end, self.figs, self.objs, self.walls = end, [], [], []
         self.fx, self.texts, self.freezes, self.slows, self.events, self.kos = [], [], [], [], [], []
         self.floor_holes, self.ceil_holes, self.cracks, self.chunks_due = [], [], [], []
-        self.cam = Track([540, -430, 1.0]); self.draw_hooks = []; self.ui_hooks = []; self.music = []
+        self.cam = Track([540, -430, 1.0]); self.draw_hooks = []; self.ui_hooks = []; self.music = []; self.gray = Track(0.0)
     # ---- authoring ----
     def camkey(self, t, cx, cy, z, e="io"): self.cam.key(t, [cx, cy, z], e); return self
     def sfx(self, t, kind, g=1.0, d=0.0): self.events.append((t, kind, g, d))
@@ -156,8 +159,8 @@ def joints(s):
     torso, a1, a2, b1, b2, l1, l2, m1, m2 = s["pose"]; f = s["face"]; sc = s["scale"]; r = math.radians
     seg = lambda p, ang, ln: (p[0] + f * ln * sc * math.sin(r(ang)), p[1] + ln * sc * math.cos(r(ang)))
     kF, kB = seg((0, 0), l1, L["th"]), seg((0, 0), m1, L["th"]); fF, fB = seg(kF, l2, L["sh"]), seg(kB, m2, L["sh"])
-    flying = abs(s["h"]) > 1 or abs(s["r"]) > 1
-    hip = (s["x"], -(STAND * sc if flying else max(fF[1], fB[1], 26 * sc)) - s["h"])
+    g0 = s.get("ground", 0.0); flying = abs(s["h"] - g0) > 1 or abs(s["r"]) > 1
+    hip = (s["x"], -(STAND * sc) - s["h"] if flying else -max(fF[1], fB[1], 26 * sc) - g0)
     sh = (f * L["torso"] * sc * math.sin(r(torso)), -L["torso"] * sc * math.cos(r(torso)))
     head = (sh[0] + f * (L["head"] + 14) * sc * math.sin(r(torso)), sh[1] - (L["head"] + 14) * sc * math.cos(r(torso)))
     eF, eB = seg(sh, a1, L["ua"]), seg(sh, b1, L["ua"]); hF, hB = seg(eF, a2, L["fa"]), seg(eB, b2, L["fa"])
@@ -236,6 +239,10 @@ class Renderer:
             def limb(pts, c):
                 d.line([P(p) for p in pts], fill=c, width=wd, joint="curve")
                 for p in pts: x, y = P(p); d.ellipse([x - wd / 2, y - wd / 2, x + wd / 2, y + wd / 2], fill=c)
+            if fg.kind == "boss":                                        # a cape streaming behind
+                sx, sy = J["sh"]; hx0, hy0 = J["hip"]; f0 = S_["face"]
+                cape = [(sx + f0 * 20, sy), (sx - f0 * 40, sy - 10), (hx0 - f0 * (150 + 20 * math.sin(real * 3)), hy0 + 170 * fg.scale), (hx0 - f0 * 20, hy0 + 150 * fg.scale)]
+                d.polygon([P(p) for p in cape], fill=(70, 0, 12))
             for pts in J["back"]: limb(pts, dark)
             limb((J["hip"], J["sh"]), col)
             hx, hy = P(J["head"]); hr = L["head"] * fg.scale * Z; d.ellipse([hx - hr, hy - hr, hx + hr, hy + hr], fill=col)
@@ -244,17 +251,24 @@ class Renderer:
                 d.ellipse([ex - er, ey - er * 0.6, ex + er, ey + er * 0.6], fill=(255, 240, 200) if fg.kind != "red" else (255, 255, 255))
                 d.line([ex - f * 10 * fg.scale * Z, ey - 12 * fg.scale * Z, ex + f * 9 * fg.scale * Z, ey - 5 * fg.scale * Z], fill=(30, 10, 10), width=max(1, int(5 * fg.scale * Z)))
             elif S_["pose"][0] > -60: d.ellipse([ex - er, ey - er, ex + er, ey + er], fill=(255, 255, 255))
-            if fg.band:                                                  # headband with tails that stream behind
-                bx0, by0 = hx - hr, hy - 12 * fg.scale * Z; d.line([bx0, by0, hx + hr, by0], fill=fg.band, width=int(11 * fg.scale * Z))
+            band = S_["band"]
+            if band:                                                     # headband with tails that stream behind
+                bx0, by0 = hx - hr, hy - 12 * fg.scale * Z; d.line([bx0, by0, hx + hr, by0], fill=band, width=int(11 * fg.scale * Z))
                 tx, ty = hx - f * hr * 0.9, by0
                 for q in (0, 1):
                     pts = [(tx, ty)]
                     for k in range(1, 5): pts.append((tx - f * k * 26 * fg.scale * Z, ty + (k * 6 + q * 14) * fg.scale * Z + 9 * Z * math.sin(real * 15 + k * 0.9 + q)))
-                    d.line(pts, fill=fg.band, width=int(9 * fg.scale * Z), joint="curve")
+                    d.line(pts, fill=band, width=int(9 * fg.scale * Z), joint="curve")
             if fg.kind == "big":                                         # shoulder spikes
                 sx, sy = P(J["sh"])
                 for q in (-1, 1): d.polygon([(sx + q * 30 * Z, sy), (sx + q * 70 * Z, sy - 70 * Z), (sx + q * 80 * Z, sy + 10 * Z)], fill=(60, 10, 10))
             for pts in J["front"]: limb(pts, col)
+            if S_["arm"]:
+                (sx, sy), (ex_, ey_) = J["front"][0][0], J["front"][0][1]; mx_, my_ = (sx + ex_) / 2, (sy + ey_) / 2; ux, uy = (ex_ - sx) / 72, (ey_ - sy) / 72
+                d.line([P((mx_ - ux * 14, my_ - uy * 14)), P((mx_ + ux * 14, my_ + uy * 14))], fill=S_["arm"], width=int(wd * 1.45))
+            if fg.kind == "boss":                                        # crown
+                k_ = hr; cx_, cy_ = hx, hy - hr * 0.8
+                d.polygon([(cx_ - k_, cy_), (cx_ - k_, cy_ - k_ * 0.9), (cx_ - k_ * 0.5, cy_ - k_ * 0.45), (cx_, cy_ - k_ * 1.1), (cx_ + k_ * 0.5, cy_ - k_ * 0.45), (cx_ + k_, cy_ - k_ * 0.9), (cx_ + k_, cy_)], fill=(235, 190, 40), outline=(120, 80, 10), width=max(1, int(3 * Z)))
             if S_["prop"] == "staff":
                 ex_, ey_ = J["elbow"]; hx_, hy_ = J["hand"]; ln = math.hypot(hx_ - ex_, hy_ - ey_) or 1; ux, uy = (hx_ - ex_) / ln, (hy_ - ey_) / ln
                 d.line([P((hx_ - ux * 150, hy_ - uy * 150)), P((hx_ + ux * 190, hy_ + uy * 190))], fill=(170, 120, 60), width=int(13 * Z))
@@ -332,6 +346,11 @@ class Renderer:
                     d.ellipse([X(px) - 4 * Z, Y(py) - 4 * Z, X(px) + 4 * Z, Y(py) + 4 * Z], fill=col)
         img = img.resize((W, H), Image.LANCZOS)
         if flash: img = Image.blend(img, Image.new("RGB", (W, H), flash[0]), max(0.0, min(1.0, flash[1])))
+        gv = float(st.gray.at(s)[0])
+        if gv > 0.01:                                                    # drain the colour, but keep anything yellow (Green's headband)
+            a = np.asarray(img).astype(np.float32); gry = a @ np.array([0.3, 0.59, 0.11], np.float32)
+            keep = (a[..., 0] > 190) & (a[..., 1] > 150) & (a[..., 2] < 110) & (a[..., 0] - a[..., 2] > 120)
+            o = a * (1 - gv) + gry[..., None] * gv; o[keep] = a[keep]; img = Image.fromarray(o.clip(0, 255).astype(np.uint8))
         if freeze_label: img = Image.blend(img, Image.new("RGB", (W, H), (0, 0, 0)), 0.45)
         d = ImageDraw.Draw(img)
         for hk in st.ui_hooks: hk(d, s, real, freeze_label)
@@ -421,6 +440,7 @@ def audio(out, dur, log, music):
         elif kind == "roar":
             t = tt(1.6); fr = 70 + 25 * np.sin(2 * np.pi * 7 * t); saw = 2 * ((np.cumsum(fr) / SR) % 1) - 1
             add(t0, (saw * 0.7 + noise(1.6, 0, 3) * 0.5) * np.minimum(1, t / 0.15) * np.exp(-t * 1.2), 0.9)
+        elif kind == "heart": add(t0, thud(55, 0.25, 0.0), 0.8); add(t0 + 0.22, thud(50, 0.25, 0.0), 0.6)
         elif kind == "sting":
             t = tt(2.2)
             for fr in (55, 82.4, 110, 164.8): add(t0, np.sin(2 * np.pi * fr * t) * np.exp(-t * 1.4), 0.35)

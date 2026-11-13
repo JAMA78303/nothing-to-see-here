@@ -4,6 +4,7 @@ usage: python sims/saga_p2.py out/saga2/            -> saga2.mp4
        python sims/saga_p2.py out/saga2/ stills     -> stills at the story beats only"""
 import math, sys
 from saga import Stage, Fig, Obj, Wall, run, audio, mux, joints, UPPER, CEIL
+from earth import earth
 
 BLUE, GREEN, RED, BIGRED, KING = (60, 150, 255), (70, 200, 90), (230, 60, 55), (205, 40, 40), (120, 15, 20)
 WHITE, YELLOW = (245, 245, 245), (255, 212, 0)
@@ -17,7 +18,7 @@ G = Fig(st, GREEN, 2960, 1, band=YELLOW, kind="hero", pose="brace", name="green"
 BR = Fig(st, BIGRED, 4150, -1, scale=1.9, kind="big", pose="guard", name="bigred")
 K = Fig(st, KING, SHIP + 70, 1, scale=1.35, kind="boss", pose="sit", vis=0, name="king"); K.G.set(0, -9999)   # seated on the throne
 ASSASSINS = []
-for x, f, pose in ((SHIP - 330, 1, "guard"), (SHIP - 520, 1, "kneel"), (SHIP - 700, 1, "guard"), (SHIP + 460, -1, "guard"), (SHIP + 650, -1, "kneel"), (SHIP + 830, -1, "guard")):
+for x, f, pose in ((SHIP - 330, -1, "guard"), (SHIP - 520, -1, "kneel"), (SHIP - 700, -1, "guard"), (SHIP + 460, 1, "guard"), (SHIP + 650, 1, "kneel"), (SHIP + 830, 1, "guard")):   # all facing outward: his bodyguards
     ASSASSINS.append(Fig(st, (170, 22, 28), x, f, kind="assassin", pose=pose, vis=0))
 
 # ---------------- 0.0  Big Red bursts through the wall ----------------
@@ -122,7 +123,7 @@ K.show(16.4)
 for a in ASSASSINS: a.show(16.4)
 K.pose(17.6, "lean", 0.4)                                            # he leans forward...
 for a in ASSASSINS:                                                  # ...and every assassin draws his blade at once
-    a.prop.set(18.35, "blade"); a.pose(18.3, "kneel" if a.P.at(18.0)[0] > 20 else "jab", 0.06)
+    a.prop.set(18.35, "blade"); a.pose(18.3, "kneel" if a.P.at(18.0)[0] > 20 else "guard", 0.06)
 st.sfx(18.35, "block", 1.0); st.sfx(18.38, "block", 1.0); st.flash(18.35, 0.06, (255, 220, 220), 0.25)
 st.text(18.7, 20.8, "end", main="PART 3 →", sub="FOLLOW FOR PART 3"); st.sfx(18.7, "sting")
 
@@ -134,9 +135,8 @@ def ship(R_, d, s, real, X, Y, Z, layer):
     rect(SHIP - 3000, -3000, SHIP + 3000, 3000, (26, 26, 38))                        # hull
     d.rounded_rectangle([X(SHIP - 1250), Y(-1950), X(SHIP + 1250), Y(-560)], radius=int(120 * Z), fill=(4, 6, 18), outline=(90, 96, 120), width=int(18 * Z))
     for sx, sy, sr in STARS: d.ellipse([X(sx) - sr * Z, Y(sy) - sr * Z, X(sx) + sr * Z, Y(sy) + sr * Z], fill=(210, 215, 240))
-    px, py, pr = X(SHIP + 520), Y(-600), 520 * Z                                     # Earth, far below
-    d.pieslice([px - pr, py - pr, px + pr, py + pr], 180, 360, fill=(40, 100, 190))
-    for ax, ay, ar in ((-260, -170, 120), (60, -260, 90), (250, -120, 140)): d.ellipse([px + ax * Z - ar * Z, py + ay * Z - ar * 0.5 * Z, px + ax * Z + ar * Z, py + ay * Z + ar * 0.5 * Z], fill=(70, 150, 80))
+    pr = int(330 * Z); e = earth(pr * 2)                                             # Earth, out of the window
+    d._image.paste(e, (int(X(SHIP + 330) - e.width / 2), int(Y(-1230) - e.height / 2)), e)
     rect(SHIP - 1250, -620, SHIP + 1250, -560, (90, 96, 120))
     for x in range(SHIP - 2800, SHIP + 2800, 240): rect(x, -540, x + 12, 0, (40, 40, 56))
     for x in (SHIP - 900, SHIP + 1000):                                              # glowing red panels

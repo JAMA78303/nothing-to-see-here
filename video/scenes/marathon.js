@@ -1,7 +1,7 @@
 // "The man who won this Olympic marathon rode in a car" (St. Louis, 1904), in the 2D-characters-in-a-3D-world style.
 // Sets along x: ROAD 0 (the dusty course, the car), more sets are added shot by shot.
 import { THREE, scene, camera, sun, hemi, V, ease, lerp, start } from "./kit.js";
-import { setupStyle, setLight, aimSun, ctex, lam, lit, add, box, makeCard, makeMax, faceCamera, look, untone, CREAM, NOINK } from "./style2kit.js";
+import { setupStyle, setLight, aimSun, ctex, lam, lit, add, box, makeCard, makeMax, faceCamera, look, untone, townsfolk, CREAM, NOINK } from "./style2kit.js";
 
 setupStyle({ ink: { widthNear: 4.2, widthFar: 2.8 }, blur: { aperture: 0.0024, maxblur: 0.007 } });
 const rnd = (() => { let s = 31; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
@@ -19,8 +19,8 @@ const T = (o, opts = {}, sc = 1, extra = null) => makeCard({ ...o, skin: o.skin 
   for (const y of [0.45, 0.9]) box(280, 0.08, 0.06, rail, 100, y, -3.6);
   const sign = ctex(1024, 256, (g, w, h) => { g.fillStyle = "#f2e6c8"; g.fillRect(0, 0, w, h); g.strokeStyle = "#7a3a1a"; g.lineWidth = 18; g.strokeRect(9, 9, w - 18, h - 18); g.fillStyle = "#7a1f1f"; g.font = "bold 92px Georgia, serif"; g.textAlign = "center"; g.fillText("OLYMPIC MARATHON", w / 2, 112); g.fillStyle = "#3a2a1a"; g.font = "bold 62px Georgia, serif"; g.fillText("ST. LOUIS  1904", w / 2, 200); });
   sign.wrapS = sign.wrapT = THREE.ClampToEdgeWrapping;
-  for (const sx of [-2.1, 2.1]) box(0.14, 2.6, 0.14, rail, 0.35 + sx, 1.3, -3.7);
-  add(new THREE.PlaneGeometry(4.4, 1.1), lam({ map: sign }), 0.35, 2.05, -3.62);
+  for (const sx of [-2.1, 2.1]) box(0.14, 3.3, 0.14, rail, 0.5 + sx, 1.65, -3.7);
+  add(new THREE.PlaneGeometry(4.4, 1.1), lam({ map: sign }), 0.5, 2.75, -3.62);
   for (let i = 0; i < 40; i++) {
     const x = -40 + i * 7 + rnd() * 4, z = -8 - rnd() * 20, s = 0.8 + rnd() * 0.8;
     box(0.3 * s, 2.4 * s, 0.3 * s, lam({ color: "#6b4a2b" }), x, 1.2 * s, z);
@@ -37,8 +37,8 @@ const car = new THREE.Group(); scene.add(car);
   box(0.16, 0.6, 1.1, leather, -1.15, 1.62, 0, car);                                   // back seat
   box(0.75, 0.5, 0.95, red, 0.95, 0.98, 0, car); box(0.06, 0.5, 0.9, brass, 1.33, 0.98, 0, car);   // bonnet, radiator
   box(0.5, 0.3, 1.1, red, 0.25, 0.9, 0, car); box(0.12, 0.45, 1.0, leather, 0.05, 1.27, 0, car);   // front seat
-  const col = add(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 8), dark, 0.55, 1.25, 0.25, car); col.rotation.z = 0.6;
-  const wheel = add(new THREE.TorusGeometry(0.18, 0.025, 6, 20), dark, 0.38, 1.52, 0.25, car); wheel.rotation.set(0, Math.PI / 2, 0.6);
+  const col = add(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8), dark, 0.62, 1.38, 0.0, car); col.rotation.z = 0.55;
+  const wheel = add(new THREE.TorusGeometry(0.2, 0.03, 6, 20), dark, 0.42, 1.74, 0.0, car); wheel.rotation.set(0, Math.PI / 2, 0.55);
   for (const z of [0.35, -0.35]) { const l = add(new THREE.CylinderGeometry(0.09, 0.07, 0.18, 12), brass, 1.4, 1.2, z, car); l.rotation.z = Math.PI / 2; }
   const spokes = ctex(256, 256, (g, w, h) => {
     g.clearRect(0, 0, w, h); g.strokeStyle = "#1a1614"; g.lineWidth = 26; g.beginPath(); g.arc(128, 128, 112, 0, 7); g.stroke();
@@ -60,6 +60,9 @@ const runners = [
   T({ jacket: "#c94a3a", pants: "#2a2a40", boots: "#2a2a2a", hat: "hair", hair: "#a86a3a" }, { expr: "shock", seed: 18 }, 1, bib(20)),
   T({ jacket: "#3a6aa8", pants: "#2a2a40", boots: "#2a2a2a", hat: "hair", hair: "#1a1a1a" }, { expr: "nervous", seed: 25 }, 1, bib(14)),
 ];
+const crowd = [...Array(10)].map((_, i) => T(townsfolk(i), { expr: i % 3 ? "grin" : "smile", seed: 40 + i }));
+const front = [...Array(5)].map((_, i) => T(townsfolk(i + 3), { expr: "grin", seed: 60 + i }, 1.05));
+for (const c of front) { const m = c.children[0]; m.material.depthTest = false; m.renderOrder = 10; m.castShadow = false; c.children[1].visible = false; }   // drawn over the ground: we're looking over their heads
 const dustM = new THREE.MeshBasicMaterial({ map: ctex(64, 64, (g) => { const gr = g.createRadialGradient(32, 32, 1, 32, 32, 30); gr.addColorStop(0, "rgba(215,190,150,0.85)"); gr.addColorStop(1, "rgba(215,190,150,0)"); g.fillStyle = gr; g.beginPath(); g.arc(32, 32, 30, 0, 7); g.fill(); }), transparent: true, depthWrite: false });
 const dust = [...Array(12)].map(() => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.8), dustM); m.layers.set(NOINK); scene.add(m); return m; });
 
@@ -69,16 +72,18 @@ start((time, tl) => {
   scene.background = new THREE.Color("#9cc8ea"); scene.fog = new THREE.Fog(untone("#e8dcc0"), 30, 120);
 
   // the car overtakes the runners
-  const cx = 1.25 + st * 2.0, camX = 0.25 + st * 1.3;
+  const cx = 1.3 + st * 2.0, camX = 0.45 + st * 1.3;
   car.position.set(cx, 0.03 * Math.abs(Math.sin(time * 16)), -1.1); car.rotation.z = 0.012 * Math.sin(time * 11);
   car.userData.wheels.forEach(w => (w.rotation.z = -time * 9));
-  driver.position.set(cx + 0.05, 0.58 + car.position.y, -1.1); driver.userData.draw({ expr: "neutral", seed: 77 });
+  driver.position.set(cx + 0.12, 0.58 + car.position.y, -1.1); driver.userData.draw({ expr: "stern", seed: 77, side: true, mode: "push", pose: 0.15 });
   lorz.position.set(cx - 0.75, 0.62 + car.position.y, -1.15); lorz.userData.draw({ expr: "m_happy", wave: Math.abs(Math.sin(time * 7)) });
-  runners.forEach((r, i) => { r.position.set(-1.95 + i * 0.75 + st * 0.9, 0, 1.6 - i * 0.5); r.userData.draw({ expr: ["nervous", "shock", "nervous"][i], mode: "stroll", phase: (time * 1.3 + i * 0.3) % 1, seed: [12, 18, 25][i] }); });
+  runners.forEach((r, i) => { r.position.set(i === 2 ? -9 : -1.05 + i * 0.75 + st * 0.9, 0, 1.4 - i * 0.5); r.userData.draw({ expr: ["nervous", "shock", "nervous"][i], mode: "stroll", phase: (time * 1.3 + i * 0.3) % 1, seed: [12, 18, 25][i] }); });
   dust.forEach((m, i) => { const u = (time * 1.4 + i / 12) % 1; m.position.set(cx - 1.6 - u * 3, 0.3 + u * 0.7, -1.1 + (i % 3 - 1) * 0.5); m.scale.setScalar(0.7 + u * 2.2); m.quaternion.copy(camera.quaternion); });
 
-  camera.position.set(camX + 0.5, 1.35, 6.4); camera.lookAt(V(camX - 0.3, 1.3, -0.5));
-  for (const c of [driver, lorz, ...runners]) faceCamera(c);
+  camera.position.set(camX + 0.35, 1.4, 6.6); camera.lookAt(V(camX - 0.1, 1.25, -0.5));
+  crowd.forEach((c, i) => { c.position.set(camX - 2.6 + i * 0.62 + (i % 2) * 0.15, 0, -3.0 - (i % 2) * 0.35); c.userData.draw({ expr: i % 3 ? "grin" : "smile", seed: 40 + i, wave: i % 2 ? Math.abs(Math.sin(time * 6 + i)) : 0 }); });
+  front.forEach((c, i) => { c.position.set(camX - 1.15 + i * 0.6, -1.62 + 0.05 * Math.abs(Math.sin(time * 8 + i)), 3.0 + (i % 2) * 0.25); c.userData.draw({ expr: "grin", seed: 60 + i, wave: Math.abs(Math.sin(time * 7 + i * 1.3)) }); });
+  for (const c of [driver, lorz, ...runners, ...crowd, ...front]) faceCamera(c);
   if (look.bokeh) look.bokeh.uniforms.focus.value = camera.position.distanceTo(V(cx - 0.6, 1.4, -1.1));
   aimSun(-45, 40, V(cx, 0, 0), 60);
 });

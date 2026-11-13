@@ -142,7 +142,7 @@ function lewis() {
   flash.position.set(1.25, 0, 0); flash.layers.set(NOINK); g.add(flash); g.userData.flash = flash;
   scene.add(g); return g;
 }
-const gun = lewis(); gun.position.set(0.05, 0.95, 2.2); gun.rotation.y = 0.75;
+const gun = lewis(); gun.position.set(-0.05, 0.95, 1.55); gun.rotation.y = 0.45;
 
 // ---------------- the truck ----------------
 const truck = new THREE.Group(); scene.add(truck);
@@ -154,6 +154,15 @@ const truck = new THREE.Group(); scene.add(truck);
   box(2.4, 0.5, 1.7, ol, -0.95, 1.12, 0, truck);
   for (const [x, z] of [[1.6, 0.85], [1.6, -0.85], [-1.4, 0.85], [-1.4, -0.85]]) { const w = add(new THREE.CylinderGeometry(0.45, 0.45, 0.3, 20), lam({ color: "#1e1e20" }), x, 0.45, z, truck); w.rotation.x = Math.PI / 2; const hub = add(new THREE.CylinderGeometry(0.18, 0.18, 0.32, 12), lam({ color: "#8a8f6a" }), x, 0.45, z, truck); hub.rotation.x = Math.PI / 2; }
   const tg = lewis(); tg.position.set(-0.9, 1.75, 0.2); tg.scale.setScalar(0.9); truck.add(tg); truck.userData.gun = tg;
+}
+
+// ---------------- a small tank, to run beside the emu ----------------
+const tank = new THREE.Group(); scene.add(tank);
+{
+  const ol = lam({ color: "#5c6b3c" }), dk = lam({ color: "#2e3226" });
+  box(1.5, 0.38, 0.9, ol, 0, 0.42, 0, tank); box(0.75, 0.3, 0.6, ol, -0.05, 0.76, 0, tank);
+  const barrel = add(new THREE.CylinderGeometry(0.05, 0.05, 0.9, 10), dk, 0.65, 0.78, 0, tank); barrel.rotation.z = Math.PI / 2;
+  for (const z of [0.42, -0.42]) { box(1.6, 0.3, 0.2, dk, 0, 0.18, z, tank); for (let i = 0; i < 5; i++) { const w = add(new THREE.CylinderGeometry(0.12, 0.12, 0.22, 12), lam({ color: "#4a4a44" }), -0.6 + i * 0.3, 0.18, z, tank); w.rotation.x = Math.PI / 2; } }
 }
 
 // ---------------- HQ: the commander's tent ----------------
@@ -180,8 +189,8 @@ const E = emus.map(() => ({ x0: rnd(), z0: rnd(), off: rnd(), sp: 1.6 + rnd() * 
 // ---------------- cameras ----------------
 const W = (x, y, z) => V(x, y, z);
 const CAMS = {
-  hook: [W(-0.9, 1.6, 5.0), W(1.0, 1.0, -6)], farm: [W(41.5, 1.6, 5.4), W(41, 0.9, -2)], split: [W(-1.1, 2.3, 6.2), W(1.6, 0.6, -6)],
-  quit: [W(-0.2, 1.5, 5.6), W(-0.6, 1.2, -4)], hq: [W(500.7, 1.55, 3.2), W(500.3, 1.25, -0.8)], armor: [W(80.3, 1.2, 3.6), W(80, 1.0, -0.5)],
+  hook: [W(-0.7, 1.5, 5.6), W(0.5, 1.0, -6)], farm: [W(41.5, 1.6, 5.4), W(41, 0.9, -2)], split: [W(-0.8, 2.2, 6.6), W(0.9, 0.6, -6)],
+  quit: [W(-0.2, 1.5, 5.6), W(-0.6, 1.2, -4)], hq: [W(500.7, 1.55, 3.2), W(500.3, 1.25, -0.8)], armor: [W(80.35, 1.4, 5.8), W(80.35, 0.9, -0.5)],
 };
 
 start((time, tl) => {
@@ -210,9 +219,9 @@ start((time, tl) => {
   const firing = (shot === "hook" && st > 0.6) || (shot === "split" && st < 1.0);
   if (gun.visible && firing) { gun.userData.flash.visible = Math.sin(time * 70) > 0.2; gun.userData.flash.quaternion.copy(camera.quaternion); }
   if (shot === "hook" || shot === "split") {
-    max.visible = mate.visible = true; max.position.set(-0.75, 0, 1.7); mate.position.set(0.8, 0, 0.9);
-    sayMax({ expr: shot === "hook" ? (k < 0.55 ? "m_stern" : "m_shock") : (k < 0.3 ? "m_stern" : "m_shock") });
-    mate.userData.draw({ expr: k < 0.5 ? "neutral" : "shock", seed: 40 });
+    max.visible = mate.visible = true; max.position.set(-0.85, 0, 1.6); mate.position.set(-1.75, 0, 0.9);
+    sayMax({ side: true, mode: "push", pose: 0.25 + (firing ? 0.04 * Math.sin(time * 60) : 0), expr: shot === "hook" ? (k < 0.55 ? "m_stern" : "m_shock") : (k < 0.3 ? "m_stern" : "m_shock") });
+    mate.userData.draw({ side: true, mode: "push", pose: 0.1, expr: k < 0.5 ? "neutral" : "shock", seed: 40 });
   }
   if (shot === "farm") { farmer.visible = true; farmer.position.set(40.4, 0, 1.3); farmer.userData.draw({ expr: Math.sin(st * 6) > 0 ? "stern" : "shock", seed: 21 }); }
   if (shot === "quit") { max.visible = true; max.position.set(lerp(-0.2, -1.3, k), 0, lerp(0.4, -0.8, k)); sayMax({ expr: "m_worried", mode: "stroll", phase: (st * 0.8) % 1 }); }
@@ -238,7 +247,9 @@ start((time, tl) => {
   });
   if (shot === "truck") E.slice(0, 8).forEach((d, i) => show(i, SET.road - 4 + st * 5.6 + i * 1.1 + d.x0, 0.6 + (i % 3) * 0.9 - 1.6 * (i % 2), runTex(time, 2.3, d.off), 1));
   if (shot === "quit") E.slice(0, 7).forEach((d, i) => show(i, 0.6 + i * 1.15, -6.4 + d.z0 * 0.3, EMU.stand, -1));
-  if (armor) show(0, 80 + lerp(-0.6, 0.6, (k - 0.45) / 0.55), -0.4, runTex(time, 2.0, 0, EMU.armor), 1);
+  const ak = armor ? (k - 0.45) / 0.55 : 0;
+  tank.visible = armor; tank.position.set(80.8 + lerp(-0.5, 0.5, ak), 0.02 * Math.abs(Math.sin(time * 18)), -0.9); tank.scale.setScalar(0.8);
+  if (armor) show(0, 79.75 + lerp(-0.5, 0.5, ak), 0.2, runTex(time, 2.0, 0), 1);
   if (shot === "loop") {
     show(0, SET.road + 30.95, 0, EMU.hat, -1).position.set(SET.road + 31.1, 1.33, -0.6);
     E.slice(1, 6).forEach((d, i) => show(i + 1, SET.road + 27.5 + i * 1.3, 1.0 - (i % 2) * 2.4, Math.sin(time * 3 + i) > 0 ? EMU.peck[0] : EMU.peck[1], i % 2 ? 1 : -1));
@@ -246,7 +257,7 @@ start((time, tl) => {
   for (const e of emus) if (e.visible) faceCamera(e);
 
   // ---- sparks and dust ----
-  sparks.forEach((s, i) => { const u = (time * 3 + i / 6) % 1; s.visible = armor && u < 0.25; s.position.set(80 + lerp(-0.6, 0.6, (k - 0.45) / 0.55) + (i % 3 - 1) * 0.3, 1.05 + (i % 2) * 0.25, 0.1); s.scale.setScalar(0.6 + u * 3); s.quaternion.copy(camera.quaternion); });
+  sparks.forEach((s, i) => { const u = (time * 3 + i / 6) % 1; s.visible = armor && u < 0.25; s.position.set((i % 2 ? 80.8 : 79.75) + lerp(-0.5, 0.5, ak) + (i % 3 - 1) * 0.25, i % 2 ? 0.7 + (i % 3) * 0.1 : 1.0 + (i % 3) * 0.15, i % 2 ? -0.3 : 0.4); s.scale.setScalar(0.6 + u * 3); s.quaternion.copy(camera.quaternion); });
   puffs.forEach((m, i) => {
     const u = (time * 1.7 + i / 10) % 1; m.visible = (firing || shot === "truck") && u < 0.5;
     const base = shot === "truck" ? V(truckX - 2.2 - u * 2, 0.3 + u * 0.4, -0.6 + (i % 3 - 1) * 0.5) : V(0.5 + (i * 1.37) % 4, 0.15 + u * 0.4, -9 + (i * 0.71) % 5);

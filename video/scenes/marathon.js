@@ -77,7 +77,7 @@ start((time, tl) => {
   car.userData.wheels.forEach(w => (w.rotation.z = -time * 9));
   driver.position.set(cx + 0.12, 0.58 + car.position.y, -1.1); driver.userData.draw({ expr: "stern", seed: 77, side: true, mode: "push", pose: 0.15 });
   lorz.position.set(cx - 0.75, 0.62 + car.position.y, -1.15); lorz.userData.draw({ expr: "m_happy", wave: Math.abs(Math.sin(time * 7)) });
-  runners.forEach((r, i) => { r.position.set(i === 2 ? -9 : -1.05 + i * 0.75 + st * 0.9, 0, 1.4 - i * 0.5); r.userData.draw({ expr: ["nervous", "shock", "nervous"][i], mode: "stroll", phase: (time * 1.3 + i * 0.3) % 1, seed: [12, 18, 25][i] }); });
+  runners.forEach((r, i) => { r.position.set(i === 2 ? -9 : -1.05 + i * 0.75 + st * 0.9, 0, 1.4 - i * 0.5); r.userData.draw({ expr: ["nervous", "shock", "nervous"][i], side: true, mode: "march", stride: 1.35, stomp: 1.6, phase: (time * 1.9 + i * 0.37) % 1, seed: [12, 18, 25][i] }); });
   dust.forEach((m, i) => { const u = (time * 1.4 + i / 12) % 1; m.position.set(cx - 1.6 - u * 3, 0.3 + u * 0.7, -1.1 + (i % 3 - 1) * 0.5); m.scale.setScalar(0.7 + u * 2.2); m.quaternion.copy(camera.quaternion); });
 
   camera.position.set(camX + 0.35, 1.4, 6.6); camera.lookAt(V(camX - 0.1, 1.25, -0.5));

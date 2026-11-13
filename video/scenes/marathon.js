@@ -1,10 +1,18 @@
 // "The man who won this Olympic marathon rode in a car" (St. Louis, 1904), in the 2D-characters-in-a-3D-world style.
 // Sets along x: ROAD 0 (the dusty course, the car), more sets are added shot by shot.
 import { THREE, scene, camera, sun, hemi, V, ease, lerp, start } from "./kit.js";
+import { blobPts } from "./vendor/toon.js";
 import { setupStyle, setLight, aimSun, ctex, lam, lit, add, box, makeCard, makeMax, faceCamera, look, untone, townsfolk, CREAM, NOINK } from "./style2kit.js";
 
 setupStyle({ ink: { widthNear: 4.2, widthFar: 2.8 }, blur: { aperture: 0.0024, maxblur: 0.007 } });
 const rnd = (() => { let s = 31; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+// short cropped hair that only covers the top of the head, so the whole face shows
+const crop = col => (p) => {
+  const h = p.head; if (!h) return; const rot = p.rot; p.rot = h.rot; const head = blobPts(h.x, h.y, h.blob);
+  const line = [[h.x - 200, h.y - 300], [h.x + 200, h.y - 300], [h.x + 200, h.y - 78], [h.x + 60, h.y - 70], [h.x - 60, h.y - 82], [h.x - 200, h.y - 60]];
+  p.clip(head, () => p.poly(line, col, 0)); p.clip(head, () => p.stroke(line.slice(2), 8)); p.rot = rot;
+};
+const both = (...fs) => (p, o) => fs.forEach(f => f(p, o));
 const bib = n => (p) => { const h = p.head ?? { x: 300, y: 309 }; const x = h.x, y = h.y + 250; p.poly([[x - 52, y - 40], [x + 52, y - 40], [x + 52, y + 40], [x - 52, y + 40]], "#ffffff", 6); p.g.fillStyle = "#1a1a1a"; p.g.font = "bold 56px Arial"; p.g.textAlign = "center"; p.g.textBaseline = "middle"; p.g.fillText(String(n), x, y + 3); };
 const T = (o, opts = {}, sc = 1, extra = null) => makeCard({ ...o, skin: o.skin ?? CREAM }, { mode: "stand", expr: "neutral", ...opts }, extra, sc);
 
@@ -56,9 +64,9 @@ const MAXRUN = { jacket: "#f2efe6", pants: "#2a2a40", boots: "#d8d4c8", buttons:
 const lorz = makeMax({ expr: "m_happy", wave: 0.8 }, MAXRUN);
 { const d0 = lorz.userData.draw; }
 const runners = [
-  T({ jacket: "#e8e4da", pants: "#3a3a52", boots: "#2a2a2a", hat: "hair", hair: "#3a2a1a" }, { expr: "nervous", seed: 12 }, 1, bib(7)),
-  T({ jacket: "#c94a3a", pants: "#2a2a40", boots: "#2a2a2a", hat: "hair", hair: "#a86a3a" }, { expr: "shock", seed: 18 }, 1, bib(20)),
-  T({ jacket: "#3a6aa8", pants: "#2a2a40", boots: "#2a2a2a", hat: "hair", hair: "#1a1a1a" }, { expr: "nervous", seed: 25 }, 1, bib(14)),
+  T({ jacket: "#e8e4da", pants: "#3a3a52", boots: "#2a2a2a", hat: null }, { expr: "nervous", seed: 12 }, 1, both(bib(7), crop("#3a2a1a"))),
+  T({ jacket: "#c94a3a", pants: "#2a2a40", boots: "#2a2a2a", hat: null }, { expr: "shock", seed: 18 }, 1, both(bib(20), crop("#a86a3a"))),
+  T({ jacket: "#3a6aa8", pants: "#2a2a40", boots: "#2a2a2a", hat: null }, { expr: "nervous", seed: 25 }, 1, both(bib(14), crop("#1a1a1a"))),
 ];
 const crowd = [...Array(10)].map((_, i) => T(townsfolk(i), { expr: i % 3 ? "grin" : "smile", seed: 40 + i }));
 const front = [...Array(5)].map((_, i) => T(townsfolk(i + 3), { expr: "grin", seed: 60 + i }, 1.05));
@@ -77,7 +85,7 @@ start((time, tl) => {
   car.userData.wheels.forEach(w => (w.rotation.z = -time * 9));
   driver.position.set(cx + 0.12, 0.58 + car.position.y, -1.1); driver.userData.draw({ expr: "stern", seed: 77, side: true, mode: "push", pose: 0.15 });
   lorz.position.set(cx - 0.75, 0.62 + car.position.y, -1.15); lorz.userData.draw({ expr: "m_happy", wave: Math.abs(Math.sin(time * 7)) });
-  runners.forEach((r, i) => { r.position.set(i === 2 ? -9 : -1.05 + i * 0.75 + st * 0.9, 0, 1.4 - i * 0.5); r.userData.draw({ expr: ["nervous", "shock", "nervous"][i], side: true, mode: "run", stride: 1.25, phase: (time * 2.6 + i * 0.37) % 1, seed: [12, 18, 25][i] }); });
+  runners.forEach((r, i) => { r.position.set(i === 2 ? -9 : -1.05 + i * 0.75 + st * 0.9, 0, 1.4 - i * 0.5); r.userData.draw({ expr: ["nervous", "nervous", "nervous"][i], side: true, faceFront: true, mode: "run", stride: 1.25, phase: (time * 2.6 + i * 0.37) % 1, seed: [12, 18, 25][i] }); });
   dust.forEach((m, i) => { const u = (time * 1.4 + i / 12) % 1; m.position.set(cx - 1.6 - u * 3, 0.3 + u * 0.7, -1.1 + (i % 3 - 1) * 0.5); m.scale.setScalar(0.7 + u * 2.2); m.quaternion.copy(camera.quaternion); });
 
   camera.position.set(camX + 0.35, 1.4, 6.6); camera.lookAt(V(camX - 0.1, 1.25, -0.5));

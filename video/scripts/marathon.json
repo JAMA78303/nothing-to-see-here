@@ -5,16 +5,88 @@
   "gap": 0.04,
   "tail": 0.15,
   "highlight": [],
-  "say": { "1904": "nineteen-oh-four" },
+  "say": {
+    "1904": "nineteen-oh-four"
+  },
   "shots": [
-    { "shot": "hook", "text": "The man who won this Olympic marathon... rode in a car." },
-    { "shot": "heat", "text": "St. Louis, 1904: boiling heat, dusty roads, and almost no water." },
-    { "shot": "apples", "text": "One runner stopped to eat rotten apples... and took a nap." },
-    { "shot": "dogs", "text": "Another got chased a mile off course by wild dogs.", "flash": true },
-    { "shot": "lorz", "text": "Fred Lorz hitched a ride for eleven miles, then jogged over the finish line." },
-    { "shot": "hicks", "text": "The real winner had to be held up by his team to finish." },
-    { "shot": "loop", "text": "Only fourteen of the thirty-two runners made it at all." }
+    {
+      "shot": "hook",
+      "text": "The man who won this Olympic marathon... rode in a car."
+    },
+    {
+      "shot": "heat",
+      "text": "St. Louis, 1904: boiling heat, dusty roads, and almost no water."
+    },
+    {
+      "shot": "apples",
+      "text": "One runner stopped to eat rotten apples... and took a nap."
+    },
+    {
+      "shot": "dogs",
+      "text": "Another got chased a mile off course by wild dogs.",
+      "flash": true
+    },
+    {
+      "shot": "lorz",
+      "text": "Fred Lorz hitched a ride for eleven miles, then jogged over the finish line."
+    },
+    {
+      "shot": "hicks",
+      "text": "The real winner had to be held up by his team to finish."
+    },
+    {
+      "shot": "loop",
+      "text": "Only fourteen of the thirty-two runners made it at all."
+    }
   ],
-  "sfx": [],
-  "youtube": { "title": "", "description": "", "tags": [] }
+  "sfx": [
+    {
+      "sound": "whoosh",
+      "shot": "heat",
+      "at": 0.0,
+      "length": 0.5,
+      "gain": 0.4
+    },
+    {
+      "sound": "impact",
+      "shot": "dogs",
+      "at": 0.0,
+      "length": 0.8,
+      "gain": 0.45
+    },
+    {
+      "sound": "whoosh",
+      "shot": "lorz",
+      "at": 0.0,
+      "length": 0.5,
+      "gain": 0.4
+    },
+    {
+      "sound": "impact",
+      "shot": "loop",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.4
+    }
+  ],
+  "youtube": {
+    "title": "He Won the Olympic Marathon… in a Car 🚗😳 #shorts",
+    "description": "The 1904 Olympic marathon in St. Louis might be the strangest race ever run 🏃\n\nIt was run in the afternoon heat on dusty dirt roads, with officials' cars kicking up clouds of dust and only one water stop. Fred Lorz dropped out with cramp, rode about 11 miles in a car, then hopped out and jogged into the stadium first. He was hailed as the winner until people found out, and he was disqualified.\n\nAndarín Carvajal stopped in an orchard to eat apples and took a nap. Len Tau was chased about a mile off course by wild dogs. The real winner, Thomas Hicks, had to be held up by his trainers to make it over the line. Only 14 of the 32 starters finished.\n\n🏃 Would you have finished? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #olympics #marathon #history #didyouknow #funnyhistory #truestory #animation",
+    "tags": [
+      "1904 olympic marathon",
+      "olympic marathon car",
+      "fred lorz",
+      "craziest olympic race",
+      "olympics history",
+      "funny history",
+      "strange history",
+      "history facts",
+      "true story",
+      "did you know",
+      "marathon",
+      "animation",
+      "cartoon",
+      "shorts"
+    ]
+  }
 }

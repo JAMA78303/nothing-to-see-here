@@ -3,19 +3,22 @@ ties on Green's headband, powers up and drives Big Red down through two floors. 
 usage: python sims/saga_p2.py out/saga2/            -> saga2.mp4
        python sims/saga_p2.py out/saga2/ stills     -> stills at the story beats only"""
 import math, sys
-from saga import Stage, Fig, Obj, Wall, run, audio, mux, UPPER, CEIL
+from saga import Stage, Fig, Obj, Wall, run, audio, mux, joints, UPPER, CEIL
 
 BLUE, GREEN, RED, BIGRED, KING = (60, 150, 255), (70, 200, 90), (230, 60, 55), (205, 40, 40), (120, 15, 20)
 WHITE, YELLOW = (245, 245, 245), (255, 212, 0)
-st = Stage(end=20.2)
+st = Stage(end=20.8)
+SHIP = 10000                                                      # the King's ship: a separate set, far off to the right
 outer, wallB, doorwall, farwall = Wall(st, 150), Wall(st, 1500), Wall(st, 2700, opening=(-440, 0)), Wall(st, 3830)
 for wl in (outer, wallB): wl.brk = (-1, -600, -20)                  # the holes from Part 1
 
 B = Fig(st, BLUE, 3080, 1, band=WHITE, kind="hero", pose="brace", name="blue")
 G = Fig(st, GREEN, 2960, 1, band=YELLOW, kind="hero", pose="brace", name="green")
 BR = Fig(st, BIGRED, 4150, -1, scale=1.9, kind="big", pose="guard", name="bigred")
-K = Fig(st, KING, 3700, -1, scale=1.35, kind="boss", h=940, pose="idle", vis=0, name="king"); K.G.set(0, 940)
-band = Obj(st, "staff", 2740, -12, 0, vis=0)                        # placeholder kind; drawn by the hook below as a headband
+K = Fig(st, KING, SHIP + 70, 1, scale=1.35, kind="boss", pose="sit", vis=0, name="king"); K.G.set(0, -9999)   # seated on the throne
+ASSASSINS = []
+for x, f, pose in ((SHIP - 330, 1, "guard"), (SHIP - 520, 1, "kneel"), (SHIP - 700, 1, "guard"), (SHIP + 460, -1, "guard"), (SHIP + 650, -1, "kneel"), (SHIP + 830, -1, "guard")):
+    ASSASSINS.append(Fig(st, (170, 22, 28), x, f, kind="assassin", pose=pose, vis=0))
 
 # ---------------- 0.0  Big Red bursts through the wall ----------------
 farwall.smash(st, 0.25, -860, -20, -1, n=60, big=2.2); st.flash(0.25, 0.1, amt=0.35)
@@ -83,9 +86,11 @@ BR.pose(7.5, "idle", 0.3)
 from saga import P_
 t, j = 7.9, 0
 while t < 11.5: BR.P.key(t, P_["idle"] + [6 * (j % 2), 0, 0, 0, 0, 0, 0, 0, 0], "io"); t += 0.45; j += 1      # big slow breaths
-G.V.set(9.9, 0); band.V.set(9.9, 1)
-B.pose(10.6, "reach", 0.25); band.V.set(10.95, 0); B.arm.set(11.0, YELLOW)
-B.pose(11.1, "idle", 0.6); B.face(11.5, 1)
+B.pose(9.15, "reach", 0.3); G.bandS.set(9.5, None)                # he slips the headband off Green's head
+G.V.set(9.95, 0)                                                     # Green fades away
+B.pose(10.5, "idle", 0.6)                                            # stands, holding it
+B.pose(11.0, "tie", 0.25); B.bandS.set(11.35, YELLOW)                # and ties it on in place of his own
+B.pose(11.45, "idle", 0.15); B.face(11.5, 1)
 
 # ---------------- 11.5  the power-up ----------------
 st.sfx(11.55, "energy"); st.ring(11.9, 2860, 0, 40, 520, (120, 190, 255), dur=0.5, width=20, squash=0.2); st.ring(12.15, 2860, -200, 40, 700, (170, 220, 255), dur=0.5, width=24)
@@ -111,11 +116,38 @@ st.ring(14.45, 3600, 700, 80, 1000, (255, 230, 150), dur=0.5, width=26, squash=0
 st.chunks_due.append((14.45, "floor", 3420, 3780, 640, 700, 0, 30, (40, 36, 46)))
 BR.G.set(14.45, -700); B.pose(14.5, "land", 0.06); B.pose(14.9, "guard", 0.2); B.pose(15.6, "idle", 0.4)
 
-# ---------------- 16.0  the camera climbs through the holes: the King is watching ----------------
-st.sfx(16.0, "music_off")
-K.show(15.6); K.pose(16.0, "idle", 0.1)
-st.hit(17.35, 3700, -1940, 0.5, freeze=0, shake=0, snd="block", col=(255, 230, 120))
-st.text(17.6, 20.2, "end", main="PART 3 →", sub="FOLLOW FOR PART 3"); st.sfx(17.6, "sting")
+# ---------------- 16.4  cut to the King's ship: on his throne, surrounded by assassins ----------------
+st.sfx(16.0, "music_off"); st.sfx(16.4, "whoosh", 1.5); st.flash(16.4, 0.15, amt=0.8)
+K.show(16.4)
+for a in ASSASSINS: a.show(16.4)
+K.pose(17.6, "lean", 0.4)                                            # he leans forward...
+for a in ASSASSINS:                                                  # ...and every assassin draws his blade at once
+    a.prop.set(18.35, "blade"); a.pose(18.3, "kneel" if a.P.at(18.0)[0] > 20 else "jab", 0.06)
+st.sfx(18.35, "block", 1.0); st.sfx(18.38, "block", 1.0); st.flash(18.35, 0.06, (255, 220, 220), 0.25)
+st.text(18.7, 20.8, "end", main="PART 3 →", sub="FOLLOW FOR PART 3"); st.sfx(18.7, "sting")
+
+import random
+_r = random.Random(9); STARS = [(SHIP - 1500 + _r.random() * 3000, -1900 + _r.random() * 1300, 1.5 + _r.random() * 3) for _ in range(120)]
+def ship(R_, d, s, real, X, Y, Z, layer):
+    if layer != "back" or s < 16.4: return
+    rect = lambda x0, y0, x1, y1, col: d.rectangle([X(x0), Y(y0), X(x1), Y(y1)], fill=col)
+    rect(SHIP - 3000, -3000, SHIP + 3000, 3000, (26, 26, 38))                        # hull
+    d.rounded_rectangle([X(SHIP - 1250), Y(-1950), X(SHIP + 1250), Y(-560)], radius=int(120 * Z), fill=(4, 6, 18), outline=(90, 96, 120), width=int(18 * Z))
+    for sx, sy, sr in STARS: d.ellipse([X(sx) - sr * Z, Y(sy) - sr * Z, X(sx) + sr * Z, Y(sy) + sr * Z], fill=(210, 215, 240))
+    px, py, pr = X(SHIP + 520), Y(-600), 520 * Z                                     # Earth, far below
+    d.pieslice([px - pr, py - pr, px + pr, py + pr], 180, 360, fill=(40, 100, 190))
+    for ax, ay, ar in ((-260, -170, 120), (60, -260, 90), (250, -120, 140)): d.ellipse([px + ax * Z - ar * Z, py + ay * Z - ar * 0.5 * Z, px + ax * Z + ar * Z, py + ay * Z + ar * 0.5 * Z], fill=(70, 150, 80))
+    rect(SHIP - 1250, -620, SHIP + 1250, -560, (90, 96, 120))
+    for x in range(SHIP - 2800, SHIP + 2800, 240): rect(x, -540, x + 12, 0, (40, 40, 56))
+    for x in (SHIP - 900, SHIP + 1000):                                              # glowing red panels
+        rect(x - 60, -460, x + 60, -140, (60, 10, 16)); rect(x - 44, -440, x + 44, -160, (200, 30, 40) if int(real * 2) % 2 else (160, 20, 30))
+    rect(SHIP - 3000, 0, SHIP + 3000, 900, (44, 44, 60)); d.line([X(SHIP - 3000), Y(0), X(SHIP + 3000), Y(0)], fill=(110, 110, 140), width=int(6 * Z))
+    rect(SHIP - 900, -8, SHIP + 1100, 0, (130, 20, 30))                              # red carpet
+    rect(SHIP - 200, -120, SHIP + 340, 0, (60, 58, 80))                              # the dais
+    d.polygon([(X(SHIP - 40), Y(-120)), (X(SHIP - 40), Y(-980)), (X(SHIP + 70), Y(-1070)), (X(SHIP + 180), Y(-980)), (X(SHIP + 180), Y(-120))], fill=(110, 14, 24), outline=(235, 190, 40), width=int(8 * Z))
+    rect(SHIP - 40, -250, SHIP + 300, -200, (110, 14, 24))                            # seat
+    rect(SHIP + 260, -420, SHIP + 300, -200, (235, 190, 40))                          # gold armrest
+st.draw_hooks.append(ship)
 
 def hooks(R_, d, s, real, X, Y, Z, layer):
     if layer == "back" and 11.55 <= s:                                # Blue's aura: strong while powering up, then a faint glow
@@ -131,14 +163,14 @@ def hooks(R_, d, s, real, X, Y, Z, layer):
             for i in range(26):
                 ph = ((s - 9.9) * 0.9 + i / 26) % 1; x = X(2800 - 140 + (i * 37) % 280); y = Y(-30 - 600 * ph)
                 r = (9 - 7 * ph) * Z; d.ellipse([x - r, y - r, x + r, y + r], fill=(160, 240, 140) if i % 2 else (255, 230, 80))
-        if band.V.at(s):                                               # the headband on the floor
-            x, y = X(2740), Y(-12); d.arc([x - 40 * Z, y - 16 * Z, x + 40 * Z, y + 16 * Z], 180, 360, fill=YELLOW, width=int(10 * Z))
-            d.line([x + 36 * Z, y, x + 80 * Z, y + 6 * Z], fill=YELLOW, width=int(8 * Z)); d.line([x + 36 * Z, y, x + 74 * Z, y - 8 * Z], fill=YELLOW, width=int(8 * Z))
-        if s >= 15.6:                                                  # the King's eyes in the dark
-            S_ = K.state(s); hx, hy = X(S_["x"] - 18), Y(-940 - 178 * 1.35 - 135 * 1.35 - 54 * 1.35)
-            for dx in (-14, 14):
-                r = 9 * Z * (1 + 0.15 * math.sin(real * 8)); d.ellipse([hx + dx * Z - r, hy - r * 0.6, hx + dx * Z + r, hy + r * 0.6], fill=(255, 230, 120))
-band.kind = "none"
+        if 9.5 <= s < 11.35:                                           # Green's headband in Blue's hand
+            J = joints({**B.state(s), "scale": 1.0}); x, y = X(J["hand"][0]), Y(J["hand"][1])
+            d.ellipse([x - 22 * Z, y - 14 * Z, x + 22 * Z, y + 14 * Z], outline=YELLOW, width=int(9 * Z))
+            for q in (0, 1): d.line([x, y + 10 * Z, x + (8 - 16 * q) * Z, y + 54 * Z + 6 * Z * math.sin(real * 4 + q)], fill=YELLOW, width=int(8 * Z))
+        if s >= 18.0:                                                  # the King's eyes light up
+            k = min(1, (s - 18.0) / 0.3); J = joints({**K.state(s), "scale": K.scale}); hx, hy = X(J["head"][0]), Y(J["head"][1])
+            for dx in (8, 30):
+                r = 11 * k * Z * (1 + 0.15 * math.sin(real * 8)); d.ellipse([hx + dx * Z - r, hy - 6 * Z - r * 0.6, hx + dx * Z + r, hy - 6 * Z + r * 0.6], fill=(255, 230, 120))
 st.draw_hooks.append(hooks)
 
 # ---------------- camera ----------------
@@ -146,13 +178,13 @@ for t, cx, cy, z in ((0.0, 3420, -430, 1.0), (0.8, 3300, -450, 0.95), (2.3, 3330
                      (4.4, 2950, -450, 0.9), (4.65, 3300, -480, 0.95), (5.5, 3300, -430, 1.0), (6.3, 3250, -430, 1.05), (6.6, 3100, -430, 1.0),
                      (7.3, 2950, -400, 1.1), (8.6, 2850, -330, 1.4), (10.6, 2870, -330, 1.35), (11.6, 2980, -420, 1.1), (12.4, 3250, -450, 0.95),
                      (13.2, 3500, -650, 0.9), (13.8, 3580, -1250, 0.9), (14.2, 3600, -500, 0.8), (14.6, 3600, 250, 0.95), (15.9, 3600, 250, 1.0),
-                     (17.2, 3660, -1380, 1.05), (20.2, 3660, -1380, 1.05)):
+                     (16.39, 3600, 250, 1.0), (16.4, SHIP + 180, -560, 0.72), (17.6, SHIP + 150, -560, 0.8), (19.0, SHIP + 110, -600, 1.0), (20.8, SHIP + 110, -600, 1.0)):
     st.camkey(t, cx, cy, z * 1.15)
 
 if __name__ == "__main__":
     out = sys.argv[1]
     if len(sys.argv) > 2 and sys.argv[2] == "stills":
-        run(st, out, stills=[0.3, 0.9, 1.5, 1.85, 2.3, 3.2, 3.9, 4.35, 4.9, 6.2, 6.45, 7.6, 9.0, 10.2, 11.2, 12.2, 12.6, 13.3, 13.9, 14.5, 15.4, 18.0])
+        run(st, out, stills=[0.3, 0.9, 1.5, 1.85, 2.3, 3.2, 3.9, 4.35, 4.9, 6.2, 6.45, 7.6, 9.0, 9.7, 10.3, 11.2, 11.4, 12.2, 12.6, 13.3, 13.9, 14.5, 15.4, 16.8, 18.5, 19.6])
     else:
         dur, log = run(st, out)
         marks = [(t, k) for t, k, *_ in log if k in ("music_on", "music_off")]; spans, on = [], 0.0

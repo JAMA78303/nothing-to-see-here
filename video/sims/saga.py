@@ -37,7 +37,8 @@ POSES = dict(
     crouch=(35, (60, 120), (40, 110), (70, -40), (-30, -80)),  win=(0, (150, 200), (-150, -200), (16, 4), (-16, -4)),
     cower=(40, (150, 210), (130, 200), (50, -40), (-20, -70)), point=(4, (92, 92), (30, 60), (24, -6), (-26, -14)),
     kneel=(28, (70, 120), (55, 110), (92, 0), (-4, -92)),      roar=(-14, (125, 155), (-125, -155), (34, -4), (-34, -14)),
-    windup=(-26, (-70, -40), (40, 80), (30, -6), (-36, -20)),  slamup=(0, (172, 186), (164, 180), (62, -40), (40, -64)),  reach=(30, (110, 120), (60, 90), (60, -20), (-40, -60)),
+    windup=(-26, (-70, -40), (40, 80), (30, -6), (-36, -20)),  slamup=(0, (172, 186), (164, 180), (62, -40), (40, -64)),
+    sit=(0, (62, 96), (50, 92), (90, 0), (86, -4)),  tie=(0, (150, 235), (140, 225), (16, -4), (-16, -8)),         lean=(26, (70, 96), (95, 140), (90, 0), (86, -4)),  reach=(30, (110, 120), (60, 90), (60, -20), (-40, -60)),
 )
 P_ = {k: np.array([v[0], *v[1], *v[2], *v[3], *v[4]], float) for k, v in POSES.items()}
 EASE = {"lin": lambda k: k, "io": lambda k: k * k * (3 - 2 * k), "out": lambda k: 1 - (1 - k) ** 2, "in": lambda k: k * k}
@@ -216,8 +217,9 @@ class Renderer:
         for x in range(int((max(LEFT, x0v) // 160) * 160), int(min(RIGHT, x1v)) + 1, 160):
             if x < LEFT: continue
             d.line([X(x), Y(CEIL), X(x), Y(0)], fill=(52, 46, 60), width=int(4 * Z)); d.line([X(x), Y(-1820), X(x), Y(UPPER)], fill=(36, 32, 44), width=int(4 * Z))
-        rect(max(LEFT, x0v), -270, min(RIGHT, x1v), -246, (36, 30, 44)); rect(max(LEFT, x0v), -830, min(RIGHT, x1v), -812, (64, 60, 72))
-        for yy in (210, 270): rect(max(LEFT, x0v), yy, min(RIGHT, x1v), yy + 14, (54, 50, 64))
+        if max(LEFT, x0v) < min(RIGHT, x1v):                             # trim lines along the walls (only while the building is in view)
+            rect(max(LEFT, x0v), -270, min(RIGHT, x1v), -246, (36, 30, 44)); rect(max(LEFT, x0v), -830, min(RIGHT, x1v), -812, (64, 60, 72))
+            for yy in (210, 270): rect(max(LEFT, x0v), yy, min(RIGHT, x1v), yy + 14, (54, 50, 64))
         for t, x, y, size in st.cracks:                                  # cracks punched into the back wall
             if s >= t:
                 for a in range(7):
@@ -247,7 +249,10 @@ class Renderer:
             limb((J["hip"], J["sh"]), col)
             hx, hy = P(J["head"]); hr = L["head"] * fg.scale * Z; d.ellipse([hx - hr, hy - hr, hx + hr, hy + hr], fill=col)
             f = S_["face"]; ex, ey = hx + f * 16 * fg.scale * Z, hy - 5 * fg.scale * Z; er = 7 * fg.scale * Z
-            if fg.kind in ("red", "big", "boss") and S_["pose"][0] > -60:
+            if fg.kind == "assassin" and S_["pose"][0] > -60:              # masked: a black band over the face, white slit eyes
+                d.rectangle([hx - hr, hy - 16 * Z, hx + hr, hy + 10 * Z], fill=(25, 10, 14))
+                d.line([ex - 8 * Z, ey + 2 * Z, ex + 10 * Z, ey - 2 * Z], fill=(255, 255, 255), width=max(1, int(5 * Z)))
+            elif fg.kind in ("red", "big", "boss") and S_["pose"][0] > -60:
                 d.ellipse([ex - er, ey - er * 0.6, ex + er, ey + er * 0.6], fill=(255, 240, 200) if fg.kind != "red" else (255, 255, 255))
                 d.line([ex - f * 10 * fg.scale * Z, ey - 12 * fg.scale * Z, ex + f * 9 * fg.scale * Z, ey - 5 * fg.scale * Z], fill=(30, 10, 10), width=max(1, int(5 * fg.scale * Z)))
             elif S_["pose"][0] > -60: d.ellipse([ex - er, ey - er, ex + er, ey + er], fill=(255, 255, 255))
@@ -269,6 +274,10 @@ class Renderer:
             if fg.kind == "boss":                                        # crown
                 k_ = hr; cx_, cy_ = hx, hy - hr * 0.8
                 d.polygon([(cx_ - k_, cy_), (cx_ - k_, cy_ - k_ * 0.9), (cx_ - k_ * 0.5, cy_ - k_ * 0.45), (cx_, cy_ - k_ * 1.1), (cx_ + k_ * 0.5, cy_ - k_ * 0.45), (cx_ + k_, cy_ - k_ * 0.9), (cx_ + k_, cy_)], fill=(235, 190, 40), outline=(120, 80, 10), width=max(1, int(3 * Z)))
+            if S_["prop"] == "blade":
+                ex_, ey_ = J["elbow"]; hx_, hy_ = J["hand"]; ln = math.hypot(hx_ - ex_, hy_ - ey_) or 1; ux, uy = (hx_ - ex_) / ln, (hy_ - ey_) / ln
+                d.line([P((hx_, hy_)), P((hx_ + ux * 150, hy_ + uy * 150))], fill=(215, 220, 230), width=int(8 * Z))
+                d.line([P((hx_ - uy * 18, hy_ + ux * 18)), P((hx_ + uy * 18, hy_ - ux * 18))], fill=(60, 50, 40), width=int(8 * Z))
             if S_["prop"] == "staff":
                 ex_, ey_ = J["elbow"]; hx_, hy_ = J["hand"]; ln = math.hypot(hx_ - ex_, hy_ - ey_) or 1; ux, uy = (hx_ - ex_) / ln, (hy_ - ey_) / ln
                 d.line([P((hx_ - ux * 150, hy_ - uy * 150)), P((hx_ + ux * 190, hy_ + uy * 190))], fill=(170, 120, 60), width=int(13 * Z))

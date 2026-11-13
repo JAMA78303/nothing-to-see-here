@@ -1,0 +1,28 @@
+{
+  "title": "Australia lost a war to birds",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "gap": 0.04,
+  "tail": 0.15,
+  "highlight": [],
+  "shots": [
+    { "shot": "hook", "text": "Australia sent soldiers with machine guns... to fight birds." },
+    { "shot": "farm", "text": "Twenty thousand emus were flattening the wheat farms." },
+    { "shot": "split", "text": "But every time the soldiers got close, the birds split up and ran.", "flash": true },
+    { "shot": "truck", "text": "They even put a gun on a truck... the emus were faster." },
+    { "shot": "quit", "text": "After a month, the army gave up." },
+    { "shot": "tanks", "text": "Their commander said the emus could take bullets like tanks." },
+    { "shot": "loop", "text": "So officially... Australia lost a war to birds." }
+  ],
+  "sfx": [
+    { "sound": "whoosh", "shot": "split", "at": 0.0, "length": 0.6, "gain": 0.5 },
+    { "sound": "rumble", "shot": "truck", "at": 0.0, "length": 3.0, "gain": 0.35 },
+    { "sound": "whoosh", "shot": "tanks", "at": 0.0, "length": 0.5, "gain": 0.4 },
+    { "sound": "impact", "shot": "loop", "at": 0.0, "length": 1.0, "gain": 0.4 }
+  ],
+  "youtube": {
+    "title": "Australia Lost a War… to Birds 😳 #shorts",
+    "description": "In late 1932, farmers in Western Australia were losing their wheat to around 20,000 emus, so the army was sent in 🐦\n\nMajor Meredith and a couple of soldiers set out with two machine guns. But the emus split into small groups and scattered every time the soldiers got close. The army even mounted a gun on a truck, but the birds outran it over the rough ground.\n\nAfter about a month the operation was called off. Meredith said that if he had a division of soldiers who could take bullets like these birds, it could face any army in the world, and that the emus could face machine guns \"with the invulnerability of tanks\".\n\nIt has been known as the Great Emu War ever since.\n\n🐦 Whose side are you on? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #emuwar #australia #history #didyouknow #animals #truestory #animation",
+    "tags": ["emu war", "great emu war", "australia emu war", "australia lost to emus", "emus", "funny history", "strange history", "history facts", "true story", "did you know", "animal facts", "animation", "cartoon", "shorts"]
+  }
+}

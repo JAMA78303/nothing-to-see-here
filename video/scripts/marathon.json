@@ -1,0 +1,20 @@
+{
+  "title": "The man who won the Olympic marathon rode in a car",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "gap": 0.04,
+  "tail": 0.15,
+  "highlight": [],
+  "say": { "1904": "nineteen-oh-four" },
+  "shots": [
+    { "shot": "hook", "text": "The man who won this Olympic marathon... rode in a car." },
+    { "shot": "heat", "text": "St. Louis, 1904: boiling heat, dusty roads, and almost no water." },
+    { "shot": "apples", "text": "One runner stopped to eat rotten apples... and took a nap." },
+    { "shot": "dogs", "text": "Another got chased a mile off course by wild dogs.", "flash": true },
+    { "shot": "lorz", "text": "Fred Lorz hitched a ride for eleven miles, then jogged over the finish line." },
+    { "shot": "hicks", "text": "The real winner had to be held up by his team to finish." },
+    { "shot": "loop", "text": "Only fourteen of the thirty-two runners made it at all." }
+  ],
+  "sfx": [],
+  "youtube": { "title": "", "description": "", "tags": [] }
+}

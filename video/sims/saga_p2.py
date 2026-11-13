@@ -130,8 +130,10 @@ st.text(18.7, 20.8, "end", main="PART 3 →", sub="FOLLOW FOR PART 3"); st.sfx(1
 import random
 _r = random.Random(9); STARS = [(SHIP - 1500 + _r.random() * 3000, -1900 + _r.random() * 1300, 1.5 + _r.random() * 3) for _ in range(120)]
 def ship(R_, d, s, real, X, Y, Z, layer):
-    if layer != "back" or s < 16.4: return
+    if s < 16.4: return
     rect = lambda x0, y0, x1, y1, col: d.rectangle([X(x0), Y(y0), X(x1), Y(y1)], fill=col)
+    if layer == "front":                                                             # the near armrest, in front of him, his arm resting on it
+        rect(SHIP + 262, -372, SHIP + 296, -120, (235, 190, 40)); rect(SHIP - 40, -386, SHIP + 300, -352, (235, 190, 40)); return
     rect(SHIP - 3000, -3000, SHIP + 3000, 3000, (26, 26, 38))                        # hull
     d.rounded_rectangle([X(SHIP - 1250), Y(-1950), X(SHIP + 1250), Y(-560)], radius=int(120 * Z), fill=(4, 6, 18), outline=(90, 96, 120), width=int(18 * Z))
     for sx, sy, sr in STARS: d.ellipse([X(sx) - sr * Z, Y(sy) - sr * Z, X(sx) + sr * Z, Y(sy) + sr * Z], fill=(210, 215, 240))
@@ -144,9 +146,9 @@ def ship(R_, d, s, real, X, Y, Z, layer):
     rect(SHIP - 3000, 0, SHIP + 3000, 900, (44, 44, 60)); d.line([X(SHIP - 3000), Y(0), X(SHIP + 3000), Y(0)], fill=(110, 110, 140), width=int(6 * Z))
     rect(SHIP - 900, -8, SHIP + 1100, 0, (130, 20, 30))                              # red carpet
     rect(SHIP - 200, -120, SHIP + 340, 0, (60, 58, 80))                              # the dais
-    d.polygon([(X(SHIP - 40), Y(-120)), (X(SHIP - 40), Y(-980)), (X(SHIP + 70), Y(-1070)), (X(SHIP + 180), Y(-980)), (X(SHIP + 180), Y(-120))], fill=(110, 14, 24), outline=(235, 190, 40), width=int(8 * Z))
-    rect(SHIP - 40, -250, SHIP + 300, -200, (110, 14, 24))                            # seat
-    rect(SHIP + 260, -420, SHIP + 300, -200, (235, 190, 40))                          # gold armrest
+    d.polygon([(X(SHIP - 40), Y(-120)), (X(SHIP - 40), Y(-980)), (X(SHIP + 70), Y(-1070)), (X(SHIP + 180), Y(-980)), (X(SHIP + 180), Y(-120))], fill=(46, 30, 70), outline=(235, 190, 40), width=int(8 * Z))
+    rect(SHIP - 40, -252, SHIP + 240, -120, (46, 30, 70)); rect(SHIP - 40, -266, SHIP + 250, -236, (200, 40, 60))   # the seat he sits on, with a cushion
+    d.line([X(SHIP - 40), Y(-262), X(SHIP + 210), Y(-262)], fill=(235, 190, 40), width=int(6 * Z))
 st.draw_hooks.append(ship)
 
 def hooks(R_, d, s, real, X, Y, Z, layer):

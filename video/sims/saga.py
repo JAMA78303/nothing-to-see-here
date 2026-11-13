@@ -38,7 +38,7 @@ POSES = dict(
     cower=(40, (150, 210), (130, 200), (50, -40), (-20, -70)), point=(4, (92, 92), (30, 60), (24, -6), (-26, -14)),
     kneel=(28, (70, 120), (55, 110), (92, 0), (-4, -92)),      roar=(-14, (125, 155), (-125, -155), (34, -4), (-34, -14)),
     windup=(-26, (-70, -40), (40, 80), (30, -6), (-36, -20)),  slamup=(0, (172, 186), (164, 180), (62, -40), (40, -64)),
-    sit=(0, (62, 96), (50, 92), (90, 0), (86, -4)),  tie=(0, (150, 235), (140, 225), (16, -4), (-16, -8)),         lean=(26, (70, 96), (95, 140), (90, 0), (86, -4)),  reach=(30, (110, 120), (60, 90), (60, -20), (-40, -60)),
+    sit=(0, (62, 96), (50, 92), (90, 0), (86, -4)),  tie=(0, (150, 235), (140, 225), (16, -4), (-16, -8)),         lean=(26, (70, 96), (66, 96), (90, 0), (86, -4)),  reach=(30, (110, 120), (60, 90), (60, -20), (-40, -60)),
 )
 P_ = {k: np.array([v[0], *v[1], *v[2], *v[3], *v[4]], float) for k, v in POSES.items()}
 EASE = {"lin": lambda k: k, "io": lambda k: k * k * (3 - 2 * k), "out": lambda k: 1 - (1 - k) ** 2, "in": lambda k: k * k}
@@ -243,7 +243,8 @@ class Renderer:
                 for p in pts: x, y = P(p); d.ellipse([x - wd / 2, y - wd / 2, x + wd / 2, y + wd / 2], fill=c)
             if fg.kind == "boss":                                        # a cape streaming behind
                 sx, sy = J["sh"]; hx0, hy0 = J["hip"]; f0 = S_["face"]
-                cape = [(sx + f0 * 20, sy), (sx - f0 * 40, sy - 10), (hx0 - f0 * (150 + 20 * math.sin(real * 3)), hy0 + 170 * fg.scale), (hx0 - f0 * 20, hy0 + 150 * fg.scale)]
+                sitting = S_["pose"][5] > 70; drop = 20 if sitting else 170          # seated: the cape drapes over the seat back
+                cape = [(sx + f0 * 20, sy), (sx - f0 * 40, sy - 10), (hx0 - f0 * (150 + 20 * math.sin(real * 3)), hy0 + drop * fg.scale), (hx0 - f0 * 20, hy0 + (drop - 20) * fg.scale)]
                 d.polygon([P(p) for p in cape], fill=(70, 0, 12))
             for pts in J["back"]: limb(pts, dark)
             limb((J["hip"], J["sh"]), col)

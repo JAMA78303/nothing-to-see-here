@@ -30,18 +30,24 @@ const bus = new THREE.Group(); scene.add(bus);
   const pave = add(new THREE.PlaneGeometry(200, 6), lam({ color: "#a8a49a" }), X, 0.08, -8); pave.rotation.x = -Math.PI / 2;
   const STY = [{ wall: "#b5543c", shutter: "#f2f2ea" }, { wall: "#d8cdb8", shutter: "#2f3a4a" }, { wall: "#a84c36", shutter: "#f2f2ea" }, { wall: "#e2d8c4", shutter: "#3a4a3a" }];
   for (let i = 0; i < 12; i++) { const w = 5, h = 9 + (i % 3), st = STY[i % 4], x = X - 30 + i * 5.2; box(w, h, 4, [lam({ color: st.wall }), lam({ color: st.wall }), lam({ color: "#6f7a86" }), lam({ color: st.wall }), lam({ map: facadeHD(`uk${i}`, w, h, { ...st, brick: i % 2 === 0, door: true }) }), lam({ color: st.wall })], x, h / 2, -13); }
-  // the clock tower
-  const stone = lam({ color: "#c9b88a" }), T0 = V(X + 14, 0, -40);
-  box(5, 40, 5, stone, T0.x, 20, T0.z); box(6, 7, 6, stone, T0.x, 43.5, T0.z);
-  const clock = ctex(256, 256, (g, w, h) => { g.fillStyle = "#f4f0e0"; g.beginPath(); g.arc(128, 128, 120, 0, 7); g.fill(); g.strokeStyle = "#2a2a2a"; g.lineWidth = 10; g.stroke(); for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g.fillRect(128 + Math.cos(a) * 100 - 4, 128 + Math.sin(a) * 100 - 4, 8, 8); } g.lineWidth = 9; g.beginPath(); g.moveTo(128, 128); g.lineTo(128, 50); g.moveTo(128, 128); g.lineTo(180, 150); g.stroke(); });
-  add(new THREE.CircleGeometry(2.2, 32), lam({ map: clock }), T0.x, 43.5, T0.z + 3.02);
-  const spire = add(new THREE.ConeGeometry(4.2, 9, 4), lam({ color: "#4a5a5a" }), T0.x, 51.5, T0.z); spire.rotation.y = Math.PI / 4;
+  // Big Ben: a tall stone tower, four clock faces, a belfry and a steep green spire
+  const T0 = V(X - 1.5, 0, -30), stoneTex = ctex(128, 512, (g, w, h) => { g.fillStyle = "#cdb98a"; g.fillRect(0, 0, w, h); g.strokeStyle = "#9a8458"; g.lineWidth = 3; for (let x = 8; x < w; x += 16) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); } for (let y = 0; y < h; y += 40) { g.fillStyle = "#b5a070"; g.fillRect(0, y, w, 5); } });
+  const stone = lam({ map: stoneTex });
+  box(4.4, 30, 4.4, stone, T0.x, 15, T0.z);
+  box(5.2, 6, 5.2, stone, T0.x, 33, T0.z);
+  const clock = ctex(256, 256, (g, w, h) => { g.fillStyle = "#c9a040"; g.fillRect(0, 0, w, h); g.fillStyle = "#f6f0dc"; g.beginPath(); g.arc(128, 128, 104, 0, 7); g.fill(); g.strokeStyle = "#1a1a1a"; g.lineWidth = 6; g.stroke(); for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g.lineWidth = 6; g.beginPath(); g.moveTo(128 + Math.cos(a) * 84, 128 + Math.sin(a) * 84); g.lineTo(128 + Math.cos(a) * 98, 128 + Math.sin(a) * 98); g.stroke(); } g.lineWidth = 8; g.beginPath(); g.moveTo(128, 128); g.lineTo(128, 52); g.moveTo(128, 128); g.lineTo(176, 150); g.stroke(); });
+  for (const [dx, dz, ry] of [[0, 2.62, 0], [2.62, 0, Math.PI / 2], [-2.62, 0, -Math.PI / 2]]) { const f = add(new THREE.PlaneGeometry(4.2, 4.2), lam({ map: clock }), T0.x + dx, 33, T0.z + dz); f.rotation.y = ry; }
+  box(4.6, 3.2, 4.6, lam({ color: "#b8a476" }), T0.x, 37.6, T0.z);
+  for (let i = 0; i < 3; i++) box(0.6, 2.2, 0.05, lit({ color: "#2a2418" }), T0.x - 1.2 + i * 1.2, 37.6, T0.z + 2.32);
+  const spire = add(new THREE.ConeGeometry(3.3, 9, 4), lam({ color: "#4f6a64" }), T0.x, 43.7, T0.z); spire.rotation.y = Math.PI / 4;
+  for (const [dx, dz] of [[-2.1, -2.1], [2.1, -2.1], [-2.1, 2.1], [2.1, 2.1]]) { add(new THREE.ConeGeometry(0.3, 2.4, 6), lam({ color: "#c9a040" }), T0.x + dx, 40.4, T0.z + dz); }
+  add(new THREE.ConeGeometry(0.18, 2.2, 6), lam({ color: "#c9a040" }), T0.x, 49.2, T0.z);
   // a red phone box
   box(1.0, 2.5, 1.0, lam({ color: "#c0261f" }), X + 5.5, 1.25, -6.2); box(0.7, 1.4, 0.02, lit({ color: "#2a3038" }), X + 5.5, 1.4, -5.69);
   // the bus: lower deck enclosed, upper deck open-topped with a rail
   const red = lit({ color: "#d42a20" }), glass = lit({ color: "#2a3340" });
   box(9, 2.2, 2.5, red, 0, 1.45, 0, bus); box(9, 0.3, 2.5, lam({ color: "#e8e2d4" }), 0, 2.7, 0, bus);
-  box(9, 0.9, 2.5, red, 0, 3.3, 0, bus); for (let i = 0; i < 6; i++) box(1.1, 0.8, 0.02, glass, -3.5 + i * 1.4, 1.75, 1.26, bus);
+  box(9, 0.1, 2.5, lit({ color: "#8a8478" }), 0, 2.9, 0, bus); for (const z of [1.22, -1.22]) box(9, 0.75, 0.06, red, 0, 3.3, z, bus); for (const x of [4.47, -4.47]) box(0.06, 0.75, 2.5, red, x, 3.3, 0, bus); for (let i = 0; i < 6; i++) box(1.1, 0.8, 0.02, glass, -3.5 + i * 1.4, 1.75, 1.26, bus);
   for (let i = 0; i < 17; i++) box(0.05, 0.5, 0.05, lam({ color: "#e8e2d4" }), -4.4 + i * 0.55, 4.0, 1.22, bus);
   box(9, 0.05, 0.05, lam({ color: "#e8e2d4" }), 0, 4.25, 1.22, bus);
   for (const x of [-3, 3]) for (const z of [1.2, -1.2]) { const w = add(new THREE.CylinderGeometry(0.55, 0.55, 0.3, 20), lit({ color: "#1e1e20" }), x, 0.55, z, bus); w.rotation.x = Math.PI / 2; }
@@ -139,7 +145,7 @@ const bucket = add(new THREE.CylinderGeometry(0.16, 0.13, 0.25, 12), lam({ color
 // ---------------- cameras ----------------
 const W = (x, y, z) => V(x, y, z);
 const CAMS = {
-  hook:   [W(-0.7, 4.7, 6.0), W(-0.9, 3.4, 0)],
+  hook:   [W(-0.4, 3.9, 6.2), W(-0.7, 6.4, 0)],
   bat:    [W(100.2, 1.5, 5.2), W(100.0, 1.2, -1)],
   tube:   [W(200.9, 2.4, 6.4), W(200.4, 0.6, -2)],
   bike:   [W(300, 1.4, 6.4), W(300, 1.0, 0)],
@@ -164,13 +170,13 @@ start((time, tl) => {
 
   if (shot === "hook") {
     // on the top deck of the bus, zombies coming up behind him
-    max.position.set(SET.london - 0.2, 2.85, 0.4); sayMax({ expr: k < 0.4 ? "m_shock" : "m_stern" });
-    [0, 1, 2].forEach(i => { const z = allZ[i]; z.visible = true; z.position.set(SET.london - 1.5 - i * 0.75 + st * 0.35, i === 2 ? 2.85 - 0.6 * (1 - Math.min(1, st / 1.5)) : 2.85, 0.3 - i * 0.2); zDraw(z, i, time); });
+    max.position.set(SET.london - 0.2, 2.95, 0.3); sayMax({ expr: k < 0.4 ? "m_shock" : "m_stern" });
+    [0, 1, 2].forEach(i => { const z = allZ[i]; z.visible = true; z.position.set(SET.london - 1.5 - i * 0.75 + st * 0.35, 2.95, 0.2 - i * 0.25); zDraw(z, i, time); });
     [3, 4, 5, 6].forEach((i, j) => { const z = allZ[i]; z.visible = true; z.position.set(SET.london - 6 + j * 1.6 + st * 0.4, 0, 2.9 + (j % 2) * 0.6); zDraw(z, i, time); });
   }
   if (shot === "bat") {
     // the cricket bat
-    max.position.set(SET.shop - 0.2, 0, 0.3); sayMax({ expr: "m_stern", side: true, mode: "swing", pose: Math.min(1, Math.max(0, (k - 0.45) / 0.15)) });
+    max.position.set(SET.shop - 0.2, 0, 0.3); sayMax({ expr: "m_stern", side: true, mode: "hammer", bat: true, pose: Math.min(1, Math.max(0, (k - 0.45) / 0.15)) });
     const z = allZ[0]; z.visible = true; const hitT = k > 0.6; z.position.set(SET.shop + 0.85 + (hitT ? (k - 0.6) * 4 : 0), hitT ? Math.max(0, (k - 0.6) * 3 - (k - 0.6) ** 2 * 6) : 0, 0.2); zDraw(z, 0, time); z.rotation.z = hitT ? -(k - 0.6) * 6 : 0;
   } else allZ[0].rotation.z = 0;
   if (shot === "tube") {
@@ -196,7 +202,7 @@ start((time, tl) => {
     [0, 1, 2, 3, 4].forEach(i => { const z = allZ[i]; z.visible = true; z.position.set(SET.walls - 1.6 + i * 0.8, -3.6, 2.7 + (i % 2) * 0.4); zDraw(z, i, time, { side: false, mode: "stand", expr: "shock" }); });
   }
   // the bat goes in his hand
-  if (bat.visible) { const sw = shot === "bat" ? Math.min(1, Math.max(0, (k - 0.45) / 0.15)) : 0; bat.position.set(max.position.x + 0.32, max.position.y + 1.0, max.position.z + 0.05); bat.rotation.set(0, 0, shot === "bat" ? lerp(2.3, -1.2, sw) : 0.3); bat.visible = shot === "bat" || shot === "tube" || shot === "loop"; }
+  if (bat.visible) { const sw = shot === "bat" ? Math.min(1, Math.max(0, (k - 0.45) / 0.15)) : 0; bat.position.set(max.position.x + 0.32, max.position.y + 1.0, max.position.z + 0.05); bat.rotation.set(0, 0, shot === "bat" ? lerp(2.3, -1.2, sw) : 0.3); bat.visible = shot === "tube" || shot === "loop"; }
   flag.userData.cloth.rotation.y = 0.2 * Math.sin(time * 4);
   for (const c of [max, ...allZ]) if (c.visible) faceCamera(c);
   if (look.bokeh) look.bokeh.uniforms.focus.value = shot === "castle" ? 25 : camera.position.distanceTo(max.position.clone().setY(max.position.y + 1.3));

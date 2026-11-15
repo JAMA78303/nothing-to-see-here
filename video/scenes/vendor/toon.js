@@ -874,7 +874,11 @@ const bodySide = (p, o, opts) => {
     p.band([B0, B1], "#7a4b2a", 5 * u, 1.5 * u, "round");
     p.band([lerp2(B0, B1, 0.6), B1], "#8d949c", 2.4 * u, 1.2 * u, "round");
   }
-  if (sledge) {   // wooden handle, iron head across the end
+  if (sledge && opts.bat) {   // local addition: a cricket bat instead of the sledge: a dark grip, then a long flat cream blade
+    const { a, b, d } = sledge, n = [-d[1], d[0]], m = [a[0] + (b[0] - a[0]) * 0.3, a[1] + (b[1] - a[1]) * 0.3], e = [b[0] + d[0] * 0.08 * HH, b[1] + d[1] * 0.08 * HH], w = 0.06 * HH;
+    p.band([a, m], "#3a2a1a", 4.5 * u, 1.4 * u, "round");
+    p.poly([[m[0] + n[0] * w * 0.8, m[1] + n[1] * w * 0.8], [e[0] + n[0] * w, e[1] + n[1] * w], [e[0] - n[0] * w, e[1] - n[1] * w], [m[0] - n[0] * w * 0.8, m[1] - n[1] * w * 0.8]], "#ead9a6", 2.4 * u);
+  } else if (sledge) {   // wooden handle, iron head across the end
     const { a, b, d } = sledge, n = [-d[1], d[0]], hw = 0.17 * HH, hh = 0.075 * HH;
     p.band([a, b], "#8a5a34", 5.5 * u, 1.6 * u, "round");
     p.poly([[b[0] + n[0] * hw - d[0] * hh, b[1] + n[1] * hw - d[1] * hh], [b[0] + n[0] * hw + d[0] * hh, b[1] + n[1] * hw + d[1] * hh],

@@ -6,8 +6,8 @@ import { setupStyle, setLight, aimSun, ctex, lam, lit, add, box, makeCard, faceC
 import { facadeHD, cobbleHD } from "./vendor/paint.js";
 
 setupStyle({ ink: { widthNear: 4.2, widthFar: 2.8 }, blur: { aperture: 0.0024, maxblur: 0.007 } });
-const SET = { london: 0, shop: 100, tube: 200, road: 300, castle: 400, yard: 500, walls: 600 };
-const SHOT_SET = { hook: "london", bat: "shop", tube: "tube", bike: "road", castle: "castle", well: "yard", loop: "walls" };
+const SET = { london: 0, shop: 100, tube: 200, road: 300, castle: 400, yard: 500, walls: 600, pub: 700 };
+const SHOT_SET = { hook: "london", bat: "shop", tube: "tube", bike: "road", pub: "pub", castle: "castle", well: "yard", loop: "walls" };
 const rnd = (() => { let s = 41; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
 const T = (o, opts = {}, sc = 1) => makeCard({ ...o, skin: o.skin ?? CREAM }, { mode: "stand", expr: "neutral", ...opts }, null, sc);
 const label = (text, w, h, bg, fg, font) => { const t = ctex(512, Math.round(512 * h / w), (g, W, H) => { g.fillStyle = bg; g.fillRect(0, 0, W, H); g.fillStyle = fg; g.font = font; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, W / 2, H / 2 + 4); }); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; return t; };
@@ -142,6 +142,25 @@ const bucket = add(new THREE.CylinderGeometry(0.16, 0.13, 0.25, 12), lam({ color
   const fl = add(new THREE.PlaneGeometry(60, 40), lam({ color: "#6a9a4a" }), X, -3.6, 10); fl.rotation.x = -Math.PI / 2;
 }
 
+// ---------------- the Winchester: a cosy booth, zombies pressed against the window ----------------
+const lights = [];
+const crisps = new THREE.Group(); scene.add(crisps);
+{
+  const X = SET.pub, wood = lit({ color: "#6b4128" }), dark = lit({ color: "#4a2c18" });
+  const fl = add(new THREE.PlaneGeometry(12, 10), lit({ color: "#5a3a26" }), X, 0, -1); fl.rotation.x = -Math.PI / 2;
+  box(12, 1.2, 0.2, dark, X, 0.6, -3.4); box(12, 0.08, 0.3, wood, X, 1.22, -3.35);
+  const wallM = lit({ color: "#7a2a2a" }); box(4.15, 2.6, 0.2, wallM, X - 3.92, 2.5, -3.5); box(4.15, 2.6, 0.2, wallM, X + 3.92, 2.5, -3.5); box(3.7, 0.6, 0.2, wallM, X, 3.5, -3.5);
+  box(3.4, 1.8, 0.05, lit({ color: "#9ab0b8", transparent: true, opacity: 0.25 }), X, 2.25, -3.3);
+  for (const [w, h, x, y] of [[3.6, 0.15, 0, 3.2], [3.6, 0.15, 0, 1.3], [0.15, 2.0, -1.75, 2.25], [0.15, 2.0, 1.75, 2.25], [0.1, 1.9, 0, 2.25]]) box(w, h, 0.12, wood, X + x, y, -3.28);
+  add(new THREE.PlaneGeometry(3.0, 0.5), lit({ map: label("THE WINCHESTER", 3.0, 0.5, "#2a1a10", "#e8c45a", "bold 54px Georgia, serif") }), X, 3.75, -3.38);
+  box(1.6, 0.08, 0.9, wood, X + 0.2, 0.78, -1.6); box(0.1, 0.75, 0.1, dark, X + 0.2, 0.38, -1.6);
+  box(2.4, 0.5, 0.7, lit({ color: "#7a1f22" }), X - 0.3, 0.25, -2.6); box(2.4, 1.1, 0.2, lit({ color: "#7a1f22" }), X - 0.3, 1.0, -2.95);
+  const night = add(new THREE.PlaneGeometry(14, 6), new THREE.MeshBasicMaterial({ color: 0x1a2030 }), X, 2.4, -6); void night;
+  box(0.6, 0.8, 0.12, lit({ color: "#c0261f" }), 0, 0.4, 0, crisps); box(0.62, 0.12, 0.13, lit({ color: "#f2d24a" }), 0, 0.72, 0, crisps);
+  crisps.scale.setScalar(0.32); crisps.position.set(X + 0.45, 0.82, -1.5);
+  const l = new THREE.PointLight(0xffc27a, 6, 9, 1.6); l.position.set(X + 0.5, 2.6, -0.6); scene.add(l); lights.push(l);
+}
+
 // ---------------- cameras ----------------
 const W = (x, y, z) => V(x, y, z);
 const CAMS = {
@@ -149,6 +168,7 @@ const CAMS = {
   bat:    [W(100.2, 1.5, 5.2), W(100.0, 1.2, -1)],
   tube:   [W(200.9, 2.4, 6.4), W(200.4, 0.6, -2)],
   bike:   [W(300, 1.4, 6.4), W(300, 1.0, 0)],
+  pub:    [W(699.95, 1.75, 3.2), W(699.95, 1.75, -3)],
   castle: [W(399.2, 2.4, 9.0), W(400, 7.5, -26)],
   well:   [W(500.6, 1.7, 5.6), W(500.2, 1.4, -2)],
   loop:   [W(600.4, 2.4, 8.6), W(600.1, -1.4, 0)],
@@ -158,6 +178,7 @@ const allZ = zombies;
 start((time, tl) => {
   const shot = tl.shot, k = tl.k, st = tl.since(shot), set = SHOT_SET[shot];
   const golden = set === "castle" || set === "walls" || set === "yard";
+  // (the pub sets its own night lighting below)
   setLight(golden ? "golden" : "day", { sunI: 3.2 }); sun.intensity = golden ? 4.2 : 2.6; hemi.intensity = 0.6;
   scene.background = new THREE.Color(golden ? "#f2b37a" : "#a9bfd4"); scene.fog = new THREE.Fog(untone(golden ? "#f0c090" : "#c9d4de"), 30, 160);
   allZ.forEach(z => (z.visible = false)); bat.visible = shot !== "hook"; bucket.visible = false; bike.visible = shot === "bike";
@@ -165,6 +186,14 @@ start((time, tl) => {
 
   let p0, l0; [p0, l0] = CAMS[shot]; const p = p0.clone().lerp(l0, 0.1 * ease(k)), l = l0.clone();
   if (shot === "bike") { const bx = SET.road - 6 + st * 4.5; p.x = bx + 0.4; l.x = bx; }
+  lights.forEach(l => (l.visible = set === "pub"));
+  if (shot === "pub") {
+    // waiting for it all to blow over: crisps in the booth, faces at the window
+    scene.background = new THREE.Color("#1a2030"); scene.fog = null; sun.intensity = 0.6; hemi.intensity = 0.45;
+    max.position.set(SET.pub - 0.55, 0.15, -2.35); sayMax({ expr: k < 0.6 ? "m_happy" : "m_worried", mode: "sit" });
+    [0, 1, 2, 3].forEach(i => { const z = allZ[i]; z.visible = true; z.position.set(SET.pub - 1.2 + i * 0.8, 0.2 + (i % 2) * 0.15, -3.75 - (i % 2) * 0.25); zDraw(z, i, time, { side: false, mode: "stand", expr: "shock" }); });
+  }
+  crisps.visible = shot === "pub";
   if (shot === "castle") { p.lerp(W(399.8, 3.4, 4), ease(k) * 0.4); }
   camera.position.copy(p); camera.lookAt(l);
 

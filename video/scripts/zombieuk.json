@@ -6,14 +6,44 @@
   "tail": 0.15,
   "highlight": [],
   "shots": [
-    { "shot": "hook", "text": "You've got ten minutes before London is overrun." },
-    { "shot": "bat", "text": "First, forget guns. In England, your best weapon is a cricket bat." },
-    { "shot": "tube", "text": "Don't go near the Tube. It's a tunnel full of dead ends.", "flash": true },
-    { "shot": "bike", "text": "Grab a bike. The roads will be jammed, and bikes are quiet." },
-    { "shot": "castle", "text": "Now head for a castle. England has hundreds, and they were built to keep people out." },
-    { "shot": "well", "text": "Thick stone walls, one way in, and most had their own well for water." },
-    { "shot": "loop", "text": "So... which castle are you running to?" }
+    {
+      "shot": "hook",
+      "text": "You've got ten minutes before London is overrun."
+    },
+    {
+      "shot": "bat",
+      "text": "First, forget guns. In England, your best weapon is a cricket bat."
+    },
+    {
+      "shot": "tube",
+      "text": "Don't go near the Tube. It's a tunnel full of dead ends.",
+      "flash": true
+    },
+    {
+      "shot": "bike",
+      "text": "Grab a bike. The roads will be jammed, and bikes are quiet."
+    },
+    {
+      "shot": "pub",
+      "text": "You could do what Shaun did: go to the Winchester and wait for it all to blow over."
+    },
+    {
+      "shot": "castle",
+      "text": "That didn't work. So head for a castle. England has hundreds, built to keep people out."
+    },
+    {
+      "shot": "well",
+      "text": "Thick stone walls, one way in, and most had their own well for water."
+    },
+    {
+      "shot": "loop",
+      "text": "So... which castle are you running to?"
+    }
   ],
   "sfx": [],
-  "youtube": { "title": "", "description": "", "tags": [] }
+  "youtube": {
+    "title": "",
+    "description": "",
+    "tags": []
+  }
 }

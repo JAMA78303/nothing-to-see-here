@@ -40,10 +40,54 @@
       "text": "So... which castle are you running to?"
     }
   ],
-  "sfx": [],
+  "sfx": [
+    {
+      "sound": "impact",
+      "shot": "bat",
+      "at": 2.4,
+      "length": 0.8,
+      "gain": 0.5
+    },
+    {
+      "sound": "whoosh",
+      "shot": "tube",
+      "at": 0.0,
+      "length": 0.5,
+      "gain": 0.45
+    },
+    {
+      "sound": "whoosh",
+      "shot": "castle",
+      "at": 0.0,
+      "length": 0.5,
+      "gain": 0.4
+    },
+    {
+      "sound": "impact",
+      "shot": "loop",
+      "at": 0.0,
+      "length": 1.0,
+      "gain": 0.4
+    }
+  ],
   "youtube": {
-    "title": "",
-    "description": "",
-    "tags": []
+    "title": "What If a Zombie Outbreak Hit England? 🧟🇬🇧 #shorts",
+    "description": "You've got ten minutes before London is overrun 🧟 Here's how you'd survive in England.\n\nForget guns: UK gun laws are strict, so a cricket bat is about the best you'll find. Stay out of the Tube, because tunnels are full of dead ends. Grab a bike, because the roads will be jammed. And don't do what Shaun did…\n\nInstead, head for a castle. England has hundreds of them, built to keep people out, with thick stone walls, one way in and often their own well for water.\n\n🏰 Which castle are you running to? Tell me in the comments.\n🔔 Follow for more what-ifs.\n\n#shorts #zombies #zombieapocalypse #england #london #whatif #survival #animation",
+    "tags": [
+      "zombie outbreak england",
+      "zombie apocalypse uk",
+      "what if zombies",
+      "zombie survival",
+      "london zombies",
+      "shaun of the dead",
+      "castle survival",
+      "cricket bat",
+      "what if",
+      "survival guide",
+      "animation",
+      "cartoon",
+      "zombies",
+      "shorts"
+    ]
   }
 }

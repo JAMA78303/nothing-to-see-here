@@ -44,3 +44,7 @@ next-env.d.ts
 # screen recordings
 /recordings
 /.recording
+
+# YouTube clipper downloads and output
+/.clipper
+/shorts

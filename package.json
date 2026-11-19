@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "clip": "node scripts/clip-shorts.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.39.0",
@@ -16,6 +17,7 @@
     "redis": "^6.3.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^1.11.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

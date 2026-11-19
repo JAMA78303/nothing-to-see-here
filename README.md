@@ -38,29 +38,41 @@ Remove them before launch, and clear the test data from the Upstash console (Dat
 
 ## Clip a YouTube video into Shorts
 
-`scripts/clip-shorts.mjs` cuts a long video into vertical 1080x1920 clips with burned-in, word-by-word captions, choosing the moments most likely to do well.
+`scripts/clip-shorts.mjs` cuts long videos and streams into vertical 1080x1920 clips with burned-in, word-by-word captions, choosing the moments most likely to do well. It handles regular videos, past streams (VODs) and streams that are live right now.
 
 ```bash
 export ANTHROPIC_API_KEY=...        # lets Claude pick the moments
 npm run clip -- "https://www.youtube.com/watch?v=..." -n 5
 ```
 
-Needs `ffmpeg` and `yt-dlp` (`pip install yt-dlp` or `brew install yt-dlp`). Clips land in `shorts/<video-id>/` with a `clips.json` listing each clip's score, title, on-screen hook and the reason it was picked.
+Needs `ffmpeg` and `yt-dlp` (`pip install yt-dlp` or `brew install yt-dlp`). Face framing needs `pip install opencv-python-headless numpy`; it downloads a 230 KB face model on first use. For videos without captions, `pip install openai-whisper` adds transcripts. Clips land in `shorts/<video-id>/` with a `clips.json` listing each clip's score, title, on-screen hook, the signals behind it and the reason it was picked.
 
-How it picks: it reads the captions with word timings plus YouTube's **Most replayed** heatmap (when the video has one), and Claude chooses self-contained moments that open on a hook and end on a payoff, scoring each 0-100. Without an API key, or with `--no-ai`, it takes the most-replayed peaks instead.
+**How it picks.** It lines up every signal it can get: the transcript, the **live chat replay** (bursts of messages, and hype like LOL, CLIP IT, 💀, ???), **loudness** (shouting, screams, explosions) and YouTube's **Most replayed** graph. Claude reads all of it and picks self-contained moments that open on a hook and end on a payoff, scoring each 0-100. For gaming that means clutch plays, fails, rage and reactions, even when nobody says much. Without an API key, or with `--no-ai`, it takes the peaks of those signals instead.
+
+**How it frames** (`--layout auto`):
+
+- **Facecam in a corner** (typical gaming stream): split screen, webcam on top and gameplay below. It finds the webcam overlay's actual rectangle (the still region around the face, since gameplay never stops moving) and keeps the gameplay crop clear of it.
+- **A face filling the frame** (Just Chatting, podcasts, vlogs): a 9:16 crop that follows the speaker. It holds still when they barely move, pans smoothly when they do, and cuts with the video's own shot changes.
+- **No face:** a centre crop of the action. Use `--focus` to aim it, or `--layout blur` to fit the whole frame over a blurred fill.
+
+**Streams.**
+
+- **Past streams:** long VODs (over 45 minutes) don't get downloaded whole. It fetches the audio and chat, picks the clips, then pulls only those stretches of video.
+- **Live right now:** point it at a live URL and it records in windows (`--window 10` minutes by default), clipping each finished window while the next one records. Press Ctrl-C to stop; what's been recorded still gets clipped. `-n` is per window, and quiet windows produce nothing. Live streams don't have captions until YouTube processes the VOD, so live clips get captions only with whisper installed. Signals there are live chat and loudness.
 
 | Option | Default | |
 | --- | --- | --- |
-| `-n, --count` | 5 | clips to make |
+| `-n, --count` | 5 | clips to make (per window when live) |
 | `--min`, `--max` | 20, 59 | clip length in seconds |
-| `--layout` | crop | `crop` fills the frame; `blur` fits the whole frame over a blurred fill (better for slides, screen shares, two-person shots) |
-| `--focus` | 0.5 | horizontal crop position, 0 left to 1 right, for off-center speakers |
+| `--layout` | auto | `auto`, `split`, `crop` or `blur` |
+| `--focus` | | fixed horizontal crop position, 0 left to 1 right (turns off face following) |
+| `--window` | 10 | live: minutes per recording window |
 | `--transcript` | | a YouTube `.json3` or whisper JSON file, for local videos |
 | `--hook-seconds` | 3.5 | how long the hook title stays up, 0 to hide it |
 | `--plan-only` | | pick clips and write `clips.json` without rendering |
-| `--no-captions`, `--no-ai`, `--font`, `--lang`, `--out` | | |
+| `--no-ai`, `--no-chat`, `--no-captions`, `--no-transcribe`, `--full-download`, `--cam-zoom`, `--whisper-model`, `--font`, `--lang`, `--out` | | see `--help` |
 
-Local files work too: `npm run clip -- talk.mp4 --transcript talk.json`, or install `openai-whisper` and it transcribes for you. Downloads are cached in `.clipper/`. Only clip videos you own or have permission to reuse.
+Local files work too: `npm run clip -- stream.mp4`. Downloads and working files are cached in `.clipper/`. Only clip videos you own or have permission to reuse.
 
 ## How it works
 
@@ -93,4 +105,4 @@ Redis keys: `world:visits`, `moment_counts` (hash), `visitor:<id>` (hash), `seen
 | `src/server/store.ts` | Redis, with an in-memory fallback for local dev |
 | `src/app/api/*` | The API routes |
 | `scripts/record-tiktok.mjs` | Records Gerald as a vertical video |
-| `scripts/clip-shorts.mjs` | Clips a YouTube video into Shorts |
+| `scripts/clip-shorts.mjs`, `scripts/clipper/` | Clips videos and streams into Shorts |

@@ -1,0 +1,28 @@
+{
+  "title": "America and Britain almost went to war over a pig",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "gap": 0.04,
+  "tail": 0.15,
+  "highlight": [],
+  "say": { "1859": "eighteen fifty-nine" },
+  "shots": [
+    { "shot": "hook", "text": "America and Britain almost went to war... over a pig." },
+    { "shot": "farm", "text": "1859. A farmer on a tiny island caught a British pig eating his potatoes." },
+    { "shot": "bang", "text": "So he shot it.", "flash": true },
+    { "shot": "money", "text": "He offered ten dollars. The British wanted a hundred." },
+    { "shot": "armies", "text": "Within weeks, four hundred American soldiers were dug in, facing five British warships." },
+    { "shot": "admiral", "text": "Then the British admiral said he would not start a war over a pig." },
+    { "shot": "grave", "text": "Nobody fired a shot. The only casualty... was the pig." }
+  ],
+  "sfx": [
+    { "sound": "impact", "shot": "bang", "at": 0.05, "length": 1.0, "gain": 0.7 },
+    { "sound": "whoosh", "shot": "armies", "at": 0.0, "length": 0.5, "gain": 0.4 },
+    { "sound": "whoosh", "shot": "grave", "at": 0.0, "length": 0.5, "gain": 0.35 }
+  ],
+  "youtube": {
+    "title": "America and Britain Almost Went to War… Over a Pig 🐷 #shorts",
+    "description": "In 1859, on San Juan Island between Vancouver Island and Washington, both America and Britain claimed the land 🏝️\n\nAn American farmer, Lyman Cutlar, found a pig owned by the British Hudson's Bay Company eating his potatoes, and shot it. He offered $10 for it; the British wanted $100 and threatened to arrest him.\n\nThe Americans sent in soldiers under Captain George Pickett, and the British sent warships. Within weeks around 460 American soldiers with 14 cannons were facing five British warships and over 2,000 men. But British Rear Admiral Robert Baynes refused to attack, saying he would not involve two great nations in a war over a squabble about a pig.\n\nBoth sides stayed on the island peacefully for 12 years until the German Kaiser settled the border in 1872. The only casualty of the Pig War was the pig.\n\n🐷 Whose side are you on? Tell me in the comments.\n🔔 Follow for more things you never knew.\n\n#shorts #pigwar #history #funnyhistory #didyouknow #truestory #america #britain #animation",
+    "tags": ["pig war", "pig war 1859", "san juan island", "america vs britain", "war over a pig", "funny history", "strange history", "history facts", "true story", "did you know", "animation", "cartoon", "pig", "shorts"]
+  }
+}

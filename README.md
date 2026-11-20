@@ -72,6 +72,8 @@ Needs `ffmpeg` and `yt-dlp` (`pip install yt-dlp` or `brew install yt-dlp`). Fac
 | `--plan-only` | | pick clips and write `clips.json` without rendering |
 | `--no-ai`, `--no-chat`, `--no-captions`, `--no-transcribe`, `--full-download`, `--cam-zoom`, `--whisper-model`, `--font`, `--lang`, `--out` | | see `--help` |
 
+If YouTube says "Sign in to confirm you're not a bot", add `--cookies-from-browser chrome` (or `firefox`, `edge`, `safari`, `brave`) while you're signed in to YouTube in that browser. YouTube always does this to cloud servers, and sometimes to home connections.
+
 Local files work too: `npm run clip -- stream.mp4`. Downloads and working files are cached in `.clipper/`. Only clip videos you own or have permission to reuse.
 
 ## How it works

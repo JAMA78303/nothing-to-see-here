@@ -64,6 +64,10 @@ Streams
       --window <min>       live: clip every this many minutes (default 10)
       --full-download      long VODs: download the whole video instead of just the clips
 
+YouTube sign-in (when YouTube says "confirm you're not a bot")
+      --cookies-from-browser <name>  chrome, firefox, edge, safari, brave...
+      --cookies <file>               a cookies.txt exported from your browser
+
       --out <dir>          output folder (default shorts/<video-id>)
   -h, --help`;
 
@@ -88,6 +92,8 @@ const { values: opt, positionals } = parseArgs({
     "hook-seconds": { type: "string", default: "3.5" },
     window: { type: "string", default: "10" },
     "full-download": { type: "boolean", default: false },
+    "cookies-from-browser": { type: "string" },
+    cookies: { type: "string" },
     out: { type: "string" },
     help: { type: "boolean", short: "h", default: false },
   },
@@ -126,6 +132,10 @@ if (O.layout !== "blur" && !opt["plan-only"] && !framingAvailable()) {
 
 if (/^https?:\/\//i.test(input)) {
   need("yt-dlp", "Install it with `pip install yt-dlp` or `brew install yt-dlp`.");
+  yt.setYtDlpArgs([
+    ...(opt["cookies-from-browser"] ? ["--cookies-from-browser", opt["cookies-from-browser"]] : []),
+    ...(opt.cookies ? ["--cookies", resolve(opt.cookies)] : []),
+  ]);
   const info = yt.probe(input);
   if (info.live_status === "is_live") await runLive(input, info);
   else if (info.live_status === "is_upcoming") fail("This stream hasn't started yet. Run this again once it's live.");
